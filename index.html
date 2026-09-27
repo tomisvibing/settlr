@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tally</title>
+<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiVGFsbHkiLCJzaG9ydF9uYW1lIjoiVGFsbHkiLCJkZXNjcmlwdGlvbiI6IlNwbGl0IHNoYXJlZCBleHBlbnNlcyB3aXRob3V0IHRoZSBtYXRocy4iLCJzdGFydF91cmwiOiIuIiwic2NvcGUiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJvcmllbnRhdGlvbiI6InBvcnRyYWl0IiwiYmFja2dyb3VuZF9jb2xvciI6IiNGMkVGRTkiLCJ0aGVtZV9jb2xvciI6IiMyMDI0MUYiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9wbmc7YmFzZTY0LGlWQk9SdzBLR2dvQUFBQU5TVWhFVWdBQUFNQUFBQURBQ0FZQUFBQlMzR3dIQUFBRVMwbEVRVlI0bk8zZFRVNGNTUlNGMFVlcjkyRVBQUGFzdmYreGU5WWJjZzhNY2xFVWtQV1RFUy9qbmpORFFrUWk3bGNxa1lsNCt2cnR5NitDVUgvTnZnQ1lTUUJFRXdEUkJFQTBBUkJOQUVRVEFORUVRRFFCRUUwQVJCTUEwUVJBTkFFUVRRQkVFd0RSQkVBMEFSQk5BRVFUQU5FRVFEUUJFRTBBUkJNQTBRUkFOQUVRVFFCRUV3RFJCRUEwQVJCTkFFUVRBTkVFUURRQkVPM3YyUmZBbXY3NzkrZXJqNy8vODJQU2xYenN5YjlJNHBIT2gzK3VXd2plQXZFd240MS82K2VNSkFBZW90dXd0eElBZDd0Mi9KMWlFUUIzNlRUbVd3aUFteDE5L0ZVQzRFWXJqTDlLQU56ZzN2RjMrbFdvQUxqS0txLzhMdzUvSjNqbUhjZFpaM2M1OXhhZFh2MnJEbnduZU9ZZHgxbG5kLzZldCtnMi9xcUR2Z1dhZWNkeDF0bmR2K2ZQZEJ4LzFVRURZSnlWeDE5MXdBQ3UrWUU4K2hWeDF0bEhPUGM5bmNkZmRjQUFHQ05oL0ZVQzRJS1U4VmNKZ0ROSjQ2OWFQSUNaUDRoSG51MzMvUHRaT2dDMlcrME83MVlDSUhiOFZRS0lsenorS2dGRVN4OS9sUUJpR2Y5dkFnaGsvSDhJSUl6eHZ5YUFJTWIvbGdCQ0dQOWxBZ2hnL084VHdPS00vMk1DV0ZqaXN6M1hFc0Npakg4YkFTekkrTGNUQUcra2pMOUtBSnhKR24rVkFEaVJOdjRxQWZBc2NmeFZBcUJ5eDE4bGdIako0NjhTUUxUMDhWY0pJSmJ4L3lhQVFNYi9od0RDR1A5ckFnaGkvRzhKNEFBODI3TWZBVFJuL1BzU1FHUEd2ejhCTkdYOFl3aWdJZU1mUndETkdQOVlBbWpFSDdDUEo0QW1qSDhPQVRSZy9QTUlZRExqbjBzQUV4bi9mQUtZeFBoN0VNQUV4dCtIQUFZei9sNEVNSkR4OXlPQVFZeS9Kd0VNWVB4OUNXQm5udTNwVFFBN012NytCTEFUNHo4R0FUUmwvR01Jb0NIakgwY0F6UmovV0FKb3hQakhFMEFUeGorSEFCb3cvbmtFTUpueHp5V0FpWXgvUGdGTVl2dzlDR0FDNCs5REFJTVpmeThDMk1pelBXc1N3QWJHdnk0QmZNTDQxeWFBRHhqLytnVHdEdVBQSUlBTGpEK0hBTTc0QS9Zc0FqaGgvSGtFOE16NE13bWdqRDlaZkFER255MDZBT01uTmdEanB5bzBBT1BuUlZ3QXhzK3BxQUNNbjNNeEFSZy9sMFFFNE5rZTNyTjhBTWJQUjVZT3dQajV6TklCM012NDF5ZUFkeGgvQmdGY1lQdzVCSERHK0xNSTRJVHg1eEhBTStQUEpJQXkvbVR4QVJoL3R1Z0FqSi9ZQUl5ZnF0QUFqSjhYaHdyZ1NNLzJQUEx4NjVtUGNxLytHUGxoQWpqUytEbU9Rd1JnL095bGZRREd6NTVhQjlCdC9OZDhyUlhPblgzMkNHMEQ2RForMXRReWdNN2ozL0oxOXpoNzFybXp6OTdiMDlkdlgzN052b2hUbmNkLzd2eGFWejkzOXRsN2FCWEFrY2JQR2xxK0JicVY4WE90TmdIYysrcHYvTnlpVFFEM01INXVkZmdBako5N0hEb0E0K2RlYlFLNGRzekd6eU8wQ2VBYXhzK2p0QXBnNVR1TzlOVHFSdGlwMWU0NDBsUGJBR0NFVm0rQllEUUJFRTBBUkJNQTBRUkFOQUVRVFFCRUV3RFJCRUEwQVJCTkFFUVRBTkVFUURRQkVFMEFSQk1BMFFSQU5BRVFUUUJFRXdEUkJFQTBBUkJOQUVRVEFORUVRRFFCRUUwQVJCTUEwUVJBTkFFUVRRQkVFd0RSQkVDMC93RzBkMVU3OWREODNRQUFBQUJKUlU1RXJrSmdnZz09Iiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3BuZyIsInB1cnBvc2UiOiJhbnkgbWFza2FibGUifSx7InNyYyI6ImRhdGE6aW1hZ2UvcG5nO2Jhc2U2NCxpVkJPUncwS0dnb0FBQUFOU1VoRVVnQUFBZ0FBQUFJQUNBWUFBQUQwZU5UNkFBQU4wRWxFUVZSNG5PM2R1NUlVeVJKRjBlVGEvQWNJeUdqdy96Sm8vQkJYWUlaSGQ5Y3pJek04L0t5bGpvMVpsYmQxbmwzVkF1OCtmSHovWXdNQW92eHY5Z3NBQU00bkFBQWdrQUFBZ0VBQ0FBQUNDUUFBQ0NRQUFDQ1FBQUNBUUFJQUFBSUpBQUFJSkFBQUlKQUFBSUJBQWdBQUFna0FBQWdrQUFBZ2tBQUFnRUFDQUFBQ0NRQUFDQ1FBQUNDUUFBQ0FRQUlBQUFJSkFBQUlKQUFBSUpBQUFJQkFBZ0FBQWdrQUFBZ2tBQUFna0FBQWdFQUNBQUFDQ1FBQUNDUUFBQ0NRQUFDQVFBSUFBQUlKQUFBSUpBQUFJSkFBQUlCQUFnQUFBZ2tBQUFna0FBQWdrQUFBZ0VBQ0FBQUNDUUFBQ0NRQUFDQ1FBQUNBUUFJQUFBSUpBQUFJSkFBQUlKQUFBSUJBQWdBQUFna0FBQWdrQUFBZ2tBQUFnRUFDQUFBQ0NRQUFDQ1FBQUNDUUFBQ0FRQUlBQUFJSkFBQUlKQUFBSUpBQUFJQkFBZ0FBQWdrQUFBZ2tBQUFna0FBQWdFQUNBQUFDQ1FBQUNDUUFBQ0NRQUFDQVFBSUFBQUlKQUFBSUpBQUFJSkFBQUlCQUFnQUFBZ2tBQUFna0FBQWdrQUFBZ0VBQ0FBQUNDUUFBQ0NRQUFDQ1FBQUNBUUFJQUFBSUpBQUFJSkFBQUlKQUFBSUJBQWdBQUFna0FBQWdrQUFBZ2tBQUFnRUFDQUFBQ0NRQUFDQ1FBQUNDUUFBQ0FRQUlBQUFMOU0vc0ZBTEN1NzkrK1h2eHZuejUvT2ZHVjhLaDNIejYrL3pIN1JRQ3dqbXVqZjRrWXFNZWZBQUM0MnpQanYrZi80emkrQVFEZ3BwRUQ3dHVBR253REFNQlZveis5K3phZ0JnRUF3RVZIamJVSW1FOEFBRUFnQVFEQW00NytsTzViZ0xrRUFBQ3ZuRFhPSW1BZUFRREFYNHh5QmdFQXdDL0dQNGNBQUdEYnRubmpMenJtRUFBQUdPRkFBZ0FnblBIUEpBQUFnaG4vWEFJQUlKVHh6eVlBQUFJWmZ3UUFRQmpqejdZSkFJQW9GY2ZmUHc4OGh3QUFDRkZ4L0psSEFBQUVNUDY4SkFBQW1xczgvcjcrbjBjQUFEUm0vTGxFQUFBMFZYbjhtVThBQURSVWZmeDkrcDlQQUFBMFkveTV4eit6WHdBMVhIdGcrR1c5bnp2dTU0YjdWQjUvUDc5YTNuMzQrUDdIN0JmQkhNODhLUHdDdithTys3bmhHTWFmUi9nVFFLaG5IeFNWSHpBenVPTitiamhHNVhzWS81cDhBeEJtNUVNaStaZmFIZmR6d3pFcUQvKzJaZjlzcXZNTlFKRFJENHJxRDU2anVPTitiamhHOWZkdC9Hc1RBQ0dPZWxCVWZ3Q041bzc3dWVFWTFkK3Y4YTlQQUFBd2xQRmZnd0FJY1BRbmhlcWZSRVp4eC8zY2NJeks3OVA0cjBNQU5IZldnNkx5QTJrRWQ5elBEY2VvL1A2TS8xb0VBTUFpakQ4akNRQ0FCUmgvUmhNQWpaMzl3S2o4Z05yREhmZHp3MzBxdngvanZ5NEJBRkNZOGVjb0FnQ2dLT1BQa1FRQVFFSEduNk1KQUlCaWpEOW5FQUFBaFJoL3ppSUFBSW93L3B4SkFEVG1GM1lNZDl6UERXOHovcHhOQUFCTVp2eVpRUUFBVEZSNS9PbE5BQUJNWXZ5WlNRQUFUR0Q4bVUwQUFKek0rRk9CQUFBNGtmR25DZ0VBY0JMalR5VUNBT0FFeHA5cUJBREF3WXcvRlFrQWdBTVpmNm9TQUFBSE1mNVVKZ0FBRG1EOHFVNEFBQXhtL0ZtQkFBQVl5UGl6Q2dFQU1JanhaeVVDQUdBQTQ4OXFCQURBVHNhZkZRa0FnQjJNUDZzU0FBQlBNdjZzVEFBQVBNSDRzem9CQVBBZzQwOEhBZ0RnQWNhZkxnUUF3SjJNUDUwSUFJQTdHSCs2RVFBQU54aC9PaElBQUZjWWY3b1NBQUFYR0g4NkV3QUFiekQrZENjQUFGNHcvaVFRQUFCL3FEeituejUvbWYwU2FFUUFBUHpMK0pORUFBQnN4cDg4QWdDSVoveEpKQUNBYU1hZlZBSUFpR1g4U1NZQWdFakduM1FDQUloai9FRUFBR0dNUC93a0FJQVl4aDkrRXdCQUJPTVBmeE1BUUh2R0gxNFRBRUJyeGgvZUpnQ0F0b3cvWENZQWdKYU1QMXduQUFCT1pQeXBRZ0FBbk1UNFU0a0FBRGlCOGFjYUFRQndNT05QUlFJQTRFREduNm9FQU1CQmpEK1ZDUUNBQXhoL3FoTUFBSU1aZjFZZ0FBQUdNdjZzUWdBQURHTDhXWWtBQUJqQStMTWFBUUN3ay9GblJRSUFZQWZqejZvRUFNQ1RqRDhyRXdBQVR6RCtyRTRBQUR6SStOT0JBQUI0Z1BHbkN3RUFjQ2ZqVHljQ0FPQU94cDl1QkFEQURjYWZqZ1FBd0JYR242NEVBTUFGeHAvT0JBREFHNHcvM1FrQWdCZU1Qd2tFQU1BZmpEOHBCQURBdjR3L1NRUUF3R2I4eVNNQWdIakduMFFDQURqYzkyOWZaNytFaTR3L3FRUUFjQ2pqRHpVSkFPQXd4aC9xRWdEQUlZdy8xQ1lBZ09HTVA5UW5BSUNoakQrc1FRQUF3eGgvV0ljQUFJWXcvckFXQVFEc1p2eGhQUUlBMk1YNHc1b0VBUEEwNHcvckVnREFVeXFQUDNDYkFBQWVadnhoZlFJQWVJanhoeDRFQUhBMzR3OTlDQURnTHNZZmVoRUF3RTNHSC9vUkFNQlZ4aDk2RWdEQVJjWWYraElBd0p1TVAvUW1BSUJYakQvMEp3Q0F2eGgveUNBQWdGK01QK1FRQU1DMmJjWWYwZ2dBd1BoRElBRUE0WXcvWkJJQUVNejRReTRCQUtHTVAyUVRBQkRJK0FNQ0FNSVlmMkRiQkFCRU1mN0Fmd1FBaEREK3dKOEVBQVF3L3NCTEFnQ2FNLzdBV3dRQU5HYjhnVXNFQURSbC9JRnJCQUEwWlB5Qld3UUFOR1A4Z1hzSUFHakUrQVAzRWdEUVJPWHgvL1Q1eSt5WEFMd2dBS0FCNHc4OFNnREE0b3cvOEF3QkFBc3ovc0N6QkFBc3l2Z0Rld2dBV0pEeEIvWVNBTEFZNHcrTUlBQmdJY1lmR0VVQXdDS01QekNTQUlBRkdIOWdOQUVBeFJsLzRBZ0NBQW96L3NCUkJBQVVaZnlCSXdrQUtNajRBMGNUQU1EZGpELzBJUUNBdXhoLzZFVUFBRGNaZitoSEFBQlhHWC9vU1FBQUZ4bC82RXNBQUc4eS90Q2JBQUJlTWY3UW53QUEvbUw4SVlNQUFINHgvcEJEQUFEYnRobC9TQ01BQU9NUGdRUUFoRFAra0VrQVFERGpEN2tFQUlReS9wQk5BRUFnNHc4SUFBaGovSUZ0RXdBUXhmZ0QveEVBRU1MNEEzOFNBQkRBK0FNdkNRQm96dmdEYnhFQTBKanhCeTRSQU5DVThRZXVFUURRa1BFSGJoRUEwSXp4Qis0aEFLQVI0dy9jU3dCQUU4WWZlSVFBZ0FhTVAvQW9BUUNMTS83QU13UUEzUEQ5MjlmWkwrRWk0dzg4U3dEQUZjWWY2RW9Bd0FYR0graE1BTUFiakQvUW5RQ0FGNHcva0VBQXdCK01QNUJDQU1DL2pEK1FSQURBWnZ5QlBBS0FlTVlmU0NRQWlHYjhnVlFDZ0ZqR0gwZ21BSWhVZWZ3QnppQUFpR1A4QVFRQVlZdy93RThDZ0JqR0grQTNBVUFFNHcvd053RkFlOFlmNERVQlFHdkdIK0J0QW9DMmpEL0FaUUtBbG93L3dIVUNnSGFNUDhCdEFvQldqRC9BZlFRQWJSaC9nUHNKQUZvdy9nQ1BFUUFzei9nRFBFNEFzRFRqRC9BY0FjQ3lqRC9BOHdRQVN6TCtBUHNJQUpaai9BSDJFd0FzeGZnRGpDRUFXSWJ4QnhoSEFMQUU0dzh3bGdDZ1BPTVBNSjRBb0RUakQzQU1BVUJaeGgvZ09BS0Frb3cvd0xFRUFPVVlmNERqQ1FCS01mNEE1eEFBbEdIOEFjNGpBQ2loOHZoLyt2eGw5a3NBR0U0QU1KM3hCemlmQUdBcTR3OHdod0JnR3VNUE1JOEFZQXJqRHpDWEFPQjB4aDlnUGdIQXFZdy9RQTBDZ05NWWY0QTZCQUNuTVA0QXRRZ0FEbWY4QWVvUkFCeksrQVBVSkFBNGpQRUhxRXNBY0FqakQxQ2JBR0E0NHc5UW53QmdLT01Qc0FZQlFBVGpEL0EzQVVCN3hoL2dOUUZBYThZZjRHMENnTGFNUDhCbEFvQ1dqRC9BZFFLQWRvdy93RzBDZ0ZhTVA4QjlCQUJ0R0grQSt3a0FXakQrQUk4UkFDelArQU04VGdDd05PTVA4QndCd0xLTVA4RHpCQUJMTXY0QSt3Z0FsbVA4QWZZVEFDekYrQU9NSVFCWWh2RUhHRWNBc0FUakR6Q1dBS0E4NHc4d25nQ2dOT01QY0F3QlFGbkdIK0E0QW9DU2pEL0FzUVFBNVJoL2dPTUpBRW94L2dEbkVBQ1VZZndCemlNQUtNSDRBNXhMQURDZDhRYzRud0JnS3VNUE1JY0FZQnJqRHpDUEFHanMrN2V2czEvQ1JjWWZZQzRCMEpUeEIrQWFBZENROFIrcjhqMVg0WVpqdUNNakNZQm1LajhnVmh4L2dLNEVRQ1BHSDRCN0NZQW1qRDhBanhBQURSaC9BQjRsQUJabi9BRjRoZ0JZbVBFSDRGa0NZRkhHL3p4bnY1OXU5OXMyTnh6RkhSbEpBQ3pJK0FPd2x3QllqUEVIWUFRQnNCRGpQODlaNzYvekhkMXdESGRrRkFHd0NPTS8zOUh2TStHT2JqaUdPektDQUZoQTVmRUhZRTBDb0xqcTQ1LzJTZUdvOTV0MFJ6Y2N3eDNaU3dBVVp2eHJHdjIrRSsvb2htTzRJM3U4Ky9EeC9ZL1pMNExYS28rL2g4UnZlMzVPN3ZpVEc0N2hqanpLTndBRkdmOTFQSHNQZC96TkRjZHdSeDdsRzRCaWpQL2FydjM4M084K2JqaUdPM0tMQUNpaTh2QnZtd2NHUURmK0JGQ0E4UWZnYkFKZ011TVB3QXdDZ0l1TVAwQmZBbUNpeXAvK2pUOUFid0pnRXVNUHdFd0NnTDhZZjRBTUFvQmZqRDlBRGdFd1FjV3YvNDAvUUJZQmdQRUhDQ1FBd2hsL2dFd0NJSmp4QjhnbEFFSVpmNEJzQWlDUThRZEFBSVF4L2dCc213Q1lZdFlJRzM4QS9pTUFRaGgvQVA0a0FBSVlmd0JlRWdDVG5EWEt4aCtBdHdpQWlZNGVaK01Qd0NVQ0FBQUNDWURKanZxVTd0TS9BTmNJZ0FKR2o3WHhCK0NXZHg4K3Z2OHgrMFh3MjU1L0t0andBM0F2M3dBVTgreUlHMzhBSHVFYmdPS3VmU05nOUFGNGxnQUFnRUQrQkFBQWdRUUFBQVFTQUFBUVNBQUFRQ0FCQUFDQkJBQUFCQklBQUJCSUFBQkFJQUVBQUlFRUFBQUVFZ0FBRUVnQUFFQWdBUUFBZ1FRQUFBUVNBQUFRU0FBQVFDQUJBQUNCQkFBQUJCSUFBQkJJQUFCQUlBRUFBSUVFQUFBRUVnQUFFRWdBQUVBZ0FRQUFnUVFBQUFRU0FBQVFTQUFBUUNBQkFBQ0JCQUFBQkJJQUFCQklBQUJBSUFFQUFJRUVBQUFFRWdBQUVFZ0FBRUFnQVFBQWdRUUFBQVFTQUFBUVNBQUFRQ0FCQUFDQkJBQUFCQklBQUJCSUFBQkFJQUVBQUlFRUFBQUVFZ0FBRUVnQUFFQWdBUUFBZ1FRQUFBUVNBQUFRU0FBQVFDQUJBQUNCQkFBQUJCSUFBQkJJQUFCQUlBRUFBSUVFQUFBRUVnQUFFRWdBQUVBZ0FRQUFnUVFBQUFRU0FBQVFTQUFBUUNBQkFBQ0JCQUFBQkJJQUFCQklBQUJBSUFFQUFJRUVBQUFFRWdBQUVFZ0FBRUFnQVFBQWdRUUFBQVFTQUFBUVNBQUFRQ0FCQUFDQkJBQUFCQklBQUJCSUFBQkFJQUVBQUlFRUFBQUVFZ0FBRUVnQUFFQWdBUUFBZ1FRQUFBUVNBQUFRU0FBQVFDQUJBQUNCQkFBQUJCSUFBQkJJQUFCQW9QOERUaVJoWGNhRHRXUUFBQUFBU1VWT1JLNUNZSUk9Iiwic2l6ZXMiOiI1MTJ4NTEyIiwidHlwZSI6ImltYWdlL3BuZyIsInB1cnBvc2UiOiJhbnkgbWFza2FibGUifV19">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAD0ElEQVR4nO3bMXLUQBCG0TbFPeyAmAzuH0PGhUwAAdhr79rWaGb+fi9UoFZtfaVgWnv38OX+sSDEp9kPAEcSNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE0UQRNF0EQRNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE0UQRNF0EQRNFEETRRBE0XQRBE0UQRNlM+zH4C9/Pr549m1r9++T3iSy7yhudmlmF+7PoOgucm1aFeJWtBcdWusK0QtaF61QqRvIWhetFvMVYLmBTvGXCVoLtg15ipB88RHYl7hPHq7xcqMg/3OM2+1QsxVm72hZxzsd595i1Virtoo6BkH+2Zet1LMVZsEPeNg38zrVou5apOgGSMt5ipBt5UYc5WgW0qNuUrQ7STHXLVJ0DN+yMSZO28Ab7VF0Hxch5irBN1Cl5irBB2vU8xVgo7WLeYqQcfqGHOVoCN1jblK0HE6x1wl6CjdY64SdAwx/yHoAOnr7LcQ9ObE/D9Bb0zMzwl6U2K+TNDNJMdcJehW0mOuEnQbHWKuEnQLXWKuEnS8TjFXCTpat5irBB2rY8xVgo7UNeYqQcfpHHOVoKN0j7lK0Euxzv44QS9CzMcQ9ALEfBxBTybmYwl6IjEfT9CT+A/gGIKeQMzjCPpkYh5L0CcS83iCPomYzyHoE4j5PIIeTMznEvRAYj6foAcR8xyCHkDM8wj6YNbZcwn6QGKeT9AHEfMaBH0AMa9D0BOJ+XiCnkTMYwh6AjGPI+iTiXksQZ9IzOMJ+iRiPoegTyDm8wh6MDGfS9ADifl8gh5EzHMI+gXW2XsS9AVi3pegnxDz3gT9DzHvT9B/iTmDoMt/AJO0D1rMWVoHLeY8bYMWc6aWQYs5V7ugxZytVdBiztcmaDH30CJoMfcRH7SYe4kO2jq7n9igxdxTZNBi7isuaDH3Fhf0e4k5g6BLzEnaBy3mLK2DFnOetkGLOVPLoMWcq13QYs7WKmgx52sTtJh7aBG0mPvYIugZ6+wZn512mTnS8kH7NoO3WDpoMfNWywYtZt5jyaDFzHstF/QqMd96LzPXslTQq8R86z3NXM8yQa8W87V7m7mmu4cv94+zH2LVmNnP9De0mDnS9KDfS8xcsmXQYuYl2wUtZl6zVdBi5prpQacd7DPX9KCrsg72mWuJoKtyDvaZa4nFChxlmTc0HEHQRBE0UQRNFEETRdBEETRRBE0UQRNF0EQRNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE0UQRNF0EQRNFEETRRBE0XQRBE0UQRNFEETRdBEETRRfgN5vUOfUxL8HgAAAABJRU5ErkJggg==">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tally">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#F2EFE9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1C1D18" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2EFE9; --surface:#FFFFFF; --ink:#20241F; --muted:#83816F; --line:#DEDACB;
+  --pos:#3F6B4B; --pos-soft:#E1E9DE; --neg:#93493A; --neg-soft:#EEE0D8;
+  --accent:#20241F; --accent-ink:#F2EFE9; --focus:#3F6B4B;
+  --font:"Schibsted Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --radius:3px;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1C1D18; --surface:#25261F; --ink:#EEECE2; --muted:#9A9884; --line:#3A3B32;
+    --pos:#8FB89A; --pos-soft:#2C3A2E; --neg:#D08D77; --neg-soft:#3D2E27;
+    --accent:#EEECE2; --accent-ink:#1C1D18; --focus:#8FB89A;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1C1D18; --surface:#25261F; --ink:#EEECE2; --muted:#9A9884; --line:#3A3B32;
+  --pos:#8FB89A; --pos-soft:#2C3A2E; --neg:#D08D77; --neg-soft:#3D2E27;
+  --accent:#EEECE2; --accent-ink:#1C1D18; --focus:#8FB89A;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5;font-variant-numeric:tabular-nums}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.wrap{max-width:640px;margin:0 auto;padding:0 1.25rem 2.5rem}
+
+/* Top bar */
+.top{display:flex;align-items:center;gap:.75rem;padding:1rem 0 .5rem;flex-wrap:wrap}
+.brand{font-weight:800;font-size:1.25rem;letter-spacing:-.02em;margin-right:auto}
+.gsel{display:flex;gap:.4rem;align-items:center;flex-wrap:nowrap;padding:0 0 .75rem;min-width:0}
+.gsel select{flex:1 1 auto;min-width:0;width:auto;font-weight:500}
+.gsel .btn{flex:0 0 auto;padding:.5rem .65rem;font-size:.85rem}
+select,input,textarea{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:.55rem .7rem;min-height:44px;width:100%;font-size:16px}
+
+/* Buttons */
+.btn{appearance:none;border:1px solid var(--ink);background:transparent;color:var(--ink);border-radius:var(--radius);padding:.6rem 1.1rem;min-height:44px;cursor:pointer;font-weight:500;white-space:nowrap}
+.btn:hover{background:var(--line)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.primary:hover{opacity:.85;background:var(--accent)}
+.btn.danger{color:var(--neg);border-color:transparent;background:transparent;padding-left:0}
+.btn.danger:hover{background:var(--neg-soft)}
+.btn.small{min-height:36px;padding:.35rem .8rem;font-size:.9rem}
+
+/* Hero ledger */
+.hero{padding:1.25rem 0 1.5rem}
+.hero h1{font-size:clamp(2rem,8vw,3rem);line-height:1.05;letter-spacing:-.035em;font-weight:800;margin:0}
+.sub{color:var(--muted);margin:.35rem 0 1.5rem}
+.ledger{display:grid;gap:.6rem}
+.lrow{display:grid;grid-template-columns:minmax(4rem,6rem) 1fr minmax(4rem,6rem);align-items:center;gap:.75rem}
+.lname{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lbar{display:grid;grid-template-columns:1fr 1fr;height:28px;position:relative}
+.lbar::after{content:"";position:absolute;left:50%;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:var(--ink);opacity:.8}
+.half{display:flex;align-items:stretch}
+.half.neg{justify-content:flex-end}
+.half i{display:block;height:100%;transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.half.neg i{background:var(--neg);border-radius:2px 0 0 2px}
+.half.pos i{background:var(--pos);border-radius:0 2px 2px 0}
+.lamt{text-align:right;font-weight:700;font-size:.95rem;line-height:1.2;white-space:nowrap}
+.lamt small{display:block;font-weight:400;color:var(--muted);font-size:.8rem}
+.lamt.pos{color:var(--pos)} .lamt.neg{color:var(--neg)} .lamt.zero{color:var(--muted)}
+@media (prefers-reduced-motion: reduce){.half i{transition:none}}
+
+.actions{display:flex;gap:.6rem;margin:0 0 2rem}
+.actions .btn{flex:1}
+.actions .btn.icon{flex:0 0 auto;width:3.4rem;padding:.6rem 0;font-size:1.15rem;text-align:center}
+
+.mic-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--neg);margin-right:.6rem;vertical-align:middle;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.35;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+@media (prefers-reduced-motion: reduce){.mic-dot{animation:none}}
+.voice-text{min-height:3.5rem;font-weight:500;color:var(--ink)}
+.banner{background:var(--neg-soft);border:1px solid var(--neg);color:var(--ink);border-radius:var(--radius);padding:.75rem .9rem;margin:0 0 1rem;font-size:.9rem;line-height:1.4}
+.banner b{display:block;margin-bottom:.15rem}
+
+section.block{margin:0 0 2rem}
+h2{font-size:1.1rem;font-weight:700;margin:0 0 .5rem;letter-spacing:-.01em}
+.list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.list li{border-bottom:1px solid var(--line)}
+.settle{display:flex;align-items:center;gap:.75rem;padding:.7rem 0}
+.settle p{margin:0;flex:1}
+.settle b{font-weight:700}
+.item{display:grid;grid-template-columns:3rem 1fr auto;gap:.75rem;align-items:center;width:100%;text-align:left;background:none;border:0;padding:.75rem 0;cursor:pointer}
+.item:hover .idesc,.item:hover .pname>span:first-child{text-decoration:underline;text-underline-offset:3px}
+.idate{color:var(--muted);font-size:.8rem;line-height:1.15;text-align:center}
+.idate b{display:block;font-size:1.15rem;color:var(--ink);font-weight:700}
+.idesc{font-weight:500;display:block}
+.imeta{color:var(--muted);font-size:.875rem}
+.iamt{font-weight:700;text-align:right}
+.item.payment .idesc,.item.payment .iamt{color:var(--pos)}
+.muted{color:var(--muted)}
+.none{color:var(--muted);padding:.75rem 0;margin:0}
+
+.item.person{grid-template-columns:1fr auto}
+.pname{display:flex;flex-direction:column;gap:.1rem}
+.pname>span:first-child{font-weight:500}
+.pbal{display:flex;flex-direction:column;align-items:flex-end;gap:.3rem}
+.pbal .lamt{font-size:.95rem}
+
+.empty{min-height:min(60vh,32rem);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem 0}
+.empty h1{font-size:clamp(1.4rem,4.5vw,1.75rem);line-height:1.3;letter-spacing:-.01em;font-weight:500;color:var(--muted);margin:0 0 1.75rem;max-width:22ch}
+
+/* Dialog */
+dialog{border:0;border-radius:6px;padding:0;background:var(--surface);color:var(--ink);width:min(560px,calc(100vw - 1.5rem));max-height:min(92dvh,900px)}
+dialog::backdrop{background:rgba(20,20,16,.5)}
+dialog form{padding:1.25rem 1.25rem 1rem;display:grid;gap:.9rem}
+dialog h2{font-size:1.4rem;letter-spacing:-.02em;margin:0}
+label{display:grid;gap:.3rem;font-size:.9rem;font-weight:500}
+label.inline{display:flex;align-items:center;gap:.6rem}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.75rem}
+.two input,.two select{min-width:0}
+fieldset{border:0;padding:0;margin:0}
+legend{font-size:.9rem;font-weight:500;margin-bottom:.3rem;padding:0}
+.seg{display:flex;background:var(--bg);border-radius:var(--radius);padding:3px}
+.seg label{flex:1;display:block;text-align:center;cursor:pointer;margin:0}
+.seg input{position:absolute;opacity:0;width:1px;height:1px}
+.seg span{display:block;padding:.45rem .5rem;border-radius:2px;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seg input:checked + span{background:var(--surface);font-weight:700;box-shadow:0 0 0 1px var(--line)}
+.seg input:focus-visible + span{outline:2px solid var(--focus)}
+.srows{display:grid;border-top:1px solid var(--line);max-height:14rem;overflow-y:auto}
+.srow{display:flex;align-items:center;gap:.75rem;padding:.5rem 0;border-bottom:1px solid var(--line);font-weight:400;font-size:1rem}
+.srow input[type=checkbox]{width:20px;height:20px;min-height:0;accent-color:var(--accent);flex:none}
+.srow .nm{flex:1}
+.srow input:not([type=checkbox]){width:6.5rem;flex:none;text-align:right}
+.sval{color:var(--muted);font-size:.85rem;white-space:nowrap}
+.hint{margin:0;font-size:.9rem;color:var(--muted)}
+.hint.bad{color:var(--neg);font-weight:500}
+.err{margin:0;color:var(--neg);font-weight:500;min-height:0}
+.err:empty{display:none}
+.dlg-actions{display:flex;gap:.5rem;align-items:center;padding-top:.25rem;flex-wrap:wrap}
+.dlg-actions .sp{flex:1}
+.mrow{display:flex;gap:.5rem;align-items:center}
+.mrow input{flex:1}
+textarea{min-height:10rem;font-size:.8rem;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical}
+
+@media (max-width:420px){
+  .lrow{grid-template-columns:4rem 1fr 4rem;gap:.5rem}
+  .two{grid-template-columns:1fr}
+  .seg span{font-size:.8rem;padding:.45rem .3rem}
+  .gsel .btn{padding:.45rem .5rem;font-size:.78rem}
+  .gsel select{font-size:.85rem}
+}
+.theme-toggle{position:fixed;left:1rem;bottom:calc(1rem + env(safe-area-inset-bottom,0px));width:2.5rem;height:2.5rem;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:1.05rem;line-height:1;cursor:pointer;opacity:.55;transition:opacity .15s;z-index:10}
+.theme-toggle:hover,.theme-toggle:focus-visible{opacity:1}
+</style>
+</head>
+<body>
+<button id="themeToggle" class="theme-toggle" aria-label="Switch to night mode" title="Switch to night mode"></button>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">Tally</div>
+    <button class="btn small" id="peopleBtn" data-action=""></button>
+  </header>
+  <div class="gsel" id="navBar"></div>
+  <div id="banner"></div>
+  <main id="app"></main>
+</div>
+<dialog id="dlg"><form id="dlgForm" novalidate></form></dialog>
+
+<script>
+/* ---------- Storage ---------- */
+const KEY = 'tally:v1';
+const THEME_KEY = 'tally:theme';
+function getThemeOverride(){ try{ return localStorage.getItem(THEME_KEY); }catch(e){ return null; } }
+function systemPrefersDark(){ return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; }
+function isDarkActive(){ const t = getThemeOverride(); return t ? t === 'dark' : systemPrefersDark(); }
+function renderThemeToggle(){
+  const btn = document.getElementById('themeToggle');
+  if(!btn) return;
+  const dark = isDarkActive();
+  btn.textContent = dark ? '☀' : '☾';
+  const label = dark ? 'Switch to day mode' : 'Switch to night mode';
+  btn.setAttribute('aria-label', label);
+  btn.setAttribute('title', label);
+}
+function applyTheme(){
+  const t = getThemeOverride();
+  if(t) document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme;
+  renderThemeToggle();
+}
+applyTheme();
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const next = isDarkActive() ? 'light' : 'dark';
+  try{ localStorage.setItem(THEME_KEY, next); }catch(e){}
+  applyTheme();
+});
+try{
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  const onChange = () => { if(!getThemeOverride()) renderThemeToggle(); };
+  mq.addEventListener ? mq.addEventListener('change', onChange) : mq.addListener(onChange);
+}catch(e){}
+function normalize(s){
+  if(!s || typeof s !== 'object') s = {};
+  if(!Array.isArray(s.people)) s.people = [];
+  if(!Array.isArray(s.groups)) s.groups = [];
+  if(!Array.isArray(s.payments)) s.payments = [];
+  if(!('meId' in s)) s.meId = null;
+  s.groups.forEach(g => {
+    if(!Array.isArray(g.members)) { g.members = []; return; }
+    if(g.members.length && typeof g.members[0] === 'object'){
+      g.members.forEach(m => { if(m && m.id && !s.people.some(p => p.id === m.id)) s.people.push({ id:m.id, name:m.name || 'Someone' }); });
+      g.members = g.members.map(m => m.id);
+    }
+  });
+  if(!('activeGroupId' in s)) s.activeGroupId = s.groups[0]?.id || null;
+  s.version = 2;
+  return s;
+}
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw){ const s = JSON.parse(raw); if(s) return normalize(s); }
+  }catch(e){}
+  return normalize({});
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); return true; }catch(e){ return false; } }
+let state = load();
+let view = 'groups'; /* 'groups' | 'people' */
+function storageWorks(){
+  try{ const k = '__tally_test__'; localStorage.setItem(k,'1'); const ok = localStorage.getItem(k) === '1'; localStorage.removeItem(k); return ok; }
+  catch(e){ return false; }
+}
+const canPersist = storageWorks();
+function renderBanner(){
+  const el = $('#banner');
+  el.innerHTML = canPersist ? '' : `<div class="banner"><b>Nothing here is being saved</b>This page can't write to storage in its current view, so your data will disappear when you leave. If you opened this from inside the Claude app, tap the share icon and choose "Open in Safari" (or open the link directly in Safari), then reload.</div>`;
+}
+
+/* ---------- Helpers ---------- */
+const $ = s => document.querySelector(s);
+const uid = () => Math.random().toString(36).slice(2,9) + Date.now().toString(36).slice(-4);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today = () => { const d = new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); };
+const CURRENCIES = ['GBP','EUR','USD','CHF','SEK','NOK','DKK','AUD','CAD','NZD'];
+function group(){
+  let g = state.groups.find(x => x.id === state.activeGroupId);
+  if(!g && state.groups.length){ g = state.groups[0]; state.activeGroupId = g.id; }
+  return g || null;
+}
+function person(id){ return state.people.find(p => p.id === id) || { id, name:'Someone' }; }
+const personName = id => person(id).name;
+function groupsOf(pid){ return state.groups.filter(g => g.members.includes(pid)); }
+function personLocked(pid){ return state.groups.some(g => g.members.includes(pid)) || state.payments.some(p => p.from===pid || p.to===pid); }
+function money(p, cur){
+  try{ return new Intl.NumberFormat('en-GB',{style:'currency',currency:cur}).format(p/100); }
+  catch(e){ return (p/100).toFixed(2) + ' ' + cur; }
+}
+function toPence(v){
+  const s = String(v ?? '').replace(/[^0-9.\-]/g,'');
+  if(s === '' ) return 0;
+  const n = Number(s);
+  return Number.isFinite(n) ? Math.round(n*100) : NaN;
+}
+
+/* Split an integer total (pence) by weights, largest-remainder so pennies always add up */
+function distribute(total, weights){
+  const ids = Object.keys(weights).filter(id => weights[id] > 0);
+  const W = ids.reduce((s,id) => s + weights[id], 0);
+  if(!W) return null;
+  const rows = ids.map(id => { const exact = total*weights[id]/W; const base = Math.floor(exact); return {id, base, rem: exact-base}; });
+  let left = total - rows.reduce((s,r) => s + r.base, 0);
+  rows.sort((a,b) => b.rem - a.rem);
+  for(let k=0; k<left; k++) rows[k % rows.length].base++;
+  const out = {}; rows.forEach(r => out[r.id] = r.base); return out;
+}
+function balances(g){
+  const b = {}; g.members.forEach(id => b[id] = 0);
+  g.expenses.forEach(e => {
+    if(e.paidBy in b) b[e.paidBy] += e.amount;
+    for(const [id,v] of Object.entries(e.splits)) if(id in b) b[id] -= v;
+  });
+  return b;
+}
+/* Fewest-transfers settle-up: greedy match largest debtor to largest creditor */
+function settlements(b){
+  const cr = [], db = [];
+  for(const [id,v] of Object.entries(b)){ if(v>0) cr.push({id,v}); else if(v<0) db.push({id,v:-v}); }
+  cr.sort((a,c) => c.v-a.v); db.sort((a,c) => c.v-a.v);
+  const out = []; let i=0, j=0;
+  while(i<db.length && j<cr.length){
+    const x = Math.min(db[i].v, cr[j].v);
+    out.push({from:db[i].id, to:cr[j].id, amount:x});
+    db[i].v -= x; cr[j].v -= x;
+    if(!db[i].v) i++; if(!cr[j].v) j++;
+  }
+  return out;
+}
+function involved(g, mid){ return g.expenses.some(e => e.paidBy === mid || mid in e.splits); }
+/* Every group balance plus every standalone settlement, grouped by currency */
+function personCurrencyTotals(pid){
+  const totals = {};
+  state.groups.forEach(g => {
+    if(!g.members.includes(pid)) return;
+    const b = balances(g)[pid] || 0;
+    totals[g.currency] = (totals[g.currency] || 0) + b;
+  });
+  state.payments.forEach(p => {
+    if(p.from === pid) totals[p.currency] = (totals[p.currency] || 0) + p.amount;
+    if(p.to === pid) totals[p.currency] = (totals[p.currency] || 0) - p.amount;
+  });
+  return totals;
+}
+
+/* ---------- Render ---------- */
+function render(){
+  renderBanner();
+  renderNav();
+  if(view === 'people') renderPeopleView(); else renderGroupView();
+}
+function renderNav(){
+  const bar = $('#navBar');
+  const g = group();
+  const peopleBtn = $('#peopleBtn');
+  peopleBtn.dataset.action = view==='people' ? 'view-groups' : 'view-people';
+  peopleBtn.textContent = view==='people' ? (state.groups.length?'Back to groups':'Back') : 'People';
+  const parts = [];
+  if(state.groups.length && view==='groups'){
+    parts.push(`<label class="sr" style="position:absolute;left:-9999px" for="gpick">Group</label>
+      <select id="gpick" aria-label="Choose group">${state.groups.map(x => `<option value="${x.id}" ${g&&x.id===g.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select>
+      <button class="btn small" data-action="edit-group">Edit group</button><button class="btn small" data-action="new-group">New group</button>`);
+  }
+  bar.innerHTML = parts.join('');
+  bar.style.display = parts.length ? 'flex' : 'none';
+}
+function renderGroupView(){
+  const app = $('#app'), g = group();
+  if(!g){
+    app.innerHTML = `
+      <section class="empty">
+        <h1>You're not part of any groups</h1>
+        <button class="btn primary" data-action="new-group">Add a group</button>
+      </section>`;
+    return;
+  }
+  const cur = g.currency, b = balances(g);
+  const max = Math.max(1, ...Object.values(b).map(Math.abs));
+  const spent = g.expenses.filter(e => e.type !== 'payment').reduce((s,e) => s+e.amount, 0);
+  const plan = settlements(b);
+  const sorted = [...g.expenses].sort((a,c) => (c.date||'').localeCompare(a.date||'') || c.createdAt - a.createdAt);
+
+  app.innerHTML = `
+    <section class="hero">
+      <h1>${esc(g.name)}</h1>
+      <p class="sub">${g.members.length} ${g.members.length===1?'person':'people'}, ${money(spent,cur)} spent so far</p>
+      <div class="ledger" role="list" aria-label="Balances">
+        ${g.members.map(mid => {
+          const v = b[mid], w = Math.round(Math.abs(v)/max*100), name = personName(mid);
+          const cls = v>0?'pos':v<0?'neg':'zero';
+          const label = v>0?`${money(v,cur)}<small>is owed</small>`:v<0?`${money(-v,cur)}<small>owes</small>`:`Square`;
+          return `<div class="lrow" role="listitem">
+            <span class="lname" title="${esc(name)}">${esc(name)}</span>
+            <div class="lbar" aria-hidden="true">
+              <div class="half neg"><i style="width:${v<0?w:0}%"></i></div>
+              <div class="half pos"><i style="width:${v>0?w:0}%"></i></div>
+            </div>
+            <span class="lamt ${cls}">${label}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </section>
+
+    <div class="actions">
+      <button class="btn primary" data-action="add-expense" ${g.members.length?'':'disabled'}>Add expense</button>
+      <button class="btn icon" data-action="voice-expense" ${g.members.length?'':'disabled'} aria-label="Add an expense by voice" title="Add an expense by voice">🎤</button>
+      <button class="btn" data-action="add-payment" ${g.members.length>1?'':'disabled'}>Record payment</button>
+    </div>
+
+    <section class="block">
+      <h2>To settle up</h2>
+      ${plan.length ? `<ul class="list">${plan.map(p => `
+        <li class="settle"><p><b>${esc(personName(p.from))}</b> pays <b>${esc(personName(p.to))}</b> ${money(p.amount,cur)}</p>
+        <button class="btn small" data-action="settle" data-from="${p.from}" data-to="${p.to}" data-amount="${p.amount}">Mark paid</button></li>`).join('')}</ul>`
+      : `<p class="none">${g.expenses.length ? 'Everyone is square.' : 'Add the first expense to see who owes whom.'}</p>`}
+    </section>
+
+    <section class="block">
+      <h2>Activity</h2>
+      ${sorted.length ? `<ul class="list">${sorted.map(e => {
+        const d = e.date ? new Date(e.date+'T12:00:00') : new Date(e.createdAt);
+        const day = d.getDate(), mon = d.toLocaleDateString('en-GB',{month:'short'});
+        const isPay = e.type === 'payment';
+        const n = Object.keys(e.splits).length;
+        const meta = isPay
+          ? `${esc(personName(e.paidBy))} paid ${esc(personName(Object.keys(e.splits)[0]))}`
+          : `${esc(personName(e.paidBy))} paid, ${e.splitMode==='exact'?'split by amount':e.splitMode==='shares'?`split by shares`:`split ${n} ${n===1?'way':'ways'}`}`;
+        return `<li><button class="item ${isPay?'payment':''}" data-action="${isPay?'edit-payment':'edit-expense'}" data-id="${e.id}">
+          <span class="idate"><b>${day}</b>${mon}</span>
+          <span><span class="idesc">${esc(isPay?'Payment':e.desc)}</span><span class="imeta">${meta}</span></span>
+          <span class="iamt">${money(e.amount,cur)}</span></button></li>`;
+      }).join('')}</ul>` : `<p class="none">No expenses yet.</p>`}
+    </section>`;
+}
+function renderPeopleView(){
+  const app = $('#app');
+  const people = state.people.slice().sort((a,b) => a.name.localeCompare(b.name));
+  const activity = state.payments.slice().sort((a,c) => (c.date||'').localeCompare(a.date||'') || c.createdAt - a.createdAt);
+  app.innerHTML = `
+    <section class="hero">
+      <h1>People</h1>
+    </section>
+
+    <div class="actions">
+      <button class="btn primary" data-action="add-person">Add a person</button>
+      <button class="btn" data-action="add-settlement" ${people.length>1?'':'disabled'}>Record a settlement</button>
+    </div>
+
+    <section class="block">
+      <h2>Balances</h2>
+      ${people.length ? `<ul class="list">${people.map(p => {
+        const totals = Object.entries(personCurrencyTotals(p.id)).filter(([,v]) => v !== 0);
+        const bal = totals.length
+          ? `<div class="pbal">${totals.map(([c,v]) => `<span class="lamt ${v>0?'pos':'neg'}">${money(Math.abs(v),c)}<small>${v>0?'is owed':'owes'}</small></span>`).join('')}</div>`
+          : `<span class="lamt zero">Square</span>`;
+        const gnames = groupsOf(p.id).map(g => esc(g.name)).join(', ');
+        return `<li><button class="item person" data-action="edit-person" data-id="${p.id}">
+          <span class="pname"><span>${esc(p.name)}${p.id===state.meId?' <span class="imeta" style="display:inline">· You</span>':''}</span><span class="imeta">${gnames || 'Not in a group yet'}</span></span>
+          ${bal}</button></li>`;
+      }).join('')}</ul>` : `<p class="none">No one saved yet. Add a person to get started.</p>`}
+    </section>
+
+    <section class="block">
+      <h2>Settlements outside a group</h2>
+      ${activity.length ? `<ul class="list">${activity.map(p => {
+        const d = p.date ? new Date(p.date+'T12:00:00') : new Date(p.createdAt);
+        const day = d.getDate(), mon = d.toLocaleDateString('en-GB',{month:'short'});
+        return `<li><button class="item payment" data-action="edit-settlement" data-id="${p.id}">
+          <span class="idate"><b>${day}</b>${mon}</span>
+          <span><span class="idesc">${esc(personName(p.from))} → ${esc(personName(p.to))}</span><span class="imeta">${esc(p.note || 'Settlement')}</span></span>
+          <span class="iamt">${money(p.amount,p.currency)}</span></button></li>`;
+      }).join('')}</ul>` : `<p class="none">Record a payment here when two people settle up outside any group's expenses.</p>`}
+    </section>`;
+}
+
+/* ---------- Dialog plumbing ---------- */
+const dlg = $('#dlg'), form = $('#dlgForm');
+let onSubmit = null, draft = null;
+function openDialog(html, submit){
+  form.innerHTML = html; onSubmit = submit;
+  if(!dlg.open) dlg.showModal();
+  const first = form.querySelector('input:not([type=hidden]):not([type=radio]):not([type=checkbox]):not([type=date]),textarea');
+  if(first) first.focus();
+}
+function closeDialog(){ if(dlg.open) dlg.close(); onSubmit = null; draft = null; }
+function fail(msg){ const e = form.querySelector('.err'); if(e) e.textContent = msg; return false; }
+form.addEventListener('submit', ev => {
+  ev.preventDefault();
+  if(onSubmit && onSubmit() !== false){ closeDialog(); save(); render(); }
+});
+
+/* ---------- Expense ---------- */
+function openExpense(eid, prefill){
+  const g = group(); const e = eid ? g.expenses.find(x => x.id === eid) : null;
+  const def = { equal:{}, exact:{}, shares:{} };
+  g.members.forEach(mid => { def.equal[mid] = 1; def.shares[mid] = 1; def.exact[mid] = ''; });
+  draft = { id: e?.id, mode: e?.splitMode || prefill?.mode || 'equal', ...def };
+  if(e){
+    const inp = e.splitInput || {};
+    g.members.forEach(mid => {
+      if(e.splitMode==='equal') draft.equal[mid] = inp[mid] ? 1 : 0;
+      if(e.splitMode==='shares') draft.shares[mid] = inp[mid] ?? 0;
+      if(e.splitMode==='exact') draft.exact[mid] = inp[mid] ? (inp[mid]/100).toFixed(2) : '';
+    });
+  }
+  if(prefill?.subset) g.members.forEach(mid => draft.equal[mid] = prefill.subset.includes(mid) ? 1 : 0);
+  const descVal = prefill?.desc ?? e?.desc ?? '';
+  const amountVal = prefill?.amount != null ? (prefill.amount/100).toFixed(2) : (e ? (e.amount/100).toFixed(2) : '');
+  const dateVal = prefill?.date || e?.date || today();
+  const paidByVal = prefill?.paidBy || e?.paidBy || (state.meId && g.members.includes(state.meId) ? state.meId : g.members[0]);
+  const modes = [['equal','Equally'],['exact','Exact amounts'],['shares','Shares']];
+  openDialog(`
+    <h2>${e?'Edit expense':'Add expense'}</h2>
+    <label>What was it for?<input name="desc" maxlength="80" value="${esc(descVal)}" placeholder="e.g. Dinner at Hawksmoor"></label>
+    <div class="two">
+      <label>Amount (${g.currency})<input name="amount" inputmode="decimal" autocomplete="off" value="${amountVal}" placeholder="0.00"></label>
+      <label>Date<input type="date" name="date" value="${dateVal}"></label>
+    </div>
+    <label>Paid by<select name="paidBy">${g.members.map(mid => `<option value="${mid}" ${mid===paidByVal?'selected':''}>${esc(personName(mid))}</option>`).join('')}</select></label>
+    <fieldset><legend>Split</legend><div class="seg">${modes.map(([v,l]) => `<label><input type="radio" name="mode" value="${v}" ${draft.mode===v?'checked':''}><span>${l}</span></label>`).join('')}</div></fieldset>
+    <div class="srows" id="splitRows"></div>
+    <p class="hint" id="splitHint"></p>
+    <p class="err" role="alert"></p>
+    <div class="dlg-actions">
+      ${e?`<button type="button" class="btn danger" data-action="del-entry" data-id="${e.id}">Delete</button>`:''}
+      <span class="sp"></span>
+      <button type="button" class="btn" data-action="close">Cancel</button>
+      <button type="submit" class="btn primary">${e?'Save changes':'Add expense'}</button>
+    </div>`, saveExpense);
+  renderSplitRows();
+}
+function renderSplitRows(){
+  const g = group(), m = draft.mode;
+  $('#splitRows').innerHTML = g.members.map(mid => {
+    const name = esc(personName(mid));
+    if(m==='equal') return `<label class="srow"><input type="checkbox" data-sid="${mid}" ${draft.equal[mid]?'checked':''}><span class="nm">${name}</span><span class="sval" data-share="${mid}"></span></label>`;
+    if(m==='exact') return `<label class="srow"><span class="nm">${name}</span><input inputmode="decimal" autocomplete="off" aria-label="${name}'s amount" data-sid="${mid}" value="${esc(draft.exact[mid])}" placeholder="0.00"></label>`;
+    return `<label class="srow"><span class="nm">${name}</span><span class="sval" data-share="${mid}"></span><input type="number" min="0" step="1" inputmode="numeric" aria-label="${name}'s shares" data-sid="${mid}" value="${draft.shares[mid]}"></label>`;
+  }).join('');
+  updateHint();
+}
+function updateHint(){
+  const g = group(), amount = toPence(form.amount.value), hint = $('#splitHint');
+  hint.className = 'hint';
+  form.querySelectorAll('[data-share]').forEach(s => s.textContent = '');
+  if(draft.mode === 'exact'){
+    let sum = 0; for(const v of Object.values(draft.exact)) sum += toPence(v) || 0;
+    const left = (amount||0) - sum;
+    if(!amount){ hint.textContent = `Assigned so far: ${money(sum,g.currency)}`; }
+    else if(left === 0){ hint.textContent = 'Everything is assigned.'; }
+    else { hint.textContent = left>0 ? `${money(left,g.currency)} left to assign` : `${money(-left,g.currency)} more than the total`; hint.classList.add('bad'); }
+    return;
+  }
+  const w = {}; g.members.forEach(mid => w[mid] = draft.mode==='equal' ? (draft.equal[mid]?1:0) : Math.max(0, Number(draft.shares[mid])||0));
+  const split = amount>0 ? distribute(amount, w) : null;
+  if(split) for(const [id,v] of Object.entries(split)){ const el = form.querySelector(`[data-share="${id}"]`); if(el) el.textContent = money(v,g.currency); }
+  const n = Object.values(w).filter(x => x>0).length;
+  hint.textContent = n ? '' : (draft.mode==='equal' ? 'Pick at least one person.' : 'Give at least one person a share.');
+  if(!n) hint.classList.add('bad');
+}
+form.addEventListener('change', ev => {
+  if(!draft) return;
+  const t = ev.target;
+  if(t.name === 'mode'){ draft.mode = t.value; renderSplitRows(); return; }
+  if(t.dataset.sid && t.type === 'checkbox'){ draft.equal[t.dataset.sid] = t.checked ? 1 : 0; updateHint(); }
+});
+form.addEventListener('input', ev => {
+  if(!draft) return;
+  const t = ev.target;
+  if(t.dataset.sid && t.type !== 'checkbox'){
+    const id = t.dataset.sid;
+    if(draft.mode==='exact') draft.exact[id] = t.value; else draft.shares[id] = t.value;
+  }
+  if((t.dataset.sid && t.type !== 'checkbox') || t.name === 'amount') updateHint();
+});
+function saveExpense(){
+  const g = group();
+  const desc = form.desc.value.trim();
+  const amount = toPence(form.amount.value);
+  if(!desc) return fail('Add a short description, like "Dinner".');
+  if(!(amount > 0)) return fail('Enter an amount above zero.');
+  let splits, input = {};
+  if(draft.mode === 'exact'){
+    splits = {}; let sum = 0;
+    for(const mid of g.members){
+      const p = toPence(draft.exact[mid]);
+      if(Number.isNaN(p) || p < 0) return fail(`Check the amount for ${personName(mid)}.`);
+      if(p > 0){ splits[mid] = p; input[mid] = p; sum += p; }
+    }
+    if(sum !== amount) return fail(`The split adds up to ${money(sum,g.currency)}, but the expense is ${money(amount,g.currency)}.`);
+  } else {
+    g.members.forEach(mid => input[mid] = draft.mode==='equal' ? (draft.equal[mid]?1:0) : Math.max(0, Math.floor(Number(draft.shares[mid])||0)));
+    splits = distribute(amount, input);
+    if(!splits) return fail(draft.mode==='equal' ? 'Pick at least one person to split with.' : 'Give at least one person a share above zero.');
+  }
+  const rec = { type:'expense', desc, amount, paidBy: form.paidBy.value, splits, splitMode: draft.mode, splitInput: input, date: form.date.value || today() };
+  if(draft.id){ const e = g.expenses.find(x => x.id === draft.id); Object.assign(e, rec); }
+  else g.expenses.push({ id: uid(), createdAt: Date.now(), ...rec });
+}
+
+/* ---------- Voice expense ---------- */
+const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+let activeRecognition = null;
+function openVoiceExpense(){
+  const g = group(); if(!g) return;
+  if(!SpeechRecognitionCtor){
+    openDialog(`
+      <h2>Voice isn't available here</h2>
+      <p class="hint">This browser doesn't support voice input. Try Chrome, Edge or Safari, or add the expense the usual way.</p>
+      <div class="dlg-actions"><span class="sp"></span><button type="button" class="btn primary" data-action="close">OK</button></div>`, () => false);
+    return;
+  }
+  draft = null;
+  let finalText = '';
+  const rec = new SpeechRecognitionCtor();
+  activeRecognition = rec;
+  rec.lang = navigator.language || 'en-GB';
+  rec.interimResults = true;
+  rec.continuous = false;
+  openDialog(`
+    <h2><span class="mic-dot" aria-hidden="true"></span>Listening…</h2>
+    <p class="hint">Try "dinner at Nando's yesterday split equally".</p>
+    <p id="voiceText" class="hint voice-text" aria-live="polite"></p>
+    <p class="err" role="alert"></p>
+    <div class="dlg-actions"><span class="sp"></span><button type="button" class="btn" data-action="close">Cancel</button></div>`, () => false);
+  const textEl = $('#voiceText');
+  rec.onresult = ev => {
+    let interim = '';
+    for(let i = ev.resultIndex; i < ev.results.length; i++){
+      const r = ev.results[i];
+      if(r.isFinal) finalText += r[0].transcript; else interim += r[0].transcript;
+    }
+    if(textEl) textEl.textContent = (finalText + interim).trim() || 'Listening…';
+  };
+  rec.onerror = ev => {
+    const err = form.querySelector('.err');
+    if(err) err.textContent = ev.error === 'not-allowed'
+      ? 'Microphone access was blocked. If you opened this from inside the Claude app, tap the share icon and choose "Open in Safari" — mic permission has to be granted there, not inside another app.'
+      : "Didn't catch that — try again.";
+  };
+  rec.onend = () => {
+    activeRecognition = null;
+    if(!dlg.open) return;
+    const text = finalText.trim();
+    if(!text){ const err = form.querySelector('.err'); if(err) err.textContent = "Didn't catch that — try again, or add the expense the usual way."; return; }
+    openExpense(null, parseVoiceExpense(text, g));
+  };
+  try{ rec.start(); }catch(err){ const e = form.querySelector('.err'); if(e) e.textContent = "Couldn't start the microphone."; }
+}
+/* Lightweight, local heuristics — no server round-trip. Every field it fills stays editable before saving. */
+function parseVoiceExpense(text, g){
+  let t = ' ' + text.trim() + ' ';
+  const result = {};
+
+  /* amount: prefer an explicit currency mark, then a currency word, then any bare number */
+  let m = t.match(/[£$€]\s?(\d+(?:[.,]\d{1,2})?)/)
+    || t.match(/(\d+(?:[.,]\d{1,2})?)\s?(pounds?|quid|dollars?|bucks|euros?)\b/i)
+    || t.match(/\b(\d+(?:[.,]\d{1,2})?)\b/);
+  if(m){ result.amount = toPence(m[1].replace(',','.')); t = t.replace(m[0], ' '); }
+
+  /* date: yesterday / today / a weekday name */
+  const fmt = d => { const x = new Date(d); x.setMinutes(x.getMinutes()-x.getTimezoneOffset()); return x.toISOString().slice(0,10); };
+  const days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  let dm;
+  if(/\byesterday\b/i.test(t)){ const d = new Date(); d.setDate(d.getDate()-1); result.date = fmt(d); t = t.replace(/\byesterday\b/i,' '); }
+  else if(/\btoday\b|\btonight\b|\bthis evening\b/i.test(t)){ result.date = fmt(new Date()); t = t.replace(/\btoday\b|\btonight\b|\bthis evening\b/i,' '); }
+  else if((dm = t.match(new RegExp('\\b(last\\s+)?(' + days.join('|') + ')\\b','i')))){
+    const idx = days.indexOf(dm[2].toLowerCase()), d = new Date();
+    let diff = (d.getDay() - idx + 7) % 7; if(diff === 0 && dm[1]) diff = 7;
+    d.setDate(d.getDate() - diff); result.date = fmt(d); t = t.replace(dm[0], ' ');
+  }
+
+  /* who paid: "<name> paid" */
+  g.members.forEach(mid => {
+    const re = new RegExp('\\b' + personName(mid).replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '\\s+paid\\b','i');
+    if(re.test(t)){ result.paidBy = mid; t = t.replace(re, ' '); }
+  });
+
+  /* split: "split equally", or naming a subset ("between Sam and Alex", "just me and Sam") */
+  if(/\bsplit(ting)?\s+(it\s+)?(equally|evenly|even)\b/i.test(t) || /\bequal(ly)?\s+split\b/i.test(t)){
+    result.mode = 'equal';
+    t = t.replace(/\bsplit(ting)?\s+(it\s+)?(equally|evenly|even)\b/i,' ').replace(/\bequal(ly)?\s+split\b/i,' ');
+  }
+  const named = g.members.filter(mid => new RegExp('\\b' + personName(mid).replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '\\b','i').test(t));
+  if(/\bbetween\b|\bjust\b|\bonly\b/i.test(t) && named.length >= 2){
+    result.mode = 'equal'; result.subset = named;
+    const names = named.map(mid => personName(mid).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|');
+    t = t.replace(new RegExp('\\b(between|just|only)\\b(\\s+me\\b)?(\\s*(,|and|&)?\\s*(' + names + '))+','ig'), ' ');
+  }
+
+  /* whatever's left becomes the description */
+  let desc = t.replace(/\s+/g,' ').trim()
+    .replace(/^(for|the|a|an)\s+/i,'')
+    .replace(/^[,\s]+|[,\s]+$/g,'')
+    .replace(/\s+(on|at|for|with|and)$/i,'')
+    .replace(/[.,;:!?]+$/,'');
+  result.desc = desc ? desc.charAt(0).toUpperCase() + desc.slice(1) : text.trim();
+  return result;
+}
+
+/* ---------- Payment (within a group) ---------- */
+function openPayment(opts = {}){
+  const g = group(); const e = opts.id ? g.expenses.find(x => x.id === opts.id) : null;
+  const from = e ? e.paidBy : (opts.from || (state.meId && g.members.includes(state.meId) ? state.meId : g.members[0]));
+  const to = e ? Object.keys(e.splits)[0] : (opts.to || g.members.find(mid => mid !== from));
+  const amt = e ? e.amount : (opts.amount || '');
+  const sel = (name, val) => `<select name="${name}">${g.members.map(mid => `<option value="${mid}" ${mid===val?'selected':''}>${esc(personName(mid))}</option>`).join('')}</select>`;
+  draft = { id: e?.id };
+  openDialog(`
+    <h2>${e?'Edit payment':'Record a payment'}</h2>
+    <div class="two"><label>From${sel('from',from)}</label><label>To${sel('to',to)}</label></div>
+    <div class="two">
+      <label>Amount (${g.currency})<input name="amount" inputmode="decimal" autocomplete="off" value="${amt?(amt/100).toFixed(2):''}" placeholder="0.00"></label>
+      <label>Date<input type="date" name="date" value="${e?.date||today()}"></label>
+    </div>
+    <p class="err" role="alert"></p>
+    <div class="dlg-actions">
+      ${e?`<button type="button" class="btn danger" data-action="del-entry" data-id="${e.id}">Delete</button>`:''}
+      <span class="sp"></span>
+      <button type="button" class="btn" data-action="close">Cancel</button>
+      <button type="submit" class="btn primary">${e?'Save changes':'Record payment'}</button>
+    </div>`, () => {
+      const f = form.from.value, t = form.to.value, a = toPence(form.amount.value);
+      if(f === t) return fail('Pick two different people.');
+      if(!(a > 0)) return fail('Enter an amount above zero.');
+      const rec = { type:'payment', desc:'Payment', amount:a, paidBy:f, splits:{[t]:a}, splitMode:'payment', splitInput:{}, date: form.date.value || today() };
+      if(draft.id) Object.assign(g.expenses.find(x => x.id === draft.id), rec);
+      else g.expenses.push({ id: uid(), createdAt: Date.now(), ...rec });
+    });
+}
+
+/* ---------- Settlement (outside any group) ---------- */
+function openSettlement(opts = {}){
+  const e = opts.id ? state.payments.find(x => x.id === opts.id) : null;
+  const people = state.people.slice().sort((a,b) => a.name.localeCompare(b.name));
+  const from = e ? e.from : (opts.from || (state.meId && people.some(p => p.id === state.meId) ? state.meId : people[0]?.id));
+  const to = e ? e.to : (opts.to || people.find(p => p.id !== from)?.id);
+  const sel = (name, val) => `<select name="${name}">${people.map(p => `<option value="${p.id}" ${p.id===val?'selected':''}>${esc(p.name)}</option>`).join('')}</select>`;
+  draft = { id: e?.id };
+  openDialog(`
+    <h2>${e?'Edit settlement':'Record a settlement'}</h2>
+    <div class="two"><label>From${sel('from',from)}</label><label>To${sel('to',to)}</label></div>
+    <div class="two">
+      <label>Amount<input name="amount" inputmode="decimal" autocomplete="off" value="${e?(e.amount/100).toFixed(2):''}" placeholder="0.00"></label>
+      <label>Currency<select name="currency">${CURRENCIES.map(c => `<option ${c===(e?.currency||'GBP')?'selected':''}>${c}</option>`).join('')}</select></label>
+    </div>
+    <div class="two">
+      <label>Date<input type="date" name="date" value="${e?.date||today()}"></label>
+      <label>Note (optional)<input name="note" maxlength="60" value="${esc(e?.note||'')}" placeholder="What was this for?"></label>
+    </div>
+    <p class="err" role="alert"></p>
+    <div class="dlg-actions">
+      ${e?`<button type="button" class="btn danger" data-action="del-settlement" data-id="${e.id}">Delete</button>`:''}
+      <span class="sp"></span>
+      <button type="button" class="btn" data-action="close">Cancel</button>
+      <button type="submit" class="btn primary">${e?'Save changes':'Record settlement'}</button>
+    </div>`, () => {
+      const f = form.from.value, t = form.to.value, a = toPence(form.amount.value);
+      if(!f || !t || f === t) return fail('Pick two different people.');
+      if(!(a > 0)) return fail('Enter an amount above zero.');
+      const rec = { from:f, to:t, amount:a, currency: form.currency.value, date: form.date.value || today(), note: form.note.value.trim() };
+      if(draft.id) Object.assign(state.payments.find(x => x.id === draft.id), rec);
+      else state.payments.push({ id: uid(), createdAt: Date.now(), ...rec });
+    });
+}
+
+/* ---------- Person ---------- */
+function openPerson(pid){
+  const p = pid ? state.people.find(x => x.id === pid) : null;
+  draft = {};
+  const locked = p && personLocked(p.id);
+  openDialog(`
+    <h2>${p?'Edit person':'Add a person'}</h2>
+    <label>Name<input name="name" maxlength="30" value="${esc(p?.name||'')}" placeholder="Full name"></label>
+    <label class="inline"><input type="checkbox" name="isMe" style="width:20px;height:20px;min-height:0" ${p && state.meId===p.id?'checked':''}><span>This is you — default forms to this person</span></label>
+    <p class="err" role="alert"></p>
+    <div class="dlg-actions">
+      ${p?`<button type="button" class="btn danger" data-action="del-person" data-id="${p.id}" ${locked?'disabled title="Remove them from every group and settlement first."':''}>Delete</button>`:''}
+      <span class="sp"></span>
+      <button type="button" class="btn" data-action="close">Cancel</button>
+      <button type="submit" class="btn primary">${p?'Save changes':'Add person'}</button>
+    </div>`, () => {
+      const name = form.name.value.trim();
+      if(!name) return fail('Give them a name.');
+      let id;
+      if(p){ p.name = name; id = p.id; } else { id = uid(); state.people.push({ id, name }); }
+      if(form.isMe.checked) state.meId = id; else if(state.meId === id) state.meId = null;
+    });
+}
+
+/* ---------- Group ---------- */
+function openGroup(isNew){
+  const g = isNew ? null : group();
+  draft = { editingGroupId: g?.id || null, members: g ? g.members.slice() : [] };
+  openDialog(`
+    <h2>${isNew?'New group':'Edit group'}</h2>
+    <label>Group name<input name="name" maxlength="50" value="${esc(g?.name||'')}" placeholder="Flat 4B, Lisbon weekend"></label>
+    <label>Currency<select name="currency">${CURRENCIES.map(c => `<option ${c===(g?.currency||'GBP')?'selected':''}>${c}</option>`).join('')}</select></label>
+    <fieldset><legend>People in this group</legend><div id="mlist" class="srows"></div></fieldset>
+    <div class="mrow"><input name="newMember" maxlength="30" placeholder="Add a saved or new name" aria-label="Person's name"><button type="button" class="btn" data-action="add-member">Add</button></div>
+    <p class="err" role="alert"></p>
+    <div class="dlg-actions">
+      ${g?`<button type="button" class="btn danger" data-action="del-group">Delete group</button>`:''}
+      <span class="sp"></span>
+      <button type="button" class="btn" data-action="close">Cancel</button>
+      <button type="submit" class="btn primary">${isNew?'Create group':'Save changes'}</button>
+    </div>`, () => {
+      addPendingMember();
+      const name = form.name.value.trim();
+      if(!name) return fail('Give the group a name.');
+      if(draft.members.length < 2) return fail('Add at least two people.');
+      const chosen = draft.members.map(id => personName(id).toLowerCase());
+      if(new Set(chosen).size !== chosen.length) return fail('Two of the people you picked share a name. Rename one so the ledger stays clear.');
+      if(g){ g.name = name; g.currency = form.currency.value; g.members = draft.members.slice(); }
+      else { const ng = { id: uid(), name, currency: form.currency.value, members: draft.members.slice(), expenses: [] }; state.groups.push(ng); state.activeGroupId = ng.id; view = 'groups'; }
+    });
+  renderMembers();
+}
+function renderMembers(){
+  const box = $('#mlist');
+  const list = state.people.slice().sort((a,b) => a.name.localeCompare(b.name));
+  const editingGroup = draft.editingGroupId ? state.groups.find(x => x.id === draft.editingGroupId) : null;
+  box.innerHTML = list.length ? list.map(p => {
+    const checked = draft.members.includes(p.id);
+    const locked = checked && editingGroup && editingGroup.members.includes(p.id) && involved(editingGroup, p.id);
+    return `<label class="srow"><input type="checkbox" data-pid="${p.id}" ${checked?'checked':''} ${locked?'disabled':''}><span class="nm">${esc(p.name)}</span>${locked?'<span class="sval">in an expense</span>':''}</label>`;
+  }).join('') : `<p class="hint" style="margin:0">Nobody's here yet.</p>`;
+}
+function addPendingMember(){
+  const inp = form.newMember; if(!inp) return;
+  const n = inp.value.trim(); if(!n) return;
+  let p = state.people.find(x => x.name.toLowerCase() === n.toLowerCase());
+  if(!p){ p = { id: uid(), name: n }; state.people.push(p); }
+  if(!draft.members.includes(p.id)) draft.members.push(p.id);
+  inp.value = ''; renderMembers(); inp.focus();
+}
+form.addEventListener('keydown', ev => { if(ev.target.name === 'newMember' && ev.key === 'Enter'){ ev.preventDefault(); addPendingMember(); } });
+form.addEventListener('change', ev => {
+  const t = ev.target;
+  if(t.dataset.pid && draft){
+    if(t.checked){ if(!draft.members.includes(t.dataset.pid)) draft.members.push(t.dataset.pid); }
+    else draft.members = draft.members.filter(id => id !== t.dataset.pid);
+  }
+});
+
+/* ---------- Events ---------- */
+document.addEventListener('click', ev => {
+  const b = ev.target.closest('[data-action]'); if(!b || b.disabled) return;
+  const g = group(), a = b.dataset.action;
+  if(a==='new-group') openGroup(true);
+  else if(a==='edit-group') openGroup(false);
+  else if(a==='add-expense') openExpense();
+  else if(a==='voice-expense') openVoiceExpense();
+  else if(a==='edit-expense') openExpense(b.dataset.id);
+  else if(a==='add-payment') openPayment();
+  else if(a==='edit-payment') openPayment({id:b.dataset.id});
+  else if(a==='settle') openPayment({from:b.dataset.from, to:b.dataset.to, amount:+b.dataset.amount});
+  else if(a==='view-people'){ view = 'people'; render(); }
+  else if(a==='view-groups'){ view = 'groups'; render(); }
+  else if(a==='add-person') openPerson();
+  else if(a==='edit-person') openPerson(b.dataset.id);
+  else if(a==='del-person'){ if(!personLocked(b.dataset.id) && confirm('Delete this person?')){ state.people = state.people.filter(x => x.id !== b.dataset.id); closeDialog(); save(); render(); } }
+  else if(a==='add-settlement') openSettlement();
+  else if(a==='edit-settlement') openSettlement({id:b.dataset.id});
+  else if(a==='del-settlement'){ if(confirm('Delete this settlement?')){ state.payments = state.payments.filter(x => x.id !== b.dataset.id); closeDialog(); save(); render(); } }
+  else if(a==='close') closeDialog();
+  else if(a==='add-member') addPendingMember();
+  else if(a==='del-entry'){ if(confirm('Delete this entry?')){ g.expenses = g.expenses.filter(x => x.id !== b.dataset.id); closeDialog(); save(); render(); } }
+  else if(a==='del-group'){ if(confirm(`Delete "${g.name}" and all its expenses? The people in it stay saved.`)){ state.groups = state.groups.filter(x => x.id !== g.id); state.activeGroupId = state.groups[0]?.id || null; closeDialog(); save(); render(); } }
+});
+document.addEventListener('change', ev => { if(ev.target.id === 'gpick'){ state.activeGroupId = ev.target.value; view = 'groups'; save(); render(); } });
+dlg.addEventListener('close', () => { onSubmit = null; draft = null; if(activeRecognition){ activeRecognition.abort(); activeRecognition = null; } });
+
+render();
+</script>
+</body>
+</html>
