@@ -165,21 +165,34 @@ textarea{min-height:10rem;font-size:.8rem;font-family:ui-monospace,SFMono-Regula
 </head>
 <body>
 <button id="themeToggle" class="theme-toggle" aria-label="Switch to night mode" title="Switch to night mode"></button>
-<div class="wrap">
+<div class="wrap" id="authGate" style="display:none">
+  <section class="empty">
+    <h1>Split shared expenses without the maths.</h1>
+    <button class="btn primary" id="signInBtn">Sign in with Google</button>
+  </section>
+</div>
+<div class="wrap" id="appWrap" style="display:none">
   <header class="top">
     <div class="brand">settlr</div>
+    <button class="btn small" id="signOutBtn">Sign out</button>
     <button class="btn small" id="peopleBtn" data-action=""></button>
   </header>
   <div class="gsel" id="navBar"></div>
-  <div id="banner"></div>
   <main id="app"></main>
 </div>
 <dialog id="dlg"><form id="dlgForm" novalidate></form></dialog>
 
-<script>
-/* ---------- Storage ---------- */
-const KEY = 'tally:v1';
-const THEME_KEY = 'tally:theme';
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+/* ---------- Supabase ---------- */
+const sb = createClient(
+  'https://ctlldbpdtohalfcwkjwq.supabase.co',
+  'sb_publishable_j4g8-00VVfjHfK6q8QlIaw_QHzAfAzU'
+);
+
+/* ---------- Theme (local UI preference only, not app data) ---------- */
+const THEME_KEY = 'settlr:theme';
 function getThemeOverride(){ try{ return localStorage.getItem(THEME_KEY); }catch(e){ return null; } }
 function systemPrefersDark(){ return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; }
 function isDarkActive(){ const t = getThemeOverride(); return t ? t === 'dark' : systemPrefersDark(); }
@@ -208,46 +221,15 @@ try{
   const onChange = () => { if(!getThemeOverride()) renderThemeToggle(); };
   mq.addEventListener ? mq.addEventListener('change', onChange) : mq.addListener(onChange);
 }catch(e){}
-function normalize(s){
-  if(!s || typeof s !== 'object') s = {};
-  if(!Array.isArray(s.people)) s.people = [];
-  if(!Array.isArray(s.groups)) s.groups = [];
-  if(!Array.isArray(s.payments)) s.payments = [];
-  if(!('meId' in s)) s.meId = null;
-  s.groups.forEach(g => {
-    if(!Array.isArray(g.members)) { g.members = []; return; }
-    if(g.members.length && typeof g.members[0] === 'object'){
-      g.members.forEach(m => { if(m && m.id && !s.people.some(p => p.id === m.id)) s.people.push({ id:m.id, name:m.name || 'Someone' }); });
-      g.members = g.members.map(m => m.id);
-    }
-  });
-  if(!('activeGroupId' in s)) s.activeGroupId = s.groups[0]?.id || null;
-  s.version = 2;
-  return s;
-}
-function load(){
-  try{
-    const raw = localStorage.getItem(KEY);
-    if(raw){ const s = JSON.parse(raw); if(s) return normalize(s); }
-  }catch(e){}
-  return normalize({});
-}
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); return true; }catch(e){ return false; } }
-let state = load();
+/* ---------- App state (populated from Supabase — see loadAllData) ---------- */
+let state = { people: [], groups: [], payments: [], meId: null, activeGroupId: null };
 let view = 'groups'; /* 'groups' | 'people' */
-function storageWorks(){
-  try{ const k = '__tally_test__'; localStorage.setItem(k,'1'); const ok = localStorage.getItem(k) === '1'; localStorage.removeItem(k); return ok; }
-  catch(e){ return false; }
-}
-const canPersist = storageWorks();
-function renderBanner(){
-  const el = $('#banner');
-  el.innerHTML = canPersist ? '' : `<div class="banner"><b>Nothing here is being saved</b>This page can't write to storage in its current view, so your data will disappear when you leave. If you opened this from inside the Claude app, tap the share icon and choose "Open in Safari" (or open the link directly in Safari), then reload.</div>`;
-}
+let session = null;
+let myPersonId = null;
+const ACTIVE_GROUP_KEY = 'settlr:activeGroup';
 
 /* ---------- Helpers ---------- */
 const $ = s => document.querySelector(s);
-const uid = () => Math.random().toString(36).slice(2,9) + Date.now().toString(36).slice(-4);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const today = () => { const d = new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); };
 const CURRENCIES = ['GBP','EUR','USD','CHF','SEK','NOK','DKK','AUD','CAD','NZD'];
@@ -322,7 +304,6 @@ function personCurrencyTotals(pid){
 
 /* ---------- Render ---------- */
 function render(){
-  renderBanner();
   renderNav();
   if(view === 'people') renderPeopleView(); else renderGroupView();
 }
@@ -333,10 +314,13 @@ function renderNav(){
   peopleBtn.dataset.action = view==='people' ? 'view-groups' : 'view-people';
   peopleBtn.textContent = view==='people' ? (state.groups.length?'Back to groups':'Back') : 'People';
   const parts = [];
-  if(state.groups.length && view==='groups'){
-    parts.push(`<label class="sr" style="position:absolute;left:-9999px" for="gpick">Group</label>
-      <select id="gpick" aria-label="Choose group">${state.groups.map(x => `<option value="${x.id}" ${g&&x.id===g.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select>
-      <button class="btn small" data-action="edit-group">Edit group</button><button class="btn small" data-action="new-group">New group</button>`);
+  if(view==='groups'){
+    if(state.groups.length){
+      parts.push(`<label class="sr" style="position:absolute;left:-9999px" for="gpick">Group</label>
+        <select id="gpick" aria-label="Choose group">${state.groups.map(x => `<option value="${x.id}" ${g&&x.id===g.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select>
+        <button class="btn small" data-action="edit-group">Edit group</button>`);
+    }
+    parts.push(`<button class="btn small" data-action="new-group">New group</button><button class="btn small" data-action="join-group">Join</button>`);
   }
   bar.innerHTML = parts.join('');
   bar.style.display = parts.length ? 'flex' : 'none';
@@ -348,6 +332,7 @@ function renderGroupView(){
       <section class="empty">
         <h1>You're not part of any groups</h1>
         <button class="btn primary" data-action="new-group">Add a group</button>
+        <button class="btn" data-action="join-group" style="margin-top:.6rem">Join a group</button>
       </section>`;
     return;
   }
@@ -461,9 +446,17 @@ function openDialog(html, submit){
 }
 function closeDialog(){ if(dlg.open) dlg.close(); onSubmit = null; draft = null; }
 function fail(msg){ const e = form.querySelector('.err'); if(e) e.textContent = msg; return false; }
-form.addEventListener('submit', ev => {
+form.addEventListener('submit', async ev => {
   ev.preventDefault();
-  if(onSubmit && onSubmit() !== false){ closeDialog(); save(); render(); }
+  if(!onSubmit) return;
+  const submitBtn = form.querySelector('button[type=submit]');
+  if(submitBtn) submitBtn.disabled = true;
+  try{
+    const result = await onSubmit();
+    if(result !== false){ closeDialog(); await loadAllData(); render(); }
+  } finally {
+    if(submitBtn) submitBtn.disabled = false;
+  }
 });
 
 /* ---------- Expense ---------- */
@@ -550,7 +543,7 @@ form.addEventListener('input', ev => {
   }
   if((t.dataset.sid && t.type !== 'checkbox') || t.name === 'amount') updateHint();
 });
-function saveExpense(){
+async function saveExpense(){
   const g = group();
   const desc = form.desc.value.trim();
   const amount = toPence(form.amount.value);
@@ -570,9 +563,27 @@ function saveExpense(){
     splits = distribute(amount, input);
     if(!splits) return fail(draft.mode==='equal' ? 'Pick at least one person to split with.' : 'Give at least one person a share above zero.');
   }
-  const rec = { type:'expense', desc, amount, paidBy: form.paidBy.value, splits, splitMode: draft.mode, splitInput: input, date: form.date.value || today() };
-  if(draft.id){ const e = g.expenses.find(x => x.id === draft.id); Object.assign(e, rec); }
-  else g.expenses.push({ id: uid(), createdAt: Date.now(), ...rec });
+  const row = { group_id: g.id, type:'expense', description: desc, amount_cents: amount, paid_by: form.paidBy.value, split_mode: draft.mode, expense_date: form.date.value || today(), split_input: input };
+  return saveExpenseRow(draft.id, row, splits);
+}
+async function saveExpenseRow(expenseId, row, splits){
+  try{
+    if(expenseId){
+      const { error } = await sb.from('expenses').update(row).eq('id', expenseId);
+      if(error) throw error;
+      const { error: de } = await sb.from('expense_splits').delete().eq('expense_id', expenseId);
+      if(de) throw de;
+    } else {
+      const { data, error } = await sb.from('expenses').insert(row).select('id').single();
+      if(error) throw error;
+      expenseId = data.id;
+    }
+    const splitRows = Object.entries(splits).map(([person_id, amount_cents]) => ({ expense_id: expenseId, person_id, amount_cents }));
+    if(splitRows.length){
+      const { error } = await sb.from('expense_splits').insert(splitRows);
+      if(error) throw error;
+    }
+  }catch(err){ return fail(err.message || 'Could not save. Try again.'); }
 }
 
 /* ---------- Voice expense ---------- */
@@ -696,13 +707,12 @@ function openPayment(opts = {}){
       <span class="sp"></span>
       <button type="button" class="btn" data-action="close">Cancel</button>
       <button type="submit" class="btn primary">${e?'Save changes':'Record payment'}</button>
-    </div>`, () => {
+    </div>`, async () => {
       const f = form.from.value, t = form.to.value, a = toPence(form.amount.value);
       if(f === t) return fail('Pick two different people.');
       if(!(a > 0)) return fail('Enter an amount above zero.');
-      const rec = { type:'payment', desc:'Payment', amount:a, paidBy:f, splits:{[t]:a}, splitMode:'payment', splitInput:{}, date: form.date.value || today() };
-      if(draft.id) Object.assign(g.expenses.find(x => x.id === draft.id), rec);
-      else g.expenses.push({ id: uid(), createdAt: Date.now(), ...rec });
+      const row = { group_id: g.id, type:'payment', description:'Payment', amount_cents:a, paid_by:f, split_mode:'payment', expense_date: form.date.value || today(), split_input: {} };
+      return saveExpenseRow(draft.id, row, { [t]: a });
     });
 }
 
@@ -731,13 +741,15 @@ function openSettlement(opts = {}){
       <span class="sp"></span>
       <button type="button" class="btn" data-action="close">Cancel</button>
       <button type="submit" class="btn primary">${e?'Save changes':'Record settlement'}</button>
-    </div>`, () => {
+    </div>`, async () => {
       const f = form.from.value, t = form.to.value, a = toPence(form.amount.value);
       if(!f || !t || f === t) return fail('Pick two different people.');
       if(!(a > 0)) return fail('Enter an amount above zero.');
-      const rec = { from:f, to:t, amount:a, currency: form.currency.value, date: form.date.value || today(), note: form.note.value.trim() };
-      if(draft.id) Object.assign(state.payments.find(x => x.id === draft.id), rec);
-      else state.payments.push({ id: uid(), createdAt: Date.now(), ...rec });
+      const row = { from_person:f, to_person:t, amount_cents:a, currency: form.currency.value, payment_date: form.date.value || today(), note: form.note.value.trim() || null };
+      try{
+        if(draft.id){ const { error } = await sb.from('payments').update(row).eq('id', draft.id); if(error) throw error; }
+        else { const { error } = await sb.from('payments').insert(row); if(error) throw error; }
+      }catch(err){ return fail(err.message || 'Could not save. Try again.'); }
     });
 }
 
@@ -745,23 +757,25 @@ function openSettlement(opts = {}){
 function openPerson(pid){
   const p = pid ? state.people.find(x => x.id === pid) : null;
   draft = {};
-  const locked = p && personLocked(p.id);
+  const isMe = p && p.id === state.meId;
+  const locked = p && (personLocked(p.id) || isMe);
   openDialog(`
     <h2>${p?'Edit person':'Add a person'}</h2>
     <label>Name<input name="name" maxlength="30" value="${esc(p?.name||'')}" placeholder="Full name"></label>
-    <label class="inline"><input type="checkbox" name="isMe" style="width:20px;height:20px;min-height:0" ${p && state.meId===p.id?'checked':''}><span>This is you — default forms to this person</span></label>
+    ${isMe?`<p class="hint">This is you, signed in with Google.</p>`:''}
     <p class="err" role="alert"></p>
     <div class="dlg-actions">
       ${p?`<button type="button" class="btn danger" data-action="del-person" data-id="${p.id}" ${locked?'disabled title="Remove them from every group and settlement first."':''}>Delete</button>`:''}
       <span class="sp"></span>
       <button type="button" class="btn" data-action="close">Cancel</button>
       <button type="submit" class="btn primary">${p?'Save changes':'Add person'}</button>
-    </div>`, () => {
+    </div>`, async () => {
       const name = form.name.value.trim();
       if(!name) return fail('Give them a name.');
-      let id;
-      if(p){ p.name = name; id = p.id; } else { id = uid(); state.people.push({ id, name }); }
-      if(form.isMe.checked) state.meId = id; else if(state.meId === id) state.meId = null;
+      try{
+        if(p){ const { error } = await sb.from('people').update({ name }).eq('id', p.id); if(error) throw error; }
+        else { const { error } = await sb.from('people').insert({ name }); if(error) throw error; }
+      }catch(err){ return fail(err.message || 'Could not save. Try again.'); }
     });
 }
 
@@ -773,6 +787,7 @@ function openGroup(isNew){
     <h2>${isNew?'New group':'Edit group'}</h2>
     <label>Group name<input name="name" maxlength="50" value="${esc(g?.name||'')}" placeholder="Flat 4B, Lisbon weekend"></label>
     <label>Currency<select name="currency">${CURRENCIES.map(c => `<option ${c===(g?.currency||'GBP')?'selected':''}>${c}</option>`).join('')}</select></label>
+    ${g?`<p class="hint">Invite code: <b>${esc(g.inviteCode)}</b> <button type="button" class="btn small" data-action="copy-invite" data-code="${esc(g.inviteCode)}">Copy</button> — share this so others can join.</p>`:''}
     <fieldset><legend>People in this group</legend><div id="mlist" class="srows"></div></fieldset>
     <div class="mrow"><input name="newMember" maxlength="30" placeholder="Add a saved or new name" aria-label="Person's name"><button type="button" class="btn" data-action="add-member">Add</button></div>
     <p class="err" role="alert"></p>
@@ -781,15 +796,30 @@ function openGroup(isNew){
       <span class="sp"></span>
       <button type="button" class="btn" data-action="close">Cancel</button>
       <button type="submit" class="btn primary">${isNew?'Create group':'Save changes'}</button>
-    </div>`, () => {
-      addPendingMember();
+    </div>`, async () => {
+      await addPendingMember();
       const name = form.name.value.trim();
       if(!name) return fail('Give the group a name.');
       if(draft.members.length < 2) return fail('Add at least two people.');
       const chosen = draft.members.map(id => personName(id).toLowerCase());
       if(new Set(chosen).size !== chosen.length) return fail('Two of the people you picked share a name. Rename one so the ledger stays clear.');
-      if(g){ g.name = name; g.currency = form.currency.value; g.members = draft.members.slice(); }
-      else { const ng = { id: uid(), name, currency: form.currency.value, members: draft.members.slice(), expenses: [] }; state.groups.push(ng); state.activeGroupId = ng.id; view = 'groups'; }
+      try{
+        if(g){
+          const { error } = await sb.from('groups').update({ name, currency: form.currency.value }).eq('id', g.id);
+          if(error) throw error;
+          const before = new Set(g.members), after = new Set(draft.members);
+          const toAdd = draft.members.filter(id => !before.has(id));
+          const toRemove = g.members.filter(id => !after.has(id));
+          if(toAdd.length){ const { error:ae } = await sb.from('group_members').insert(toAdd.map(person_id => ({ group_id: g.id, person_id }))); if(ae) throw ae; }
+          for(const pid of toRemove){ const { error:re } = await sb.from('group_members').delete().eq('group_id', g.id).eq('person_id', pid); if(re) throw re; }
+        } else {
+          const { data, error } = await sb.from('groups').insert({ name, currency: form.currency.value }).select('id').single();
+          if(error) throw error;
+          const { error: me } = await sb.from('group_members').insert(draft.members.map(person_id => ({ group_id: data.id, person_id })));
+          if(me) throw me;
+          state.activeGroupId = data.id; view = 'groups';
+        }
+      }catch(err){ return fail(err.message || 'Could not save. Try again.'); }
     });
   renderMembers();
 }
@@ -803,15 +833,20 @@ function renderMembers(){
     return `<label class="srow"><input type="checkbox" data-pid="${p.id}" ${checked?'checked':''} ${locked?'disabled':''}><span class="nm">${esc(p.name)}</span>${locked?'<span class="sval">in an expense</span>':''}</label>`;
   }).join('') : `<p class="hint" style="margin:0">Nobody's here yet.</p>`;
 }
-function addPendingMember(){
+async function addPendingMember(){
   const inp = form.newMember; if(!inp) return;
   const n = inp.value.trim(); if(!n) return;
   let p = state.people.find(x => x.name.toLowerCase() === n.toLowerCase());
-  if(!p){ p = { id: uid(), name: n }; state.people.push(p); }
+  if(!p){
+    const { data, error } = await sb.from('people').insert({ name: n }).select('id,name').single();
+    if(error){ const el = form.querySelector('.err'); if(el) el.textContent = error.message; return; }
+    p = { id: data.id, name: data.name };
+    state.people.push(p);
+  }
   if(!draft.members.includes(p.id)) draft.members.push(p.id);
   inp.value = ''; renderMembers(); inp.focus();
 }
-form.addEventListener('keydown', ev => { if(ev.target.name === 'newMember' && ev.key === 'Enter'){ ev.preventDefault(); addPendingMember(); } });
+form.addEventListener('keydown', async ev => { if(ev.target.name === 'newMember' && ev.key === 'Enter'){ ev.preventDefault(); await addPendingMember(); } });
 form.addEventListener('change', ev => {
   const t = ev.target;
   if(t.dataset.pid && draft){
@@ -820,12 +855,33 @@ form.addEventListener('change', ev => {
   }
 });
 
+/* ---------- Join a group ---------- */
+function openJoinGroup(){
+  draft = {};
+  openDialog(`
+    <h2>Join a group</h2>
+    <label>Invite code<input name="code" maxlength="12" placeholder="e.g. 8f3a2c1d" autocapitalize="off" autocorrect="off"></label>
+    <p class="err" role="alert"></p>
+    <div class="dlg-actions">
+      <span class="sp"></span>
+      <button type="button" class="btn" data-action="close">Cancel</button>
+      <button type="submit" class="btn primary">Join</button>
+    </div>`, async () => {
+      const code = form.code.value.trim().toLowerCase();
+      if(!code) return fail('Enter the invite code.');
+      const { data, error } = await sb.rpc('join_group_by_code', { code });
+      if(error) return fail(error.message || "Couldn't join — check the code.");
+      state.activeGroupId = data; view = 'groups';
+    });
+}
+
 /* ---------- Events ---------- */
-document.addEventListener('click', ev => {
+document.addEventListener('click', async ev => {
   const b = ev.target.closest('[data-action]'); if(!b || b.disabled) return;
   const g = group(), a = b.dataset.action;
   if(a==='new-group') openGroup(true);
   else if(a==='edit-group') openGroup(false);
+  else if(a==='join-group') openJoinGroup();
   else if(a==='add-expense') openExpense();
   else if(a==='voice-expense') openVoiceExpense();
   else if(a==='edit-expense') openExpense(b.dataset.id);
@@ -836,19 +892,133 @@ document.addEventListener('click', ev => {
   else if(a==='view-groups'){ view = 'groups'; render(); }
   else if(a==='add-person') openPerson();
   else if(a==='edit-person') openPerson(b.dataset.id);
-  else if(a==='del-person'){ if(!personLocked(b.dataset.id) && confirm('Delete this person?')){ state.people = state.people.filter(x => x.id !== b.dataset.id); closeDialog(); save(); render(); } }
+  else if(a==='del-person'){
+    if(!personLocked(b.dataset.id) && confirm('Delete this person?')){
+      const { error } = await sb.from('people').delete().eq('id', b.dataset.id);
+      if(error){ alert(error.message); return; }
+      closeDialog(); await loadAllData(); render();
+    }
+  }
   else if(a==='add-settlement') openSettlement();
   else if(a==='edit-settlement') openSettlement({id:b.dataset.id});
-  else if(a==='del-settlement'){ if(confirm('Delete this settlement?')){ state.payments = state.payments.filter(x => x.id !== b.dataset.id); closeDialog(); save(); render(); } }
+  else if(a==='del-settlement'){
+    if(confirm('Delete this settlement?')){
+      const { error } = await sb.from('payments').delete().eq('id', b.dataset.id);
+      if(error){ alert(error.message); return; }
+      closeDialog(); await loadAllData(); render();
+    }
+  }
   else if(a==='close') closeDialog();
-  else if(a==='add-member') addPendingMember();
-  else if(a==='del-entry'){ if(confirm('Delete this entry?')){ g.expenses = g.expenses.filter(x => x.id !== b.dataset.id); closeDialog(); save(); render(); } }
-  else if(a==='del-group'){ if(confirm(`Delete "${g.name}" and all its expenses? The people in it stay saved.`)){ state.groups = state.groups.filter(x => x.id !== g.id); state.activeGroupId = state.groups[0]?.id || null; closeDialog(); save(); render(); } }
+  else if(a==='add-member') await addPendingMember();
+  else if(a==='copy-invite'){
+    try{ await navigator.clipboard.writeText(b.dataset.code); const old = b.textContent; b.textContent = 'Copied!'; setTimeout(() => { b.textContent = old; }, 1500); }catch(e){}
+  }
+  else if(a==='del-entry'){
+    if(confirm('Delete this entry?')){
+      const { error } = await sb.from('expenses').delete().eq('id', b.dataset.id);
+      if(error){ alert(error.message); return; }
+      closeDialog(); await loadAllData(); render();
+    }
+  }
+  else if(a==='del-group'){
+    if(confirm(`Delete "${g.name}" and all its expenses? The people in it stay saved.`)){
+      const { error } = await sb.from('groups').delete().eq('id', g.id);
+      if(error){ alert(error.message); return; }
+      state.activeGroupId = null;
+      closeDialog(); await loadAllData(); render();
+    }
+  }
 });
-document.addEventListener('change', ev => { if(ev.target.id === 'gpick'){ state.activeGroupId = ev.target.value; view = 'groups'; save(); render(); } });
+document.addEventListener('change', ev => {
+  if(ev.target.id === 'gpick'){
+    state.activeGroupId = ev.target.value; view = 'groups';
+    try{ localStorage.setItem(ACTIVE_GROUP_KEY, state.activeGroupId); }catch(e){}
+    render();
+  }
+});
 dlg.addEventListener('close', () => { onSubmit = null; draft = null; if(activeRecognition){ activeRecognition.abort(); activeRecognition = null; } });
 
-render();
+/* ---------- Auth & data loading ---------- */
+async function ensureMyPerson(){
+  const { data } = await sb.from('people').select('id').eq('owner_id', session.user.id).eq('user_id', session.user.id).maybeSingle();
+  if(data){ myPersonId = data.id; return; }
+  const name = session.user.user_metadata?.full_name || session.user.email || 'Me';
+  const { data: created, error } = await sb.from('people').insert({ owner_id: session.user.id, user_id: session.user.id, name }).select('id').single();
+  if(error) throw error;
+  myPersonId = created.id;
+}
+async function loadAllData(){
+  const [{ data: groups }, { data: people }, { data: members }, { data: expenses }, { data: splits }, { data: payments }] = await Promise.all([
+    sb.from('groups').select('*').order('created_at'),
+    sb.from('people').select('*').order('name'),
+    sb.from('group_members').select('*'),
+    sb.from('expenses').select('*').order('expense_date', { ascending:false }),
+    sb.from('expense_splits').select('*'),
+    sb.from('payments').select('*').order('payment_date', { ascending:false }),
+  ]);
+
+  state.people = (people||[]).map(p => ({ id:p.id, name:p.name }));
+  state.meId = myPersonId;
+
+  const splitsByExpense = {};
+  (splits||[]).forEach(s => { (splitsByExpense[s.expense_id] ||= {})[s.person_id] = s.amount_cents; });
+
+  const expensesByGroup = {};
+  (expenses||[]).forEach(e => {
+    (expensesByGroup[e.group_id] ||= []).push({
+      id: e.id, type: e.type, desc: e.description, amount: e.amount_cents,
+      paidBy: e.paid_by, splits: splitsByExpense[e.id] || {}, splitMode: e.split_mode,
+      splitInput: e.split_input || {}, date: e.expense_date, createdAt: new Date(e.created_at).getTime()
+    });
+  });
+
+  const membersByGroup = {};
+  (members||[]).forEach(m => { (membersByGroup[m.group_id] ||= []).push(m.person_id); });
+
+  state.groups = (groups||[]).map(g => ({
+    id: g.id, name: g.name, currency: g.currency, inviteCode: g.invite_code,
+    members: membersByGroup[g.id] || [], expenses: expensesByGroup[g.id] || []
+  }));
+
+  if(!state.activeGroupId || !state.groups.some(x => x.id === state.activeGroupId)){
+    let saved = null;
+    try{ saved = localStorage.getItem(ACTIVE_GROUP_KEY); }catch(e){}
+    state.activeGroupId = (saved && state.groups.some(x => x.id === saved)) ? saved : (state.groups[0]?.id || null);
+  }
+
+  state.payments = (payments||[]).map(p => ({
+    id:p.id, from:p.from_person, to:p.to_person, amount:p.amount_cents, currency:p.currency,
+    note:p.note, date:p.payment_date, createdAt:new Date(p.created_at).getTime()
+  }));
+}
+async function onAuthChange(){
+  if(session){
+    $('#authGate').style.display = 'none';
+    try{
+      await ensureMyPerson();
+      await loadAllData();
+    }catch(err){
+      $('#appWrap').style.display = '';
+      $('#app').innerHTML = `<p class="none">Couldn't load your data: ${esc(err.message||'unknown error')}</p>`;
+      return;
+    }
+    $('#appWrap').style.display = '';
+    render();
+  } else {
+    myPersonId = null;
+    $('#appWrap').style.display = 'none';
+    $('#authGate').style.display = '';
+  }
+}
+sb.auth.onAuthStateChange((_event, s) => { session = s; onAuthChange(); });
+$('#signInBtn').addEventListener('click', () => {
+  sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } });
+});
+$('#signOutBtn').addEventListener('click', () => sb.auth.signOut());
+
+const { data: initialSessionData } = await sb.auth.getSession();
+session = initialSessionData.session;
+await onAuthChange();
 </script>
 </body>
 </html>
