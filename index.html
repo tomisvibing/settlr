@@ -447,6 +447,9 @@ function openDialog(html, submit){
 }
 function closeDialog(){ if(dlg.open) dlg.close(); onSubmit = null; draft = null; }
 function fail(msg){ const e = form.querySelector('.err'); if(e) e.textContent = msg; return false; }
+function describeError(err){
+  return [err?.message, err?.details, err?.hint].filter(Boolean).join(' — ') || 'Could not save. Try again.';
+}
 form.addEventListener('submit', async ev => {
   ev.preventDefault();
   if(!onSubmit) return;
@@ -584,7 +587,7 @@ async function saveExpenseRow(expenseId, row, splits){
       const { error } = await sb.from('expense_splits').insert(splitRows);
       if(error) throw error;
     }
-  }catch(err){ return fail(err.message || 'Could not save. Try again.'); }
+  }catch(err){ return fail(describeError(err)); }
 }
 
 /* ---------- Voice expense ---------- */
@@ -750,7 +753,7 @@ function openSettlement(opts = {}){
       try{
         if(draft.id){ const { error } = await sb.from('payments').update(row).eq('id', draft.id); if(error) throw error; }
         else { const { error } = await sb.from('payments').insert(row); if(error) throw error; }
-      }catch(err){ return fail(err.message || 'Could not save. Try again.'); }
+      }catch(err){ return fail(describeError(err)); }
     });
 }
 
@@ -776,7 +779,7 @@ function openPerson(pid){
       try{
         if(p){ const { error } = await sb.from('people').update({ name }).eq('id', p.id); if(error) throw error; }
         else { const { error } = await sb.from('people').insert({ name, owner_id: session.user.id }); if(error) throw error; }
-      }catch(err){ return fail(err.message || 'Could not save. Try again.'); }
+      }catch(err){ return fail(describeError(err)); }
     });
 }
 
@@ -814,13 +817,11 @@ function openGroup(isNew){
           if(toAdd.length){ const { error:ae } = await sb.from('group_members').insert(toAdd.map(person_id => ({ group_id: g.id, person_id }))); if(ae) throw ae; }
           for(const pid of toRemove){ const { error:re } = await sb.from('group_members').delete().eq('group_id', g.id).eq('person_id', pid); if(re) throw re; }
         } else {
-          const { data, error } = await sb.from('groups').insert({ name, currency: form.currency.value, created_by: session.user.id }).select('id').single();
+          const { data: gid, error } = await sb.rpc('create_group', { name, currency: form.currency.value, member_person_ids: draft.members });
           if(error) throw error;
-          const { error: me } = await sb.from('group_members').insert(draft.members.map(person_id => ({ group_id: data.id, person_id })));
-          if(me) throw me;
-          state.activeGroupId = data.id; view = 'groups';
+          state.activeGroupId = gid; view = 'groups';
         }
-      }catch(err){ return fail(err.message || 'Could not save. Try again.'); }
+      }catch(err){ return fail(describeError(err)); }
     });
   renderMembers();
 }
