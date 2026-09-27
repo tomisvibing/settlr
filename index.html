@@ -167,6 +167,7 @@ textarea{min-height:10rem;font-size:.8rem;font-family:ui-monospace,SFMono-Regula
 <button id="themeToggle" class="theme-toggle" aria-label="Switch to night mode" title="Switch to night mode"></button>
 <div class="wrap" id="authGate" style="display:none">
   <section class="empty">
+    <div class="brand" style="font-size:2.5rem;margin-bottom:.5rem">settlr</div>
     <h1>Split shared expenses without the maths.</h1>
     <button class="btn primary" id="signInBtn">Sign in with Google</button>
   </section>
@@ -940,12 +941,13 @@ dlg.addEventListener('close', () => { onSubmit = null; draft = null; if(activeRe
 
 /* ---------- Auth & data loading ---------- */
 async function ensureMyPerson(){
-  const { data } = await sb.from('people').select('id').eq('owner_id', session.user.id).eq('user_id', session.user.id).maybeSingle();
-  if(data){ myPersonId = data.id; return; }
   const name = session.user.user_metadata?.full_name || session.user.email || 'Me';
-  const { data: created, error } = await sb.from('people').insert({ owner_id: session.user.id, user_id: session.user.id, name }).select('id').single();
+  const { data, error } = await sb.from('people')
+    .upsert({ owner_id: session.user.id, user_id: session.user.id, name }, { onConflict: 'owner_id,user_id' })
+    .select('id')
+    .single();
   if(error) throw error;
-  myPersonId = created.id;
+  myPersonId = data.id;
 }
 async function loadAllData(){
   const [{ data: groups }, { data: people }, { data: members }, { data: expenses }, { data: splits }, { data: payments }] = await Promise.all([
@@ -1010,15 +1012,18 @@ async function onAuthChange(){
     $('#authGate').style.display = '';
   }
 }
-sb.auth.onAuthStateChange((_event, s) => { session = s; onAuthChange(); });
+/* onAuthStateChange fires once immediately with the current session, then again
+   on sign-in/out/refresh — serialize handling so overlapping fires can't race
+   (e.g. both trying to create the "me" contact at once). */
+let authChangeChain = Promise.resolve();
+sb.auth.onAuthStateChange((_event, s) => {
+  session = s;
+  authChangeChain = authChangeChain.then(onAuthChange).catch(err => console.error(err));
+});
 $('#signInBtn').addEventListener('click', () => {
   sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } });
 });
 $('#signOutBtn').addEventListener('click', () => sb.auth.signOut());
-
-const { data: initialSessionData } = await sb.auth.getSession();
-session = initialSessionData.session;
-await onAuthChange();
 </script>
 </body>
 </html>
