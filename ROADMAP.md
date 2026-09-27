@@ -6,14 +6,19 @@ Where settlr is heading, roughly in order. Tick items off as they ship.
 
 - [x] Home overview of all groups, with your overall balance and recent activity
 - [x] Settings (cog icon): edit your name, sign out, theme, download your data
-- [x] Delete account (`supabase/delete_my_account.sql`, live in Supabase)
+- [x] Delete account (the `delete_my_account` function, live in Supabase)
 - [x] Back-button-friendly routing, invite links, group CSV export, activity search
 
 ## Phase 0: Foundations
 
 Everything later builds on these.
 
-- [ ] Put the database setup (tables, security rules, functions) in the repo as migrations, so every database change is reviewable
+- [x] Put the database setup (tables, security rules, functions) in the repo as migrations (`supabase/migrations/`), so every database change is reviewable
+- [ ] Fix what Supabase's security and performance checks flag:
+  - signed-out visitors can call the `SECURITY DEFINER` functions (`create_group`, `join_group_by_code`, `preview_group_by_code`, `is_member`, `my_group_ids`); limit them to signed-in users
+  - `is_member` and `my_group_ids` don't pin their `search_path`
+  - `create_group` and the "add group members" rule accept any person ID, even people the caller can't see
+  - nine foreign keys have no index, and the security rules re-run `auth.uid()` for every row (wrap it as `(select auth.uid())`)
 - [ ] Split the single `index.html` into a small Vite project with modules, before receipts, AI and the redesign make it unmanageable
 - [ ] Automated tests for the balance and split maths
 - [ ] Error monitoring (e.g. Sentry) so crashes get reported
