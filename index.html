@@ -48,9 +48,15 @@ button,input,select,textarea{font:inherit;color:inherit}
 /* Top bar */
 .top{display:flex;align-items:center;gap:.75rem;padding:1rem 0 .5rem;flex-wrap:wrap}
 .brand{font-weight:800;font-size:1.25rem;letter-spacing:-.02em;margin-right:auto}
-.gsel{display:flex;gap:.4rem;align-items:center;flex-wrap:nowrap;padding:0 0 .75rem;min-width:0}
-.gsel select{flex:1 1 auto;min-width:0;width:auto;font-weight:500}
-.gsel .btn{flex:0 0 auto;padding:.5rem .65rem;font-size:.85rem}
+.brand{color:inherit;text-decoration:none}
+.topnav{display:flex;align-items:center;gap:.35rem}
+.navlink{color:var(--ink);text-decoration:none;font-weight:500;padding:.45rem .75rem;border-radius:var(--radius);min-height:40px;display:inline-flex;align-items:center}
+.navlink:hover{background:var(--line)}
+.navlink[aria-current="page"]{background:var(--surface);box-shadow:0 0 0 1px var(--line)}
+.iconbtn{width:42px;height:42px;padding:0;justify-content:center}
+.iconbtn svg{display:block}
+.back{display:inline-flex;align-items:center;gap:.35rem;color:var(--muted);text-decoration:none;font-weight:500;font-size:.9rem;padding:.25rem 0}
+.back:hover{color:var(--ink)}
 select,input,textarea{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:.55rem .7rem;min-height:44px;width:100%;font-size:16px}
 
 /* Buttons */
@@ -82,7 +88,7 @@ select,input,textarea{background:var(--surface);border:1px solid var(--line);bor
 @media (prefers-reduced-motion: reduce){.half i{transition:none}}
 
 .actions{display:flex;gap:.6rem;margin:0 0 2rem}
-.actions .btn{flex:1}
+.actions .btn{flex:1 1 0;min-width:0;padding-left:.6rem;padding-right:.6rem;white-space:normal;line-height:1.2}
 .actions .btn.icon{flex:0 0 auto;width:3.4rem;padding:.6rem 0;font-size:1.15rem;text-align:center}
 
 .mic-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--neg);margin-right:.6rem;vertical-align:middle;animation:pulse 1.2s ease-in-out infinite}
@@ -131,7 +137,7 @@ label.inline{display:flex;align-items:center;gap:.6rem}
 fieldset{border:0;padding:0;margin:0}
 legend{font-size:.9rem;font-weight:500;margin-bottom:.3rem;padding:0}
 .seg{display:flex;background:var(--bg);border-radius:var(--radius);padding:3px}
-.seg label{flex:1;display:block;text-align:center;cursor:pointer;margin:0}
+.seg label{flex:1;display:block;position:relative;text-align:center;cursor:pointer;margin:0}
 .seg input{position:absolute;opacity:0;width:1px;height:1px}
 .seg span{display:block;padding:.45rem .5rem;border-radius:2px;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .seg input:checked + span{background:var(--surface);font-weight:700;box-shadow:0 0 0 1px var(--line)}
@@ -145,7 +151,7 @@ legend{font-size:.9rem;font-weight:500;margin-bottom:.3rem;padding:0}
 .hint{margin:0;font-size:.9rem;color:var(--muted)}
 .hint.bad{color:var(--neg);font-weight:500}
 .err{margin:0;color:var(--neg);font-weight:500;min-height:0}
-.err:empty{display:none}
+.err:empty,.hint:empty{display:none}
 .dlg-actions{display:flex;gap:.5rem;align-items:center;padding-top:.25rem;flex-wrap:wrap}
 .dlg-actions .sp{flex:1}
 .mrow{display:flex;gap:.5rem;align-items:center}
@@ -156,32 +162,78 @@ textarea{min-height:10rem;font-size:.8rem;font-family:ui-monospace,SFMono-Regula
   .lrow{grid-template-columns:4rem 1fr 4rem;gap:.5rem}
   .two{grid-template-columns:1fr}
   .seg span{font-size:.8rem;padding:.45rem .3rem}
-  .gsel .btn{padding:.45rem .5rem;font-size:.78rem}
-  .gsel select{font-size:.85rem}
+  .toolbar .btn{padding:.35rem .6rem}
 }
-.theme-toggle{position:fixed;left:1rem;bottom:calc(1rem + env(safe-area-inset-bottom,0px));width:2.5rem;height:2.5rem;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:1.05rem;line-height:1;cursor:pointer;opacity:.55;transition:opacity .15s;z-index:10}
-.theme-toggle:hover,.theme-toggle:focus-visible{opacity:1}
+
+/* Home */
+.summary{display:grid;gap:.15rem;margin:0 0 .35rem}
+.summary .big{font-size:clamp(1.9rem,7.5vw,2.75rem);line-height:1.05;letter-spacing:-.035em;font-weight:800;margin:0}
+.summary .big.pos{color:var(--pos)} .summary .big.neg{color:var(--neg)}
+a.item{color:inherit;text-decoration:none}
+a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.item.gcard{grid-template-columns:2.6rem 1fr auto}
+.gav{width:2.6rem;height:2.6rem;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;background:var(--line);color:var(--ink)}
+.gav.pos{background:var(--pos-soft);color:var(--pos)} .gav.neg{background:var(--neg-soft);color:var(--neg)}
+.iamt small{display:block;font-weight:400;font-size:.8rem;color:var(--muted)}
+.iamt small.pos{color:var(--pos)} .iamt small.neg{color:var(--neg)}
+.toolbar{display:flex;gap:.4rem;flex-wrap:wrap;margin:.9rem 0 0}
+.search{margin:0 0 .6rem}
+.you{color:var(--muted);font-weight:400}
+
+/* Settings */
+.profile{display:flex;align-items:center;gap:.9rem;padding:.9rem 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.avatar{width:3.25rem;height:3.25rem;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:1.3rem;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.profile .who{flex:1;min-width:0}
+.profile .who b{display:block;font-size:1.1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.profile .who span{color:var(--muted);font-size:.9rem;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.setrow{display:flex;align-items:center;gap:.75rem;padding:.8rem 0;border-bottom:1px solid var(--line)}
+.setrow:first-of-type{border-top:1px solid var(--line)}
+.setrow p{margin:0;flex:1}
+.setrow p small{display:block;color:var(--muted);font-size:.85rem}
+.danger-zone{border:1px solid var(--neg);border-radius:var(--radius);padding:1rem;display:grid;gap:.6rem;justify-items:start}
+.danger-zone p{margin:0}
+.btn.destroy{background:var(--neg);border-color:var(--neg);color:#fff;font-weight:600}
+.btn.destroy:hover{opacity:.88;background:var(--neg)}
+.btn.outline-neg{border-color:var(--neg);color:var(--neg)}
+.btn.outline-neg:hover{background:var(--neg-soft)}
+.bullets{margin:0;padding-left:1.1rem;display:grid;gap:.35rem;font-size:.95rem}
+.foot{color:var(--muted);font-size:.8rem;text-align:center;margin:2.5rem 0 0}
+
+/* Toast */
+#toast{position:fixed;left:50%;bottom:calc(1.25rem + env(safe-area-inset-bottom,0px));transform:translate(-50%,1rem);background:var(--accent);color:var(--accent-ink);padding:.65rem 1rem;border-radius:var(--radius);font-weight:500;font-size:.95rem;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:20;max-width:calc(100vw - 2rem)}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion: reduce){#toast{transition:none}}
 </style>
 </head>
 <body>
-<button id="themeToggle" class="theme-toggle" aria-label="Switch to night mode" title="Switch to night mode"></button>
+<div class="wrap" id="bootScreen">
+  <section class="empty">
+    <div class="brand" style="font-size:2.5rem;margin:0 0 .5rem">settlr</div>
+    <p class="muted">Loading…</p>
+  </section>
+</div>
 <div class="wrap" id="authGate" style="display:none">
   <section class="empty">
     <div class="brand" style="font-size:2.5rem;margin:0 0 .5rem">settlr</div>
     <h1>Split shared expenses without the maths.</h1>
+    <p class="hint" id="authNote" style="margin:-1rem 0 1.25rem"></p>
     <button class="btn primary" id="signInBtn">Sign in with Google</button>
   </section>
 </div>
 <div class="wrap" id="appWrap" style="display:none">
   <header class="top">
-    <div class="brand" data-action="view-groups" style="cursor:pointer">settlr</div>
-    <button class="btn small" id="signOutBtn">Sign out</button>
-    <button class="btn small" id="peopleBtn" data-action=""></button>
+    <a class="brand" href="#/">settlr</a>
+    <nav class="topnav" aria-label="Main">
+      <a class="navlink" href="#/" id="navHome">Home</a>
+      <a class="navlink" href="#/people" id="navPeople">People</a>
+      <a class="navlink iconbtn" href="#/settings" id="navSettings" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></a>
+    </nav>
   </header>
-  <div class="gsel" id="navBar"></div>
   <main id="app"></main>
 </div>
 <dialog id="dlg"><form id="dlgForm" novalidate></form></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
 
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -195,52 +247,64 @@ const sb = createClient(
 /* ---------- Theme (local UI preference only, not app data) ---------- */
 const THEME_KEY = 'settlr:theme';
 function getThemeOverride(){ try{ return localStorage.getItem(THEME_KEY); }catch(e){ return null; } }
-function systemPrefersDark(){ return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; }
-function isDarkActive(){ const t = getThemeOverride(); return t ? t === 'dark' : systemPrefersDark(); }
-function renderThemeToggle(){
-  const btn = document.getElementById('themeToggle');
-  if(!btn) return;
-  const dark = isDarkActive();
-  btn.textContent = dark ? '☀' : '☾';
-  const label = dark ? 'Switch to day mode' : 'Switch to night mode';
-  btn.setAttribute('aria-label', label);
-  btn.setAttribute('title', label);
-}
 function applyTheme(){
   const t = getThemeOverride();
-  if(t) document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme;
-  renderThemeToggle();
+  if(t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme;
+}
+function setTheme(t){
+  try{ if(t === 'light' || t === 'dark') localStorage.setItem(THEME_KEY, t); else localStorage.removeItem(THEME_KEY); }catch(e){}
+  applyTheme();
 }
 applyTheme();
-document.getElementById('themeToggle').addEventListener('click', () => {
-  const next = isDarkActive() ? 'light' : 'dark';
-  try{ localStorage.setItem(THEME_KEY, next); }catch(e){}
-  applyTheme();
-});
-try{
-  const mq = window.matchMedia('(prefers-color-scheme: dark)');
-  const onChange = () => { if(!getThemeOverride()) renderThemeToggle(); };
-  mq.addEventListener ? mq.addEventListener('change', onChange) : mq.addListener(onChange);
-}catch(e){}
+
 /* ---------- App state (populated from Supabase — see loadAllData) ---------- */
-let state = { people: [], groups: [], payments: [], meId: null, activeGroupId: null };
-let view = 'groups'; /* 'groups' | 'people' */
+const emptyState = () => ({ people: [], groups: [], payments: [], myIds: new Set(), activeGroupId: null });
+let state = emptyState();
 let session = null;
 let myPersonId = null;
-const ACTIVE_GROUP_KEY = 'settlr:activeGroup';
+let lastLoadedAt = 0;
+const PENDING_JOIN_KEY = 'settlr:pendingJoin';
 
 /* ---------- Helpers ---------- */
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const today = () => { const d = new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); };
 const CURRENCIES = ['GBP','EUR','USD','CHF','SEK','NOK','DKK','AUD','CAD','NZD'];
-function group(){
-  let g = state.groups.find(x => x.id === state.activeGroupId);
-  if(!g && state.groups.length){ g = state.groups[0]; state.activeGroupId = g.id; }
-  return g || null;
-}
+function group(){ return state.groups.find(x => x.id === state.activeGroupId) || null; }
 function person(id){ return state.people.find(p => p.id === id) || { id, name:'Someone' }; }
 const personName = id => person(id).name;
+/* "Me" can be several people rows: my own contact plus any placeholder I claimed when joining a group */
+const isMe = pid => state.myIds.has(pid);
+function meIn(g){ return g.members.find(isMe) || null; }
+function defaultPayer(g){ return meIn(g) || g.members[0]; }
+const nameWithYou = pid => esc(personName(pid)) + (isMe(pid) ? ' <span class="you">(you)</span>' : '');
+function lastActivity(g){ return g.expenses.reduce((m,e) => Math.max(m, e.createdAt), g.createdAt || 0); }
+function dayMonth(e){
+  const d = e.date ? new Date(e.date+'T12:00:00') : new Date(e.createdAt);
+  return { day: d.getDate(), mon: d.toLocaleDateString('en-GB',{month:'short'}) };
+}
+function ago(ts){
+  if(!ts) return '';
+  const start = d => { const x = new Date(d); x.setHours(0,0,0,0); return x.getTime(); };
+  const days = Math.round((start(Date.now()) - start(ts)) / 864e5);
+  if(days <= 0) return 'today';
+  if(days === 1) return 'yesterday';
+  if(days < 7) return `${days} days ago`;
+  return new Date(ts).toLocaleDateString('en-GB',{day:'numeric',month:'short', year: days > 300 ? 'numeric' : undefined});
+}
+const byNewest = (a,c) => (c.date||'').localeCompare(a.date||'') || c.createdAt - a.createdAt;
+let toastTimer = null;
+function toast(msg){
+  const el = $('#toast'); el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+}
+function download(filename, text, type){
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const a = document.createElement('a'); a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+const slug = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'settlr';
 function groupsOf(pid){ return state.groups.filter(g => g.members.includes(pid)); }
 function personLocked(pid){ return state.groups.some(g => g.members.includes(pid)) || state.payments.some(p => p.from===pid || p.to===pid); }
 function money(p, cur){
@@ -303,57 +367,151 @@ function personCurrencyTotals(pid){
   return totals;
 }
 
+/* ---------- Routing (hash-based so the back button and home-screen app both work) ---------- */
+function parseRoute(){
+  const h = location.hash;
+  if(!h.startsWith('#/')) return { name:'home' };
+  const [name, arg] = h.slice(2).split('/');
+  if(name === 'g' && arg) return { name:'group', id: decodeURIComponent(arg) };
+  if(name === 'people' || name === 'settings') return { name };
+  if(name === 'join' && arg) return { name:'join', code: decodeURIComponent(arg) };
+  return { name:'home' };
+}
+function navigate(hash){ if(location.hash === hash) render(); else location.hash = hash; }
+const groupHref = g => '#/g/' + encodeURIComponent(g.id);
+const inviteLink = g => location.origin + location.pathname + '#/join/' + encodeURIComponent(g.inviteCode);
+
 /* ---------- Render ---------- */
 function render(){
-  renderNav();
-  if(view === 'people') renderPeopleView(); else renderGroupView();
-}
-function renderNav(){
-  const bar = $('#navBar');
-  const g = group();
-  const peopleBtn = $('#peopleBtn');
-  peopleBtn.dataset.action = view==='people' ? 'view-groups' : 'view-people';
-  peopleBtn.textContent = view==='people' ? (state.groups.length?'Back to groups':'Back') : 'People';
-  const parts = [];
-  if(view==='groups'){
-    if(state.groups.length){
-      parts.push(`<label class="sr" style="position:absolute;left:-9999px" for="gpick">Group</label>
-        <select id="gpick" aria-label="Choose group">${state.groups.map(x => `<option value="${x.id}" ${g&&x.id===g.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select>
-        <button class="btn small" data-action="edit-group">Edit group</button>`);
-    }
-    parts.push(`<button class="btn small" data-action="new-group">New group</button><button class="btn small" data-action="join-group">Join</button>`);
+  let r = parseRoute();
+  if(r.name === 'join'){
+    history.replaceState(null, '', location.pathname + location.search + '#/');
+    renderRoute({ name:'home' });
+    openJoinGroup(r.code);
+    return;
   }
-  bar.innerHTML = parts.join('');
-  bar.style.display = parts.length ? 'flex' : 'none';
+  renderRoute(r);
 }
-function renderGroupView(){
-  const app = $('#app'), g = group();
+function renderRoute(r){
+  const tab = r.name === 'group' ? 'home' : r.name;
+  [['home','#navHome'],['people','#navPeople'],['settings','#navSettings']].forEach(([n,sel]) => {
+    const el = $(sel); if(n === tab) el.setAttribute('aria-current','page'); else el.removeAttribute('aria-current');
+  });
+  if(r.name === 'group') renderGroupView(r.id);
+  else if(r.name === 'people') renderPeopleView();
+  else if(r.name === 'settings') renderSettings();
+  else renderHome();
+}
+const spentIn = g => g.expenses.filter(e => e.type !== 'payment').reduce((s,e) => s+e.amount, 0);
+const initial = s => ([...String(s||'').trim()][0] || '?').toUpperCase();
+/* What an entry did to my balance: + means I'm owed more, − means I owe more */
+function myLine(e, g){
+  const me = meIn(g); if(!me) return '';
+  const v = (e.paidBy === me ? e.amount : 0) - (e.splits[me] || 0);
+  if(!v) return '';
+  const isPay = e.type === 'payment';
+  const word = v > 0 ? (isPay ? 'you paid' : 'you lent') : (isPay ? 'you received' : 'you borrowed');
+  return `<small class="${v>0?'pos':'neg'}">${word} ${money(Math.abs(v), g.currency)}</small>`;
+}
+function entryMeta(e){
+  const n = Object.keys(e.splits).length;
+  if(e.type === 'payment') return `${esc(personName(e.paidBy))} paid ${esc(personName(Object.keys(e.splits)[0]))}`;
+  return `${esc(personName(e.paidBy))} paid, ${e.splitMode==='exact'?'split by amount':e.splitMode==='shares'?'split by shares':`split ${n} ${n===1?'way':'ways'}`}`;
+}
+function entryInner(e, g, groupName){
+  const { day, mon } = dayMonth(e), isPay = e.type === 'payment';
+  return `<span class="idate"><b>${day}</b>${mon}</span>
+    <span><span class="idesc">${esc(isPay?'Payment':e.desc)}</span><span class="imeta">${groupName ? esc(g.name) + ' · ' : ''}${entryMeta(e)}</span></span>
+    <span class="iamt">${money(e.amount,g.currency)}${myLine(e,g)}</span>`;
+}
+function myTotals(){
+  const totals = {};
+  state.myIds.forEach(pid => { for(const [c,v] of Object.entries(personCurrencyTotals(pid))) totals[c] = (totals[c]||0) + v; });
+  return Object.entries(totals).filter(([,v]) => v !== 0);
+}
+
+function renderHome(){
+  const app = $('#app');
+  const first = (personName(myPersonId) || '').split(' ')[0];
+  if(!state.groups.length){
+    app.innerHTML = `
+      <section class="empty">
+        <h1>${first ? `Welcome, ${esc(first)}. ` : ''}You're not part of any groups yet.</h1>
+        <button class="btn primary" data-action="new-group">Start a group</button>
+        <button class="btn" data-action="join-group" style="margin-top:.6rem">Join with an invite code</button>
+      </section>`;
+    return;
+  }
+  const totals = myTotals();
+  const groups = state.groups.slice().sort((a,c) => lastActivity(c) - lastActivity(a));
+  const recent = state.groups.flatMap(g => g.expenses.map(e => ({ e, g }))).sort((x,y) => byNewest(x.e, y.e)).slice(0, 6);
+  app.innerHTML = `
+    <section class="hero">
+      <p class="sub" style="margin:0 0 .4rem">${first ? `Hi ${esc(first)} — here's` : "Here's"} where you stand</p>
+      <div class="summary">${totals.length
+        ? totals.map(([c,v]) => `<p class="big ${v>0?'pos':'neg'}">${v>0?"You're owed":'You owe'} ${money(Math.abs(v),c)}</p>`).join('')
+        : `<p class="big">You're all square</p>`}</div>
+      <p class="sub" style="margin:.35rem 0 0">Across ${state.groups.length} ${state.groups.length===1?'group':'groups'}${state.payments.length ? ' and your settlements' : ''}.</p>
+    </section>
+
+    <div class="actions">
+      <button class="btn primary" data-action="new-group">New group</button>
+      <button class="btn" data-action="join-group">Join a group</button>
+    </div>
+
+    <section class="block">
+      <h2>Your groups</h2>
+      <ul class="list">${groups.map(g => {
+        const me = meIn(g), v = me ? (balances(g)[me] || 0) : 0, cur = g.currency;
+        const status = !me ? `<span class="lamt zero">Not in it</span>`
+          : v>0 ? `<span class="lamt pos">${money(v,cur)}<small>you're owed</small></span>`
+          : v<0 ? `<span class="lamt neg">${money(-v,cur)}<small>you owe</small></span>`
+          : `<span class="lamt zero">Square</span>`;
+        const n = g.members.length;
+        return `<li><a class="item gcard" href="${groupHref(g)}">
+          <span class="gav ${v>0?'pos':v<0?'neg':''}" aria-hidden="true">${esc(initial(g.name))}</span>
+          <span><span class="idesc">${esc(g.name)}</span><span class="imeta">${n} ${n===1?'person':'people'} · ${money(spentIn(g),cur)} spent · ${ago(lastActivity(g))}</span></span>
+          ${status}</a></li>`;
+      }).join('')}</ul>
+    </section>
+
+    <section class="block">
+      <h2>Recent activity</h2>
+      ${recent.length ? `<ul class="list">${recent.map(({e,g}) => `<li><a class="item ${e.type==='payment'?'payment':''}" href="${groupHref(g)}">${entryInner(e, g, true)}</a></li>`).join('')}</ul>`
+        : `<p class="none">Nothing yet. Open a group and add the first expense.</p>`}
+    </section>`;
+}
+
+function renderGroupView(id){
+  const app = $('#app');
+  state.activeGroupId = id;
+  const g = group();
   if(!g){
     app.innerHTML = `
       <section class="empty">
-        <h1>You're not part of any groups</h1>
-        <button class="btn primary" data-action="new-group">Add a group</button>
-        <button class="btn" data-action="join-group" style="margin-top:.6rem">Join a group</button>
+        <h1>This group isn't available. It may have been deleted, or you're no longer in it.</h1>
+        <a class="btn primary" href="#/">Back to your groups</a>
       </section>`;
     return;
   }
   const cur = g.currency, b = balances(g);
   const max = Math.max(1, ...Object.values(b).map(Math.abs));
-  const spent = g.expenses.filter(e => e.type !== 'payment').reduce((s,e) => s+e.amount, 0);
   const plan = settlements(b);
-  const sorted = [...g.expenses].sort((a,c) => (c.date||'').localeCompare(a.date||'') || c.createdAt - a.createdAt);
+  const sorted = [...g.expenses].sort(byNewest);
+  const pays = (from, to) => `${isMe(from) ? '<b>You</b> pay' : `<b>${esc(personName(from))}</b> pays`} ${isMe(to) ? '<b>you</b>' : `<b>${esc(personName(to))}</b>`}`;
 
   app.innerHTML = `
-    <section class="hero">
+    <a class="back" href="#/">← All groups</a>
+    <section class="hero" style="padding-top:.5rem">
       <h1>${esc(g.name)}</h1>
-      <p class="sub">${g.members.length} ${g.members.length===1?'person':'people'}, ${money(spent,cur)} spent so far</p>
+      <p class="sub">${g.members.length} ${g.members.length===1?'person':'people'}, ${money(spentIn(g),cur)} spent so far</p>
       <div class="ledger" role="list" aria-label="Balances">
         ${g.members.map(mid => {
           const v = b[mid], w = Math.round(Math.abs(v)/max*100), name = personName(mid);
           const cls = v>0?'pos':v<0?'neg':'zero';
           const label = v>0?`${money(v,cur)}<small>is owed</small>`:v<0?`${money(-v,cur)}<small>owes</small>`:`Square`;
           return `<div class="lrow" role="listitem">
-            <span class="lname" title="${esc(name)}">${esc(name)}</span>
+            <span class="lname" title="${esc(name)}">${isMe(mid) ? 'You' : esc(name)}</span>
             <div class="lbar" aria-hidden="true">
               <div class="half neg"><i style="width:${v<0?w:0}%"></i></div>
               <div class="half pos"><i style="width:${v>0?w:0}%"></i></div>
@@ -361,6 +519,11 @@ function renderGroupView(){
             <span class="lamt ${cls}">${label}</span>
           </div>`;
         }).join('')}
+      </div>
+      <div class="toolbar">
+        <button class="btn small" data-action="invite">Invite people</button>
+        <button class="btn small" data-action="edit-group">Edit group</button>
+        <button class="btn small" data-action="export-group" ${g.expenses.length?'':'disabled'}>Export CSV</button>
       </div>
     </section>
 
@@ -373,35 +536,36 @@ function renderGroupView(){
     <section class="block">
       <h2>To settle up</h2>
       ${plan.length ? `<ul class="list">${plan.map(p => `
-        <li class="settle"><p><b>${esc(personName(p.from))}</b> pays <b>${esc(personName(p.to))}</b> ${money(p.amount,cur)}</p>
+        <li class="settle"><p>${pays(p.from, p.to)} ${money(p.amount,cur)}</p>
         <button class="btn small" data-action="settle" data-from="${p.from}" data-to="${p.to}" data-amount="${p.amount}">Mark paid</button></li>`).join('')}</ul>`
       : `<p class="none">${g.expenses.length ? 'Everyone is square.' : 'Add the first expense to see who owes whom.'}</p>`}
     </section>
 
     <section class="block">
       <h2>Activity</h2>
-      ${sorted.length ? `<ul class="list">${sorted.map(e => {
-        const d = e.date ? new Date(e.date+'T12:00:00') : new Date(e.createdAt);
-        const day = d.getDate(), mon = d.toLocaleDateString('en-GB',{month:'short'});
+      ${sorted.length > 6 ? `<input class="search" type="search" data-filter="activity" placeholder="Search activity" aria-label="Search activity" autocomplete="off">` : ''}
+      ${sorted.length ? `<ul class="list" id="activityList">${sorted.map(e => {
         const isPay = e.type === 'payment';
-        const n = Object.keys(e.splits).length;
-        const meta = isPay
-          ? `${esc(personName(e.paidBy))} paid ${esc(personName(Object.keys(e.splits)[0]))}`
-          : `${esc(personName(e.paidBy))} paid, ${e.splitMode==='exact'?'split by amount':e.splitMode==='shares'?`split by shares`:`split ${n} ${n===1?'way':'ways'}`}`;
-        return `<li><button class="item ${isPay?'payment':''}" data-action="${isPay?'edit-payment':'edit-expense'}" data-id="${e.id}">
-          <span class="idate"><b>${day}</b>${mon}</span>
-          <span><span class="idesc">${esc(isPay?'Payment':e.desc)}</span><span class="imeta">${meta}</span></span>
-          <span class="iamt">${money(e.amount,cur)}</span></button></li>`;
-      }).join('')}</ul>` : `<p class="none">No expenses yet.</p>`}
+        const hay = [isPay?'payment':e.desc, personName(e.paidBy), ...Object.keys(e.splits).map(personName), (e.amount/100).toFixed(2)].join(' ').toLowerCase();
+        return `<li data-search="${esc(hay)}"><button class="item ${isPay?'payment':''}" data-action="${isPay?'edit-payment':'edit-expense'}" data-id="${e.id}">${entryInner(e, g, false)}</button></li>`;
+      }).join('')}</ul><p class="none" id="noMatches" hidden>Nothing matches that search.</p>` : `<p class="none">No expenses yet.</p>`}
     </section>`;
 }
+function filterActivity(q){
+  q = q.trim().toLowerCase();
+  let shown = 0;
+  document.querySelectorAll('#activityList > li').forEach(li => { const ok = !q || li.dataset.search.includes(q); li.hidden = !ok; if(ok) shown++; });
+  const nm = $('#noMatches'); if(nm) nm.hidden = shown > 0;
+}
+
 function renderPeopleView(){
   const app = $('#app');
   const people = state.people.slice().sort((a,b) => a.name.localeCompare(b.name));
-  const activity = state.payments.slice().sort((a,c) => (c.date||'').localeCompare(a.date||'') || c.createdAt - a.createdAt);
+  const activity = state.payments.slice().sort(byNewest);
   app.innerHTML = `
     <section class="hero">
       <h1>People</h1>
+      <p class="sub" style="margin-bottom:0">Everyone you share expenses with, and where you stand with each of them across all groups.</p>
     </section>
 
     <div class="actions">
@@ -418,7 +582,7 @@ function renderPeopleView(){
           : `<span class="lamt zero">Square</span>`;
         const gnames = groupsOf(p.id).map(g => esc(g.name)).join(', ');
         return `<li><button class="item person" data-action="edit-person" data-id="${p.id}">
-          <span class="pname"><span>${esc(p.name)}${p.id===state.meId?' <span class="imeta" style="display:inline">· You</span>':''}</span><span class="imeta">${gnames || 'Not in a group yet'}</span></span>
+          <span class="pname"><span>${nameWithYou(p.id)}</span><span class="imeta">${gnames || 'Not in a group yet'}</span></span>
           ${bal}</button></li>`;
       }).join('')}</ul>` : `<p class="none">No one saved yet. Add a person to get started.</p>`}
     </section>
@@ -426,14 +590,55 @@ function renderPeopleView(){
     <section class="block">
       <h2>Settlements outside a group</h2>
       ${activity.length ? `<ul class="list">${activity.map(p => {
-        const d = p.date ? new Date(p.date+'T12:00:00') : new Date(p.createdAt);
-        const day = d.getDate(), mon = d.toLocaleDateString('en-GB',{month:'short'});
+        const { day, mon } = dayMonth(p);
         return `<li><button class="item payment" data-action="edit-settlement" data-id="${p.id}">
           <span class="idate"><b>${day}</b>${mon}</span>
           <span><span class="idesc">${esc(personName(p.from))} → ${esc(personName(p.to))}</span><span class="imeta">${esc(p.note || 'Settlement')}</span></span>
           <span class="iamt">${money(p.amount,p.currency)}</span></button></li>`;
       }).join('')}</ul>` : `<p class="none">Record a payment here when two people settle up outside any group's expenses.</p>`}
     </section>`;
+}
+
+function renderSettings(){
+  const app = $('#app');
+  const u = session.user, meta = u.user_metadata || {};
+  const name = personName(myPersonId);
+  const avatar = meta.avatar_url || meta.picture;
+  const theme = getThemeOverride() || 'system';
+  app.innerHTML = `
+    <section class="hero"><h1>Settings</h1></section>
+
+    <section class="block">
+      <h2>Account</h2>
+      <div class="profile">
+        <span class="avatar">${avatar ? `<img src="${esc(avatar)}" alt="" referrerpolicy="no-referrer">` : esc(initial(name))}</span>
+        <span class="who"><b>${esc(name)}</b><span>${esc(u.email || 'Signed in with Google')}</span></span>
+        <button class="btn small" data-action="edit-profile">Edit name</button>
+      </div>
+      <div class="setrow" style="border-top:0"><p>Sign out<small>You can sign back in any time with Google.</small></p><button class="btn small" data-action="sign-out">Sign out</button></div>
+    </section>
+
+    <section class="block">
+      <h2>Appearance</h2>
+      <div class="seg" role="radiogroup" aria-label="Theme">${[['system','Match device'],['light','Light'],['dark','Dark']].map(([v,l]) =>
+        `<label><input type="radio" name="theme" value="${v}" ${theme===v?'checked':''}><span>${l}</span></label>`).join('')}</div>
+    </section>
+
+    <section class="block">
+      <h2>Your data</h2>
+      <div class="setrow"><p>Download my data<small>Every group, expense, person and settlement you can see, as a JSON file.</small></p><button class="btn small" data-action="export-all">Download</button></div>
+    </section>
+
+    <section class="block">
+      <h2>Danger zone</h2>
+      <div class="danger-zone">
+        <p><b>Delete account</b></p>
+        <p class="hint">Permanently delete your settlr account and everything only you use. Shared groups stay intact for everyone else. This can't be undone.</p>
+        <button class="btn outline-neg" data-action="delete-account">Delete my account</button>
+      </div>
+    </section>
+
+    <p class="foot">settlr · Split shared expenses without the maths.</p>`;
 }
 
 /* ---------- Dialog plumbing ---------- */
@@ -447,6 +652,11 @@ function openDialog(html, submit){
 }
 function closeDialog(){ if(dlg.open) dlg.close(); onSubmit = null; draft = null; }
 function fail(msg){ const e = form.querySelector('.err'); if(e) e.textContent = msg; return false; }
+async function refresh(){
+  try{ await loadAllData(); }
+  catch(err){ toast(`Couldn't refresh: ${err.message || 'check your connection'}`); }
+  render();
+}
 function describeError(err){
   return [err?.message, err?.details, err?.hint].filter(Boolean).join(' — ') || 'Could not save. Try again.';
 }
@@ -457,7 +667,8 @@ form.addEventListener('submit', async ev => {
   if(submitBtn) submitBtn.disabled = true;
   try{
     const result = await onSubmit();
-    if(result !== false){ closeDialog(); await loadAllData(); render(); }
+    /* a handler returns false to keep the dialog open, or a route to go to once saved */
+    if(result !== false){ closeDialog(); await refresh(); if(typeof result === 'string') navigate(result); }
   } finally {
     if(submitBtn) submitBtn.disabled = false;
   }
@@ -481,7 +692,7 @@ function openExpense(eid, prefill){
   const descVal = prefill?.desc ?? e?.desc ?? '';
   const amountVal = prefill?.amount != null ? (prefill.amount/100).toFixed(2) : (e ? (e.amount/100).toFixed(2) : '');
   const dateVal = prefill?.date || e?.date || today();
-  const paidByVal = prefill?.paidBy || e?.paidBy || (state.meId && g.members.includes(state.meId) ? state.meId : g.members[0]);
+  const paidByVal = prefill?.paidBy || e?.paidBy || defaultPayer(g);
   const modes = [['equal','Equally'],['exact','Exact amounts'],['shares','Shares']];
   openDialog(`
     <h2>${e?'Edit expense':'Add expense'}</h2>
@@ -693,7 +904,7 @@ function parseVoiceExpense(text, g){
 /* ---------- Payment (within a group) ---------- */
 function openPayment(opts = {}){
   const g = group(); const e = opts.id ? g.expenses.find(x => x.id === opts.id) : null;
-  const from = e ? e.paidBy : (opts.from || (state.meId && g.members.includes(state.meId) ? state.meId : g.members[0]));
+  const from = e ? e.paidBy : (opts.from || defaultPayer(g));
   const to = e ? Object.keys(e.splits)[0] : (opts.to || g.members.find(mid => mid !== from));
   const amt = e ? e.amount : (opts.amount || '');
   const sel = (name, val) => `<select name="${name}">${g.members.map(mid => `<option value="${mid}" ${mid===val?'selected':''}>${esc(personName(mid))}</option>`).join('')}</select>`;
@@ -724,7 +935,7 @@ function openPayment(opts = {}){
 function openSettlement(opts = {}){
   const e = opts.id ? state.payments.find(x => x.id === opts.id) : null;
   const people = state.people.slice().sort((a,b) => a.name.localeCompare(b.name));
-  const from = e ? e.from : (opts.from || (state.meId && people.some(p => p.id === state.meId) ? state.meId : people[0]?.id));
+  const from = e ? e.from : (opts.from || (people.some(p => p.id === myPersonId) ? myPersonId : people[0]?.id));
   const to = e ? e.to : (opts.to || people.find(p => p.id !== from)?.id);
   const sel = (name, val) => `<select name="${name}">${people.map(p => `<option value="${p.id}" ${p.id===val?'selected':''}>${esc(p.name)}</option>`).join('')}</select>`;
   draft = { id: e?.id };
@@ -761,12 +972,12 @@ function openSettlement(opts = {}){
 function openPerson(pid){
   const p = pid ? state.people.find(x => x.id === pid) : null;
   draft = {};
-  const isMe = p && p.id === state.meId;
-  const locked = p && (personLocked(p.id) || isMe);
+  const mine = p && isMe(p.id);
+  const locked = p && (personLocked(p.id) || mine);
   openDialog(`
     <h2>${p?'Edit person':'Add a person'}</h2>
     <label>Name<input name="name" maxlength="30" value="${esc(p?.name||'')}" placeholder="Full name"></label>
-    ${isMe?`<p class="hint">This is you, signed in with Google.</p>`:''}
+    ${mine?`<p class="hint">This is you — it's the name other people see in shared groups.</p>`:''}
     <p class="err" role="alert"></p>
     <div class="dlg-actions">
       ${p?`<button type="button" class="btn danger" data-action="del-person" data-id="${p.id}" ${locked?'disabled title="Remove them from every group and settlement first."':''}>Delete</button>`:''}
@@ -791,7 +1002,7 @@ function openGroup(isNew){
     <h2>${isNew?'New group':'Edit group'}</h2>
     <label>Group name<input name="name" maxlength="50" value="${esc(g?.name||'')}" placeholder="Flat 4B, Lisbon weekend"></label>
     <label>Currency<select name="currency">${CURRENCIES.map(c => `<option ${c===(g?.currency||'GBP')?'selected':''}>${c}</option>`).join('')}</select></label>
-    ${g?`<p class="hint">Invite code: <b>${esc(g.inviteCode)}</b> <button type="button" class="btn small" data-action="copy-invite" data-code="${esc(g.inviteCode)}">Copy</button> — share this so others can join.</p>`:''}
+    ${g?`<p class="hint">Invite code: <b>${esc(g.inviteCode)}</b> <button type="button" class="btn small" data-action="invite">Share invite link</button></p>`:''}
     <fieldset><legend>People in this group</legend><div id="mlist" class="srows"></div></fieldset>
     <div class="mrow"><input name="newMember" maxlength="30" placeholder="Add a saved or new name" aria-label="Person's name"><button type="button" class="btn" data-action="add-member">Add</button></div>
     <p class="err" role="alert"></p>
@@ -819,7 +1030,7 @@ function openGroup(isNew){
         } else {
           const { data: gid, error } = await sb.rpc('create_group', { name, currency: form.currency.value, member_person_ids: draft.members });
           if(error) throw error;
-          state.activeGroupId = gid; view = 'groups';
+          return '#/g/' + encodeURIComponent(gid);
         }
       }catch(err){ return fail(describeError(err)); }
     });
@@ -858,11 +1069,11 @@ form.addEventListener('change', ev => {
 });
 
 /* ---------- Join a group ---------- */
-function openJoinGroup(){
+function openJoinGroup(prefill){
   draft = {};
   openDialog(`
     <h2>Join a group</h2>
-    <label>Invite code<input name="code" maxlength="12" placeholder="e.g. 8f3a2c1d" autocapitalize="off" autocorrect="off"></label>
+    <label>Invite code<input name="code" maxlength="12" value="${esc(prefill || '')}" placeholder="e.g. 8f3a2c1d" autocapitalize="off" autocorrect="off"></label>
     <p class="err" role="alert"></p>
     <div class="dlg-actions">
       <span class="sp"></span>
@@ -871,13 +1082,16 @@ function openJoinGroup(){
     </div>`, async () => {
       const code = form.code.value.trim().toLowerCase();
       if(!code) return fail('Enter the invite code.');
+      const existing = state.groups.find(x => x.inviteCode === code);
+      if(existing){ toast(`You're already in ${existing.name}.`); return '#/g/' + encodeURIComponent(existing.id); }
       const { data, error } = await sb.rpc('preview_group_by_code', { code });
       if(error) return fail(error.message || "Couldn't find that group — check the code.");
       if(data && data.length){ openClaimPicker(code, data); return false; }
       const { data: gid, error: je } = await sb.rpc('join_group_by_code', { code });
       if(je) return fail(je.message || "Couldn't join — check the code.");
-      state.activeGroupId = gid; view = 'groups';
+      return '#/g/' + encodeURIComponent(gid);
     });
+  if(prefill) form.requestSubmit();
 }
 function openClaimPicker(code, candidates){
   draft = {};
@@ -897,8 +1111,112 @@ function openClaimPicker(code, candidates){
       const claimId = form.claim.value || null;
       const { data: gid, error } = await sb.rpc('join_group_by_code', { code, claim_person_id: claimId });
       if(error) return fail(error.message || "Couldn't join — check the code.");
-      state.activeGroupId = gid; view = 'groups';
+      return '#/g/' + encodeURIComponent(gid);
     });
+}
+
+/* ---------- Account ---------- */
+function openProfile(){
+  draft = {};
+  openDialog(`
+    <h2>Your name</h2>
+    <label>Name<input name="name" maxlength="30" value="${esc(personName(myPersonId))}" autocomplete="name"></label>
+    <p class="hint">This is how you appear to everyone in your groups.</p>
+    <p class="err" role="alert"></p>
+    <div class="dlg-actions">
+      <span class="sp"></span>
+      <button type="button" class="btn" data-action="close">Cancel</button>
+      <button type="submit" class="btn primary">Save</button>
+    </div>`, async () => {
+      const name = form.name.value.trim();
+      if(!name) return fail('Enter your name.');
+      const { error } = await sb.from('people').update({ name }).eq('id', myPersonId);
+      if(error) return fail(describeError(error));
+      toast('Name updated.');
+    });
+}
+function openDeleteAccount(){
+  draft = {};
+  openDialog(`
+    <h2>Delete your account?</h2>
+    <p style="margin:0">This permanently deletes your settlr account. Here's what happens:</p>
+    <ul class="bullets">
+      <li>Groups where nobody else has signed in are deleted, along with their expenses.</li>
+      <li>Groups shared with other signed-in people stay, so their balances remain correct. Your name stays on past expenses there.</li>
+      <li>People you added and settlements outside groups are deleted, unless a shared group still needs them.</li>
+    </ul>
+    <p class="hint">Want a copy first? <button type="button" class="btn small" data-action="export-all">Download my data</button></p>
+    <label>Type DELETE to confirm<input name="confirm" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false"></label>
+    <p class="err" role="alert"></p>
+    <div class="dlg-actions">
+      <span class="sp"></span>
+      <button type="button" class="btn" data-action="close">Cancel</button>
+      <button type="submit" class="btn destroy">Delete account</button>
+    </div>`, async () => {
+      if(form.confirm.value.trim().toUpperCase() !== 'DELETE') return fail('Type DELETE to confirm.');
+      const { error } = await sb.rpc('delete_my_account');
+      if(error){
+        /* PGRST202: the RPC doesn't exist yet — supabase/delete_my_account.sql hasn't been run */
+        if(error.code === 'PGRST202'){ console.warn('delete_my_account RPC missing', error); return fail("Account deletion isn't available yet. Please try again later."); }
+        return fail(describeError(error));
+      }
+      clearLocalData();
+      authNote = 'Your account has been deleted. Thanks for using settlr.';
+      closeDialog();
+      await sb.auth.signOut({ scope: 'local' });
+      return false;
+    });
+}
+function clearLocalData(){
+  try{ [PENDING_JOIN_KEY, 'settlr:activeGroup'].forEach(k => localStorage.removeItem(k)); }catch(e){}
+}
+async function signOut(){
+  const { error } = await sb.auth.signOut();
+  if(error) await sb.auth.signOut({ scope: 'local' });
+}
+
+/* ---------- Sharing & export ---------- */
+async function shareInvite(g){
+  const url = inviteLink(g);
+  if(navigator.share){
+    try{ await navigator.share({ title: `Join ${g.name} on settlr`, text: `Join "${g.name}" on settlr to split expenses (invite code ${g.inviteCode}).`, url }); return; }
+    catch(err){ if(err.name === 'AbortError') return; }
+  }
+  try{ await navigator.clipboard.writeText(url); toast('Invite link copied.'); }
+  catch(e){ window.prompt('Copy this invite link:', url); }
+}
+/* Quote for CSV, and defuse cells a spreadsheet would run as a formula (text comes from other group members) */
+function csvCell(v){
+  let t = String(v ?? '');
+  if(/^[=+\-@\t\r]/.test(t) && !Number.isFinite(Number(t))) t = "'" + t;
+  return /[",\r\n]/.test(t) ? '"' + t.replace(/"/g,'""') + '"' : t;
+}
+function exportGroupCsv(g){
+  const rows = [['Date','Description','Type','Amount','Currency','Paid by', ...g.members.map(personName)]];
+  [...g.expenses].sort((a,c) => byNewest(c,a)).forEach(e => rows.push([
+    e.date || '', e.type === 'payment' ? 'Payment' : e.desc, e.type === 'payment' ? 'Payment' : 'Expense',
+    (e.amount/100).toFixed(2), g.currency, personName(e.paidBy),
+    ...g.members.map(mid => e.splits[mid] ? (e.splits[mid]/100).toFixed(2) : '')
+  ]));
+  download(`${slug(g.name)}.csv`, '﻿' + rows.map(r => r.map(csvCell).join(',')).join('\r\n'), 'text/csv;charset=utf-8');
+}
+function exportAll(){
+  const cents = v => (v/100).toFixed(2);
+  const data = {
+    exportedAt: new Date().toISOString(),
+    account: { name: personName(myPersonId), email: session.user.email || null },
+    groups: state.groups.map(g => ({
+      name: g.name, currency: g.currency, inviteCode: g.inviteCode, members: g.members.map(personName),
+      entries: [...g.expenses].sort(byNewest).map(e => ({
+        date: e.date, type: e.type, description: e.type === 'payment' ? 'Payment' : e.desc, amount: cents(e.amount),
+        paidBy: personName(e.paidBy), splitMode: e.splitMode,
+        splits: Object.fromEntries(Object.entries(e.splits).map(([id,v]) => [personName(id), cents(v)]))
+      }))
+    })),
+    people: state.people.map(p => p.name).sort(),
+    settlements: state.payments.slice().sort(byNewest).map(p => ({ date: p.date, from: personName(p.from), to: personName(p.to), amount: cents(p.amount), currency: p.currency, note: p.note || null })),
+  };
+  download(`settlr-export-${today()}.json`, JSON.stringify(data, null, 2), 'application/json');
 }
 
 /* ---------- Events ---------- */
@@ -914,15 +1232,13 @@ document.addEventListener('click', async ev => {
   else if(a==='add-payment') openPayment();
   else if(a==='edit-payment') openPayment({id:b.dataset.id});
   else if(a==='settle') openPayment({from:b.dataset.from, to:b.dataset.to, amount:+b.dataset.amount});
-  else if(a==='view-people'){ view = 'people'; render(); }
-  else if(a==='view-groups'){ view = 'groups'; render(); }
   else if(a==='add-person') openPerson();
   else if(a==='edit-person') openPerson(b.dataset.id);
   else if(a==='del-person'){
     if(!personLocked(b.dataset.id) && confirm('Delete this person?')){
       const { error } = await sb.from('people').delete().eq('id', b.dataset.id);
-      if(error){ alert(error.message); return; }
-      closeDialog(); await loadAllData(); render();
+      if(error){ fail(describeError(error)); return; }
+      closeDialog(); await refresh();
     }
   }
   else if(a==='add-settlement') openSettlement();
@@ -930,52 +1246,66 @@ document.addEventListener('click', async ev => {
   else if(a==='del-settlement'){
     if(confirm('Delete this settlement?')){
       const { error } = await sb.from('payments').delete().eq('id', b.dataset.id);
-      if(error){ alert(error.message); return; }
-      closeDialog(); await loadAllData(); render();
+      if(error){ fail(describeError(error)); return; }
+      closeDialog(); await refresh();
     }
   }
   else if(a==='close') closeDialog();
   else if(a==='add-member') await addPendingMember();
-  else if(a==='copy-invite'){
-    try{ await navigator.clipboard.writeText(b.dataset.code); const old = b.textContent; b.textContent = 'Copied!'; setTimeout(() => { b.textContent = old; }, 1500); }catch(e){}
-  }
+  else if(a==='invite'){ if(g) await shareInvite(g); }
+  else if(a==='export-group'){ if(g) exportGroupCsv(g); }
+  else if(a==='export-all') exportAll();
+  else if(a==='edit-profile') openProfile();
+  else if(a==='delete-account') openDeleteAccount();
+  else if(a==='sign-out') await signOut();
+  else if(a==='retry') location.reload();
   else if(a==='del-entry'){
     if(confirm('Delete this entry?')){
       const { error } = await sb.from('expenses').delete().eq('id', b.dataset.id);
-      if(error){ alert(error.message); return; }
-      closeDialog(); await loadAllData(); render();
+      if(error){ fail(describeError(error)); return; }
+      closeDialog(); await refresh();
     }
   }
   else if(a==='del-group'){
-    if(confirm(`Delete "${g.name}" and all its expenses? The people in it stay saved.`)){
+    if(confirm(`Delete "${g.name}" and all its expenses for everyone in it? The people in it stay saved.`)){
       const { error } = await sb.from('groups').delete().eq('id', g.id);
-      if(error){ alert(error.message); return; }
+      if(error){ fail(describeError(error)); return; }
       state.activeGroupId = null;
-      closeDialog(); await loadAllData(); render();
+      closeDialog(); navigate('#/'); await refresh();
+      toast(`Deleted ${g.name}.`);
     }
   }
 });
 document.addEventListener('change', ev => {
-  if(ev.target.id === 'gpick'){
-    state.activeGroupId = ev.target.value; view = 'groups';
-    try{ localStorage.setItem(ACTIVE_GROUP_KEY, state.activeGroupId); }catch(e){}
-    render();
-  }
+  if(ev.target.name === 'theme' && !ev.target.closest('dialog')) setTheme(ev.target.value);
+});
+document.addEventListener('input', ev => {
+  if(ev.target.dataset.filter === 'activity') filterActivity(ev.target.value);
 });
 dlg.addEventListener('close', () => { onSubmit = null; draft = null; if(activeRecognition){ activeRecognition.abort(); activeRecognition = null; } });
+window.addEventListener('hashchange', () => {
+  if(!session){ rememberPendingJoin(); return; }
+  if(!myPersonId) return;
+  closeDialog(); render(); window.scrollTo(0, 0);
+});
+/* Other people edit shared groups too — pick up their changes when the app comes back into view */
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible' && myPersonId && !dlg.open && Date.now() - lastLoadedAt > 30000) refresh();
+});
 
 /* ---------- Auth & data loading ---------- */
 async function ensureMyPerson(){
+  const uid = session.user.id;
   const name = session.user.user_metadata?.full_name || session.user.email || 'Me';
-  const { data, error } = await sb.from('people')
-    .upsert({ owner_id: session.user.id, user_id: session.user.id, name }, { onConflict: 'owner_id,user_id' })
-    .select('id')
-    .single();
+  /* ignoreDuplicates: create my contact once (race-safe) without overwriting a name I've since changed */
+  const { error } = await sb.from('people').upsert({ owner_id: uid, user_id: uid, name }, { onConflict: 'owner_id,user_id', ignoreDuplicates: true });
   if(error) throw error;
+  const { data, error: se } = await sb.from('people').select('id').eq('owner_id', uid).eq('user_id', uid).single();
+  if(se) throw se;
   myPersonId = data.id;
 }
 async function loadAllData(){
-  const [{ data: groups }, { data: people }, { data: members }, { data: expenses }, { data: splits }, { data: payments }] = await Promise.all([
+  const results = await Promise.all([
     sb.from('groups').select('*').order('created_at'),
     sb.from('people').select('*').order('name'),
     sb.from('group_members').select('*'),
@@ -983,15 +1313,19 @@ async function loadAllData(){
     sb.from('expense_splits').select('*'),
     sb.from('payments').select('*').order('payment_date', { ascending:false }),
   ]);
+  const failed = results.find(r => r.error);
+  if(failed) throw failed.error;
+  const [groups, people, members, expenses, splits, payments] = results.map(r => r.data || []);
 
-  state.people = (people||[]).map(p => ({ id:p.id, name:p.name }));
-  state.meId = myPersonId;
+  state.people = people.map(p => ({ id:p.id, name:p.name, userId:p.user_id }));
+  state.myIds = new Set(state.people.filter(p => p.userId === session.user.id).map(p => p.id));
+  if(myPersonId) state.myIds.add(myPersonId);
 
   const splitsByExpense = {};
-  (splits||[]).forEach(s => { (splitsByExpense[s.expense_id] ||= {})[s.person_id] = s.amount_cents; });
+  splits.forEach(s => { (splitsByExpense[s.expense_id] ||= {})[s.person_id] = s.amount_cents; });
 
   const expensesByGroup = {};
-  (expenses||[]).forEach(e => {
+  expenses.forEach(e => {
     (expensesByGroup[e.group_id] ||= []).push({
       id: e.id, type: e.type, desc: e.description, amount: e.amount_cents,
       paidBy: e.paid_by, splits: splitsByExpense[e.id] || {}, splitMode: e.split_mode,
@@ -1000,25 +1334,30 @@ async function loadAllData(){
   });
 
   const membersByGroup = {};
-  (members||[]).forEach(m => { (membersByGroup[m.group_id] ||= []).push(m.person_id); });
+  members.forEach(m => { (membersByGroup[m.group_id] ||= []).push(m.person_id); });
 
-  state.groups = (groups||[]).map(g => ({
-    id: g.id, name: g.name, currency: g.currency, inviteCode: g.invite_code,
+  state.groups = groups.map(g => ({
+    id: g.id, name: g.name, currency: g.currency, inviteCode: g.invite_code, createdAt: new Date(g.created_at).getTime(),
     members: membersByGroup[g.id] || [], expenses: expensesByGroup[g.id] || []
   }));
 
-  if(!state.activeGroupId || !state.groups.some(x => x.id === state.activeGroupId)){
-    let saved = null;
-    try{ saved = localStorage.getItem(ACTIVE_GROUP_KEY); }catch(e){}
-    state.activeGroupId = (saved && state.groups.some(x => x.id === saved)) ? saved : (state.groups[0]?.id || null);
-  }
-
-  state.payments = (payments||[]).map(p => ({
+  state.payments = payments.map(p => ({
     id:p.id, from:p.from_person, to:p.to_person, amount:p.amount_cents, currency:p.currency,
     note:p.note, date:p.payment_date, createdAt:new Date(p.created_at).getTime()
   }));
+  lastLoadedAt = Date.now();
+}
+/* An invite link opened while signed out survives the Google round-trip in localStorage */
+let authNote = '';
+function rememberPendingJoin(){
+  const r = parseRoute();
+  if(r.name !== 'join') return;
+  try{ localStorage.setItem(PENDING_JOIN_KEY, r.code); }catch(e){}
+  authNote = authNote || "You've been invited to a group. Sign in to join it.";
+  $('#authNote').textContent = authNote;
 }
 async function onAuthChange(){
+  $('#bootScreen').style.display = 'none';
   if(session){
     $('#authGate').style.display = 'none';
     try{
@@ -1026,29 +1365,41 @@ async function onAuthChange(){
       await loadAllData();
     }catch(err){
       $('#appWrap').style.display = '';
-      $('#app').innerHTML = `<p class="none">Couldn't load your data: ${esc(err.message||'unknown error')}</p>`;
+      $('#app').innerHTML = `<section class="empty"><h1>Couldn't load your data: ${esc(err.message||'unknown error')}</h1><button class="btn primary" data-action="retry">Try again</button></section>`;
       return;
     }
+    let pending = null;
+    try{ pending = localStorage.getItem(PENDING_JOIN_KEY); localStorage.removeItem(PENDING_JOIN_KEY); }catch(e){}
+    if(pending && parseRoute().name !== 'join') history.replaceState(null, '', location.pathname + location.search + '#/join/' + encodeURIComponent(pending));
     $('#appWrap').style.display = '';
     render();
   } else {
     myPersonId = null;
+    state = emptyState();
+    closeDialog();
+    rememberPendingJoin();
+    $('#authNote').textContent = authNote;
+    authNote = '';
     $('#appWrap').style.display = 'none';
     $('#authGate').style.display = '';
   }
 }
 /* onAuthStateChange fires once immediately with the current session, then again
    on sign-in/out/refresh — serialize handling so overlapping fires can't race
-   (e.g. both trying to create the "me" contact at once). */
+   (e.g. both trying to create the "me" contact at once), and skip token refreshes
+   and repeat sign-in events for the same user, which don't need a full reload. */
 let authChangeChain = Promise.resolve();
-sb.auth.onAuthStateChange((_event, s) => {
+let handledUserId;
+sb.auth.onAuthStateChange((event, s) => {
   session = s;
+  const uid = s?.user?.id || null;
+  if(event !== 'INITIAL_SESSION' && uid === handledUserId) return;
+  handledUserId = uid;
   authChangeChain = authChangeChain.then(onAuthChange).catch(err => console.error(err));
 });
 $('#signInBtn').addEventListener('click', () => {
-  sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } });
+  sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname + location.search } });
 });
-$('#signOutBtn').addEventListener('click', () => sb.auth.signOut());
 </script>
 </body>
 </html>
