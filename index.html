@@ -174,7 +174,7 @@ textarea{min-height:10rem;font-size:.8rem;font-family:ui-monospace,SFMono-Regula
 </div>
 <div class="wrap" id="appWrap" style="display:none">
   <header class="top">
-    <div class="brand">settlr</div>
+    <div class="brand" data-action="view-groups" style="cursor:pointer">settlr</div>
     <button class="btn small" id="signOutBtn">Sign out</button>
     <button class="btn small" id="peopleBtn" data-action=""></button>
   </header>
@@ -775,7 +775,7 @@ function openPerson(pid){
       if(!name) return fail('Give them a name.');
       try{
         if(p){ const { error } = await sb.from('people').update({ name }).eq('id', p.id); if(error) throw error; }
-        else { const { error } = await sb.from('people').insert({ name }); if(error) throw error; }
+        else { const { error } = await sb.from('people').insert({ name, owner_id: session.user.id }); if(error) throw error; }
       }catch(err){ return fail(err.message || 'Could not save. Try again.'); }
     });
 }
@@ -814,7 +814,7 @@ function openGroup(isNew){
           if(toAdd.length){ const { error:ae } = await sb.from('group_members').insert(toAdd.map(person_id => ({ group_id: g.id, person_id }))); if(ae) throw ae; }
           for(const pid of toRemove){ const { error:re } = await sb.from('group_members').delete().eq('group_id', g.id).eq('person_id', pid); if(re) throw re; }
         } else {
-          const { data, error } = await sb.from('groups').insert({ name, currency: form.currency.value }).select('id').single();
+          const { data, error } = await sb.from('groups').insert({ name, currency: form.currency.value, created_by: session.user.id }).select('id').single();
           if(error) throw error;
           const { error: me } = await sb.from('group_members').insert(draft.members.map(person_id => ({ group_id: data.id, person_id })));
           if(me) throw me;
@@ -839,7 +839,7 @@ async function addPendingMember(){
   const n = inp.value.trim(); if(!n) return;
   let p = state.people.find(x => x.name.toLowerCase() === n.toLowerCase());
   if(!p){
-    const { data, error } = await sb.from('people').insert({ name: n }).select('id,name').single();
+    const { data, error } = await sb.from('people').insert({ name: n, owner_id: session.user.id }).select('id,name').single();
     if(error){ const el = form.querySelector('.err'); if(el) el.textContent = error.message; return; }
     p = { id: data.id, name: data.name };
     state.people.push(p);
@@ -866,13 +866,37 @@ function openJoinGroup(){
     <div class="dlg-actions">
       <span class="sp"></span>
       <button type="button" class="btn" data-action="close">Cancel</button>
-      <button type="submit" class="btn primary">Join</button>
+      <button type="submit" class="btn primary">Continue</button>
     </div>`, async () => {
       const code = form.code.value.trim().toLowerCase();
       if(!code) return fail('Enter the invite code.');
-      const { data, error } = await sb.rpc('join_group_by_code', { code });
+      const { data, error } = await sb.rpc('preview_group_by_code', { code });
+      if(error) return fail(error.message || "Couldn't find that group — check the code.");
+      if(data && data.length){ openClaimPicker(code, data); return false; }
+      const { data: gid, error: je } = await sb.rpc('join_group_by_code', { code });
+      if(je) return fail(je.message || "Couldn't join — check the code.");
+      state.activeGroupId = gid; view = 'groups';
+    });
+}
+function openClaimPicker(code, candidates){
+  draft = {};
+  openDialog(`
+    <h2>Is that you?</h2>
+    <p class="hint">This group already has people who haven't signed in yet. If one of them is you, pick your name so your past expenses stay attached to you.</p>
+    <fieldset><div class="srows">
+      ${candidates.map(c => `<label class="srow"><input type="radio" name="claim" value="${c.person_id}"><span class="nm">${esc(c.name)}</span></label>`).join('')}
+      <label class="srow"><input type="radio" name="claim" value="" checked><span class="nm">None of these — I'm new</span></label>
+    </div></fieldset>
+    <p class="err" role="alert"></p>
+    <div class="dlg-actions">
+      <span class="sp"></span>
+      <button type="button" class="btn" data-action="close">Cancel</button>
+      <button type="submit" class="btn primary">Join</button>
+    </div>`, async () => {
+      const claimId = form.claim.value || null;
+      const { data: gid, error } = await sb.rpc('join_group_by_code', { code, claim_person_id: claimId });
       if(error) return fail(error.message || "Couldn't join — check the code.");
-      state.activeGroupId = data; view = 'groups';
+      state.activeGroupId = gid; view = 'groups';
     });
 }
 
