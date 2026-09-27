@@ -17,7 +17,7 @@ Everything later builds on these.
 - [x] Fix what Supabase's security and performance checks flagged (`supabase/migrations/20260927213402_harden_functions_and_policies.sql`)
 - [x] Split the single `index.html` into a small Vite project with modules, deployed to GitHub Pages by GitHub Actions
 - [x] Automated tests for the balance and split maths (Vitest, run on every PR)
-- [ ] Error monitoring (e.g. Sentry) so crashes get reported
+- [x] Error monitoring with Sentry, switched on by the `SENTRY_DSN` repository variable
 
 ## Phase 1: Look, feel and sign-in
 

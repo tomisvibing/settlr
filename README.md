@@ -26,6 +26,17 @@ Google sign-in on `npm run dev` only works if `http://localhost:5173` is listed 
 - `public/`: manifest and icons, copied into the build as-is
 - `supabase/migrations/`: the database schema (see `supabase/README.md`)
 
+## Crash reporting
+
+Errors people hit are sent to [Sentry](https://sentry.io), identified by account ID only (no names or emails). Uncaught errors are reported automatically, and so are failures the app catches and shows: loading data, background refreshes and saves (see `src/monitoring.js`).
+
+It's off until a DSN is set:
+1. Create a free Sentry account and a **Browser JavaScript** project, then copy its DSN.
+2. In GitHub, go to **Settings → Secrets and variables → Actions → Variables** and add a repository variable `SENTRY_DSN` with that value. The DSN isn't secret: it only allows sending events.
+3. The next deploy switches it on. To try it locally, put `VITE_SENTRY_DSN=...` in `.env.local`.
+
+Builds include public source maps, so stack traces in Sentry point at the real source files.
+
 ## Deploying
 
 Every push to `main` runs lint, tests and the build, then publishes `dist/` to GitHub Pages (`.github/workflows/ci.yml`). Pull requests run the same checks without deploying.

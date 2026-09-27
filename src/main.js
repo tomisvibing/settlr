@@ -1,4 +1,5 @@
 import './styles.css';
+import { initMonitoring } from './monitoring.js';
 import { applyTheme } from './theme.js';
 import { initDialog } from './dialogs/dialog.js';
 import { initExpenseDialog } from './dialogs/expense.js';
@@ -6,6 +7,7 @@ import { initGroupDialog } from './dialogs/group.js';
 import { initEvents } from './events.js';
 import { initAuth } from './auth.js';
 
+initMonitoring();
 applyTheme();
 initDialog();
 initExpenseDialog();

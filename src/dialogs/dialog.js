@@ -2,6 +2,7 @@
 import { $ } from '../lib/format.js';
 import { refresh } from '../data.js';
 import { navigate } from '../router.js';
+import { reportError } from '../monitoring.js';
 
 export const dlg = $('#dlg'), form = $('#dlgForm');
 let onSubmit = null;
@@ -17,7 +18,9 @@ export function openDialog(html, submit){
 }
 export function closeDialog(){ if(dlg.open) dlg.close(); onSubmit = null; draft = null; }
 export function fail(msg){ const e = form.querySelector('.err'); if(e) e.textContent = msg; return false; }
+/* Every failed save comes through here, so it's also where they get reported */
 export function describeError(err){
+  reportError(err, 'save');
   return [err?.message, err?.details, err?.hint].filter(Boolean).join(' — ') || 'Could not save. Try again.';
 }
 

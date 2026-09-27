@@ -4,6 +4,7 @@ import { $, esc } from './lib/format.js';
 import { loadAllData } from './data.js';
 import { parseRoute, render } from './router.js';
 import { closeDialog } from './dialogs/dialog.js';
+import { reportError, setMonitoringUser } from './monitoring.js';
 
 async function ensureMyPerson(){
   const uid = session.user.id;
@@ -28,11 +29,13 @@ export function rememberPendingJoin(){
 async function onAuthChange(){
   $('#bootScreen').style.display = 'none';
   if(session){
+    setMonitoringUser(session.user.id);
     $('#authGate').style.display = 'none';
     try{
       await ensureMyPerson();
       await loadAllData();
     }catch(err){
+      reportError(err, 'load');
       $('#appWrap').style.display = '';
       $('#app').innerHTML = `<section class="empty"><h1>Couldn't load your data: ${esc(err.message||'unknown error')}</h1><button class="btn primary" data-action="retry">Try again</button></section>`;
       return;
@@ -44,6 +47,7 @@ async function onAuthChange(){
     render();
   } else {
     setMyPersonId(null);
+    setMonitoringUser(null);
     resetState();
     closeDialog();
     rememberPendingJoin();
@@ -65,7 +69,7 @@ export function initAuth(){
     const uid = s?.user?.id || null;
     if(event !== 'INITIAL_SESSION' && uid === handledUserId) return;
     handledUserId = uid;
-    authChangeChain = authChangeChain.then(onAuthChange).catch(err => console.error(err));
+    authChangeChain = authChangeChain.then(onAuthChange).catch(err => reportError(err, 'auth'));
   });
   $('#signInBtn').addEventListener('click', () => {
     sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname + location.search } });
