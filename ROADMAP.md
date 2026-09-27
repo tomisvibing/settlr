@@ -15,8 +15,8 @@ Everything later builds on these.
 
 - [x] Put the database setup (tables, security rules, functions) in the repo as migrations (`supabase/migrations/`), so every database change is reviewable
 - [x] Fix what Supabase's security and performance checks flagged (`supabase/migrations/20260927213402_harden_functions_and_policies.sql`)
-- [ ] Split the single `index.html` into a small Vite project with modules, before receipts, AI and the redesign make it unmanageable
-- [ ] Automated tests for the balance and split maths
+- [x] Split the single `index.html` into a small Vite project with modules, deployed to GitHub Pages by GitHub Actions
+- [x] Automated tests for the balance and split maths (Vitest, run on every PR)
 - [ ] Error monitoring (e.g. Sentry) so crashes get reported
 
 ## Phase 1: Look, feel and sign-in
