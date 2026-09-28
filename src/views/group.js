@@ -2,76 +2,73 @@ import { state } from '../store.js';
 import { $, esc, money, byNewest } from '../lib/format.js';
 import { balances, settlements } from '../lib/ledger.js';
 import { group, personName, isMe, spentIn } from '../selectors.js';
-import { entryInner } from './shared.js';
+import { avatar, groupTile, balancePill, entryInner, icon } from './shared.js';
+
+/* Search text for an activity row: description, the people in it and the amount */
+export function searchText(e){
+  return [e.type === 'payment' ? 'payment' : e.desc, personName(e.paidBy), ...Object.keys(e.splits).map(personName), (e.amount/100).toFixed(2)].join(' ').toLowerCase();
+}
+export function activityList(entries, g0, withGroup){
+  return `<ul class="rows" id="activityList">${entries.map(({ e, g }) => {
+    const isPay = e.type === 'payment';
+    return `<li data-search="${esc(searchText(e) + (withGroup ? ' ' + g.name.toLowerCase() : ''))}"><button class="row ${isPay ? 'payment' : ''}" data-action="${isPay ? 'edit-payment' : 'edit-expense'}" data-id="${e.id}" data-group="${g.id}">${entryInner(e, g, withGroup)}</button></li>`;
+  }).join('')}</ul><p class="none" id="noMatches" hidden>Nothing matches that search.</p>`;
+}
 
 export function renderGroupView(id){
   const app = $('#app');
   state.activeGroupId = id;
   const g = group();
   if(!g){
-    app.innerHTML = `
-      <section class="empty">
-        <h1>This group isn't available. It may have been deleted, or you're no longer in it.</h1>
-        <a class="btn primary" href="#/">Back to your groups</a>
-      </section>`;
+    app.innerHTML = `<section class="empty">
+      <h1>This group isn’t available. It may have been deleted, or you’re no longer in it.</h1>
+      <a class="btn primary" href="#/">Back to your groups</a>
+    </section>`;
     return;
   }
   const cur = g.currency, b = balances(g);
-  const max = Math.max(1, ...Object.values(b).map(Math.abs));
   const plan = settlements(b);
   const sorted = [...g.expenses].sort(byNewest);
   const pays = (from, to) => `${isMe(from) ? '<b>You</b> pay' : `<b>${esc(personName(from))}</b> pays`} ${isMe(to) ? '<b>you</b>' : `<b>${esc(personName(to))}</b>`}`;
+  const members = g.members.slice().sort((a, c) => (isMe(c) - isMe(a)) || (b[c] - b[a]));
+  const n = g.members.length;
 
-  app.innerHTML = `
-    <a class="back" href="#/">← All groups</a>
-    <section class="hero" style="padding-top:.5rem">
-      <h1>${esc(g.name)}</h1>
-      <p class="sub">${g.members.length} ${g.members.length===1?'person':'people'}, ${money(spentIn(g),cur)} spent so far</p>
-      <div class="ledger" role="list" aria-label="Balances">
-        ${g.members.map(mid => {
-          const v = b[mid], w = Math.round(Math.abs(v)/max*100), name = personName(mid);
-          const cls = v>0?'pos':v<0?'neg':'zero';
-          const label = v>0?`${money(v,cur)}<small>is owed</small>`:v<0?`${money(-v,cur)}<small>owes</small>`:`Square`;
-          return `<div class="lrow" role="listitem">
-            <span class="lname" title="${esc(name)}">${isMe(mid) ? 'You' : esc(name)}</span>
-            <div class="lbar" aria-hidden="true">
-              <div class="half neg"><i style="width:${v<0?w:0}%"></i></div>
-              <div class="half pos"><i style="width:${v>0?w:0}%"></i></div>
-            </div>
-            <span class="lamt ${cls}">${label}</span>
-          </div>`;
-        }).join('')}
-      </div>
-      <div class="toolbar">
-        <button class="btn small" data-action="invite">Invite people</button>
-        <button class="btn small" data-action="edit-group">Edit group</button>
-        <button class="btn small" data-action="export-group" ${g.expenses.length?'':'disabled'}>Export CSV</button>
-      </div>
-    </section>
-
-    <div class="actions">
-      <button class="btn primary" data-action="add-expense" ${g.members.length?'':'disabled'}>Add expense</button>
-      <button class="btn icon" data-action="voice-expense" ${g.members.length?'':'disabled'} aria-label="Add an expense by voice" title="Add an expense by voice">🎤</button>
-      <button class="btn" data-action="add-payment" ${g.members.length>1?'':'disabled'}>Record payment</button>
+  app.innerHTML = `<div class="stack">
+    <div class="topbar">
+      <a class="iconbtn" href="#/" aria-label="Back to all groups">${icon.back}</a>
+      <span class="sp"></span>
+      <button class="btn small" data-action="invite">${icon.invite}Invite</button>
+      <button class="iconbtn" data-action="edit-group" aria-label="Edit group" title="Edit group">${icon.edit}</button>
+      <button class="iconbtn" data-action="export-group" aria-label="Export as CSV" title="Export as CSV" ${g.expenses.length ? '' : 'disabled'}>${icon.download}</button>
     </div>
 
-    <section class="block">
-      <h2>To settle up</h2>
-      ${plan.length ? `<ul class="list">${plan.map(p => `
-        <li class="settle"><p>${pays(p.from, p.to)} ${money(p.amount,cur)}</p>
-        <button class="btn small" data-action="settle" data-from="${p.from}" data-to="${p.to}" data-amount="${p.amount}">Mark paid</button></li>`).join('')}</ul>`
-      : `<p class="none">${g.expenses.length ? 'Everyone is square.' : 'Add the first expense to see who owes whom.'}</p>`}
+    <div class="ghead">
+      ${groupTile(g, 'lg')}
+      <div style="min-width:0"><h1>${esc(g.name)}</h1><p>${n} ${n === 1 ? 'person' : 'people'} · ${money(spentIn(g), cur)} spent</p></div>
+    </div>
+
+    <section class="card" aria-label="Balances">
+      <ul class="rows">${members.map(mid => `<li class="row">
+        ${avatar(mid)}
+        <span class="r-main"><span class="r-title">${isMe(mid) ? 'You' : esc(personName(mid))}</span></span>
+        ${balancePill(b[mid] || 0, cur)}
+      </li>`).join('')}</ul>
     </section>
 
-    <section class="block">
-      <h2>Activity</h2>
+    <section class="section">
+      <div class="section-head"><h2>Settle up</h2><button class="btn small" data-action="add-payment" ${n > 1 ? '' : 'disabled'}>Record a payment</button></div>
+      ${plan.length ? `<ul class="settle">${plan.map(p => `
+        <li class="${isMe(p.from) ? 'owe' : ''}"><p>${pays(p.from, p.to)} ${money(p.amount, cur)}</p>
+        <button class="btn small primary" data-action="settle" data-from="${p.from}" data-to="${p.to}" data-amount="${p.amount}">Mark paid</button></li>`).join('')}</ul>`
+      : `<div class="card"><p class="none">${g.expenses.length ? 'Everyone is square.' : 'Add the first expense to see who owes whom.'}</p></div>`}
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>Activity</h2></div>
       ${sorted.length > 6 ? `<input class="search" type="search" data-filter="activity" placeholder="Search activity" aria-label="Search activity" autocomplete="off">` : ''}
-      ${sorted.length ? `<ul class="list" id="activityList">${sorted.map(e => {
-        const isPay = e.type === 'payment';
-        const hay = [isPay?'payment':e.desc, personName(e.paidBy), ...Object.keys(e.splits).map(personName), (e.amount/100).toFixed(2)].join(' ').toLowerCase();
-        return `<li data-search="${esc(hay)}"><button class="item ${isPay?'payment':''}" data-action="${isPay?'edit-payment':'edit-expense'}" data-id="${e.id}">${entryInner(e, g, false)}</button></li>`;
-      }).join('')}</ul><p class="none" id="noMatches" hidden>Nothing matches that search.</p>` : `<p class="none">No expenses yet.</p>`}
-    </section>`;
+      <div class="card">${sorted.length ? activityList(sorted.map(e => ({ e, g })), g, false) : `<p class="none">No expenses yet. Tap + to add one.</p>`}</div>
+    </section>
+  </div>`;
 }
 export function filterActivity(q){
   q = q.trim().toLowerCase();

@@ -1,8 +1,21 @@
 import { sb } from '../supabase.js';
-import { $, esc, money, toPence, today } from '../lib/format.js';
+import { state } from '../store.js';
+import { $, esc, money, toPence, today, currencySymbol } from '../lib/format.js';
 import { distribute } from '../lib/ledger.js';
-import { group, personName, defaultPayer } from '../selectors.js';
+import { group, personName, defaultPayer, isMe, lastActivity } from '../selectors.js';
+import { parseRoute } from '../router.js';
+import { toast } from '../ui.js';
+import { avatar, groupTile, icon } from '../views/shared.js';
 import { form, draft, setDraft, openDialog, fail, describeError } from './dialog.js';
+import { openGroup } from './group.js';
+
+const touch = () => window.matchMedia?.('(pointer: coarse)').matches;
+/* Size the amount box to its digits (a "." is narrow) so the currency sign sits right beside them */
+const fitAmount = () => {
+  const i = form.amount; if(!i) return;
+  const v = i.value || i.placeholder, dots = (v.match(/[.,]/g) || []).length;
+  i.style.width = (v.length - dots + dots * 0.35 + 0.15) + 'ch';
+};
 
 export function openExpense(eid, prefill){
   const g = group(); const e = eid ? g.expenses.find(x => x.id === eid) : null;
@@ -22,34 +35,57 @@ export function openExpense(eid, prefill){
   const amountVal = prefill?.amount != null ? (prefill.amount/100).toFixed(2) : (e ? (e.amount/100).toFixed(2) : '');
   const dateVal = prefill?.date || e?.date || today();
   const paidByVal = prefill?.paidBy || e?.paidBy || defaultPayer(g);
-  const modes = [['equal','Equally'],['exact','Exact amounts'],['shares','Shares']];
+  const modes = [['equal','Equally'],['shares','Shares'],['exact','Exact']];
+  const keys = ['1','2','3','4','5','6','7','8','9','.','0','del'];
+  const who = mid => isMe(mid) ? 'You' : esc(personName(mid));
   openDialog(`
-    <h2>${e?'Edit expense':'Add expense'}</h2>
-    <label>What was it for?<input name="desc" maxlength="80" value="${esc(descVal)}" placeholder="e.g. Dinner at Hawksmoor"></label>
-    <div class="two">
-      <label>Amount (${g.currency})<input name="amount" inputmode="decimal" autocomplete="off" value="${amountVal}" placeholder="0.00"></label>
-      <label>Date<input type="date" name="date" value="${dateVal}"></label>
+    <h2 class="sr">${e ? 'Edit expense' : 'Add expense'}</h2>
+    <div class="sheet-head">
+      <span class="grp">${groupTile(g, 'sm')}<span>${e ? 'Edit · ' : ''}${esc(g.name)}</span></span>
+      ${e ? '' : `<button type="button" class="iconbtn" data-action="voice-expense" aria-label="Add by voice" title="Add by voice">${icon.mic}</button>`}
+      <button type="button" class="iconbtn" data-action="close" aria-label="Close">${icon.close}</button>
     </div>
-    <label>Paid by<select name="paidBy">${g.members.map(mid => `<option value="${mid}" ${mid===paidByVal?'selected':''}>${esc(personName(mid))}</option>`).join('')}</select></label>
-    <fieldset><legend>Split</legend><div class="seg">${modes.map(([v,l]) => `<label><input type="radio" name="mode" value="${v}" ${draft.mode===v?'checked':''}><span>${l}</span></label>`).join('')}</div></fieldset>
-    <div class="srows" id="splitRows"></div>
-    <p class="hint" id="splitHint"></p>
+    <label class="amount"><span class="sr">Amount in ${g.currency}</span><span class="cur" aria-hidden="true">${esc(currencySymbol(g.currency))}</span><input name="amount" inputmode="${touch() ? 'none' : 'decimal'}" autocomplete="off" value="${amountVal}" placeholder="0"></label>
+    <label>What for?<input name="desc" maxlength="80" value="${esc(descVal)}" placeholder="Dinner, taxi, tickets…"></label>
+    <fieldset class="field"><legend class="flabel">Paid by</legend>
+      <div class="chips">${g.members.map(mid => `<label class="chip"><input type="radio" name="paidBy" value="${mid}" ${mid===paidByVal?'checked':''}>${avatar(mid,'sm')}${who(mid)}</label>`).join('')}</div>
+    </fieldset>
+    <fieldset class="field"><legend class="sr">Split</legend>
+      <div class="flabel"><span>Split</span><span class="hint" id="splitHint" aria-live="polite"></span></div>
+      <div class="seg small">${modes.map(([v,l]) => `<label><input type="radio" name="mode" value="${v}" ${draft.mode===v?'checked':''}><span>${l}</span></label>`).join('')}</div>
+      <div id="splitRows"></div>
+    </fieldset>
+    <label class="daterow">Date<input type="date" name="date" value="${dateVal}"></label>
+    <div class="keypad" aria-hidden="true">${keys.map(k => `<button type="button" tabindex="-1" data-key="${k}">${k === 'del' ? icon.backspace : k}</button>`).join('')}</div>
     <p class="err" role="alert"></p>
     <div class="dlg-actions">
-      ${e?`<button type="button" class="btn danger" data-action="del-entry" data-id="${e.id}">Delete</button>`:''}
-      <span class="sp"></span>
-      <button type="button" class="btn" data-action="close">Cancel</button>
-      <button type="submit" class="btn primary">${e?'Save changes':'Add expense'}</button>
+      ${e ? `<button type="button" class="btn danger" data-action="del-entry" data-id="${e.id}">Delete</button><span class="sp"></span><button type="submit" class="btn primary">Save changes</button>`
+          : `<button type="submit" class="btn primary wide">Add expense</button>`}
     </div>`, saveExpense);
+  fitAmount();
   renderSplitRows();
 }
+/* From the + button: straight in when there's a group in view (or only one), otherwise ask which */
+export function openAddExpense(){
+  const r = parseRoute();
+  if(r.name === 'group' && group()) return openExpense();
+  if(!state.groups.length){ toast('Start a group first, then add expenses to it.'); return openGroup(true); }
+  if(state.groups.length === 1){ state.activeGroupId = state.groups[0].id; return openExpense(); }
+  setDraft({});
+  const groups = state.groups.slice().sort((a, c) => lastActivity(c) - lastActivity(a));
+  openDialog(`
+    <div class="sheet-head"><h2 style="flex:1">Add to which group?</h2><button type="button" class="iconbtn" data-action="close" aria-label="Close">${icon.close}</button></div>
+    <ul class="cardlist">${groups.map(g => `<li><button type="button" class="card gcard" data-action="pick-group" data-id="${g.id}" style="font:inherit;text-align:left;cursor:pointer">
+      ${groupTile(g)}<span class="r-main"><span class="r-title serif">${esc(g.name)}</span><span class="r-meta">${g.members.length} people · ${esc(g.currency)}</span></span></button></li>`).join('')}</ul>`, () => false);
+}
 function renderSplitRows(){
-  const g = group(), m = draft.mode;
-  $('#splitRows').innerHTML = g.members.map(mid => {
-    const name = esc(personName(mid));
-    if(m==='equal') return `<label class="srow"><input type="checkbox" data-sid="${mid}" ${draft.equal[mid]?'checked':''}><span class="nm">${name}</span><span class="sval" data-share="${mid}"></span></label>`;
-    if(m==='exact') return `<label class="srow"><span class="nm">${name}</span><input inputmode="decimal" autocomplete="off" aria-label="${name}'s amount" data-sid="${mid}" value="${esc(draft.exact[mid])}" placeholder="0.00"></label>`;
-    return `<label class="srow"><span class="nm">${name}</span><span class="sval" data-share="${mid}"></span><input type="number" min="0" step="1" inputmode="numeric" aria-label="${name}'s shares" data-sid="${mid}" value="${draft.shares[mid]}"></label>`;
+  const g = group(), m = draft.mode, box = $('#splitRows');
+  box.className = m === 'equal' ? 'chips' : 'srows';
+  box.innerHTML = g.members.map(mid => {
+    const name = isMe(mid) ? 'You' : esc(personName(mid));
+    if(m==='equal') return `<label class="chip"><input type="checkbox" data-sid="${mid}" ${draft.equal[mid]?'checked':''}>${avatar(mid,'sm')}${name}</label>`;
+    if(m==='exact') return `<label class="srow">${avatar(mid,'sm')}<span class="nm">${name}</span><input inputmode="decimal" autocomplete="off" aria-label="${name}'s amount" data-sid="${mid}" value="${esc(draft.exact[mid])}" placeholder="0.00"></label>`;
+    return `<label class="srow">${avatar(mid,'sm')}<span class="nm">${name}</span><span class="sval" data-share="${mid}"></span><input type="number" min="0" step="1" inputmode="numeric" aria-label="${name}'s shares" data-sid="${mid}" value="${draft.shares[mid]}"></label>`;
   }).join('');
   updateHint();
 }
@@ -61,20 +97,36 @@ function updateHint(){
     let sum = 0; for(const v of Object.values(draft.exact)) sum += toPence(v) || 0;
     const left = (amount||0) - sum;
     if(!amount){ hint.textContent = `Assigned so far: ${money(sum,g.currency)}`; }
-    else if(left === 0){ hint.textContent = 'Everything is assigned.'; }
-    else { hint.textContent = left>0 ? `${money(left,g.currency)} left to assign` : `${money(-left,g.currency)} more than the total`; hint.classList.add('bad'); }
+    else if(left === 0){ hint.textContent = 'Everything is assigned'; }
+    else { hint.textContent = left>0 ? `${money(left,g.currency)} left to assign` : `${money(-left,g.currency)} too much`; hint.classList.add('bad'); }
     return;
   }
   const w = {}; g.members.forEach(mid => w[mid] = draft.mode==='equal' ? (draft.equal[mid]?1:0) : Math.max(0, Number(draft.shares[mid])||0));
   const split = amount>0 ? distribute(amount, w) : null;
   if(split) for(const [id,v] of Object.entries(split)){ const el = form.querySelector(`[data-share="${id}"]`); if(el) el.textContent = money(v,g.currency); }
   const n = Object.values(w).filter(x => x>0).length;
-  hint.textContent = n ? '' : (draft.mode==='equal' ? 'Pick at least one person.' : 'Give at least one person a share.');
-  if(!n) hint.classList.add('bad');
+  if(!n){ hint.textContent = draft.mode==='equal' ? 'Pick at least one person' : 'Give at least one person a share'; hint.classList.add('bad'); return; }
+  if(draft.mode === 'equal' && split){
+    const vals = Object.values(split), lo = Math.min(...vals), hi = Math.max(...vals);
+    hint.textContent = `${money(lo,g.currency)}${hi !== lo ? '–' + money(hi,g.currency) : ''} each`;
+  } else hint.textContent = draft.mode === 'equal' ? `${n} ${n === 1 ? 'person' : 'people'}` : '';
+}
+/* The on-screen keypad (phones): same rules as typing, at most two decimals */
+function pressKey(k){
+  const i = form.amount; let a = i.value;
+  if(k === 'del') a = a.slice(0, -1);
+  else if(k === '.'){ if(!a.includes('.')) a = (a || '0') + '.'; }
+  else { if(/\.\d\d$/.test(a) || a.replace('.', '').length >= 7) return; a = a === '0' ? k : a + k; }
+  i.value = a;
+  i.dispatchEvent(new Event('input', { bubbles: true }));
 }
 export function initExpenseDialog(){
   /* The form is shared by every dialog; only react while the expense split editor is showing */
   const editing = () => draft && form.querySelector('#splitRows');
+  form.addEventListener('click', ev => {
+    const k = ev.target.closest('[data-key]');
+    if(k && editing()) pressKey(k.dataset.key);
+  });
   form.addEventListener('change', ev => {
     if(!editing()) return;
     const t = ev.target;
@@ -88,6 +140,7 @@ export function initExpenseDialog(){
       const id = t.dataset.sid;
       if(draft.mode==='exact') draft.exact[id] = t.value; else draft.shares[id] = t.value;
     }
+    if(t.name === 'amount') fitAmount();
     if((t.dataset.sid && t.type !== 'checkbox') || t.name === 'amount') updateHint();
   });
 }

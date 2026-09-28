@@ -10,7 +10,7 @@ import { rememberPendingJoin } from './auth.js';
 import { shareInvite, exportGroupCsv, exportAll } from './share.js';
 import { filterActivity } from './views/group.js';
 import { dlg, closeDialog, fail, describeError } from './dialogs/dialog.js';
-import { openExpense } from './dialogs/expense.js';
+import { openExpense, openAddExpense } from './dialogs/expense.js';
 import { openVoiceExpense, abortVoice } from './dialogs/voice.js';
 import { openPayment } from './dialogs/payment.js';
 import { openSettlement } from './dialogs/settlement.js';
@@ -22,11 +22,15 @@ import { openProfile, openDeleteAccount, signOut } from './dialogs/account.js';
 export function initEvents(){
   document.addEventListener('click', async ev => {
     const b = ev.target.closest('[data-action]'); if(!b || b.disabled) return;
+    /* Rows in the Activity tab belong to different groups */
+    if(b.dataset.group) state.activeGroupId = b.dataset.group;
     const g = group(), a = b.dataset.action;
     if(a==='new-group') openGroup(true);
     else if(a==='edit-group') openGroup(false);
     else if(a==='join-group') openJoinGroup();
     else if(a==='add-expense') openExpense();
+    else if(a==='quick-add') openAddExpense();
+    else if(a==='pick-group'){ state.activeGroupId = b.dataset.id; openExpense(); }
     else if(a==='voice-expense') openVoiceExpense();
     else if(a==='edit-expense') openExpense(b.dataset.id);
     else if(a==='add-payment') openPayment();

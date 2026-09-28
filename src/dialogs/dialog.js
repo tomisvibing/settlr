@@ -14,7 +14,11 @@ export function openDialog(html, submit){
   form.innerHTML = html; onSubmit = submit;
   if(!dlg.open) dlg.showModal();
   const first = form.querySelector('input:not([type=hidden]):not([type=radio]):not([type=checkbox]):not([type=date]),textarea');
-  if(first) first.focus();
+  /* On touch screens, focusing a text field pops the keyboard over half the sheet: focus the heading
+     instead, unless the field uses the on-screen keypad (inputmode="none") */
+  const touch = window.matchMedia?.('(pointer: coarse)').matches;
+  if(first && (!touch || first.inputMode === 'none')) first.focus();
+  else { const h = form.querySelector('h2'); if(h){ h.tabIndex = -1; h.focus(); } }
 }
 export function closeDialog(){ if(dlg.open) dlg.close(); onSubmit = null; draft = null; }
 export function fail(msg){ const e = form.querySelector('.err'); if(e) e.textContent = msg; return false; }

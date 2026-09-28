@@ -1,58 +1,90 @@
 import { state, myPersonId } from '../store.js';
-import { $, esc, money, ago, byNewest, initial } from '../lib/format.js';
+import { $, esc, money, ago, byNewest } from '../lib/format.js';
 import { balances } from '../lib/ledger.js';
-import { personName, meIn, lastActivity, spentIn, myTotals } from '../selectors.js';
+import { personName, meIn, lastActivity, myTotals } from '../selectors.js';
 import { groupHref } from '../router.js';
-import { entryInner } from './shared.js';
+import { avatar, groupTile, balancePill, entryInner, icon } from './shared.js';
+
+const greeting = (h = new Date().getHours()) => h < 5 ? 'Evening,' : h < 12 ? 'Morning,' : h < 18 ? 'Afternoon,' : 'Evening,';
+const joinMoney = list => list.map(([c, v]) => money(Math.abs(v), c)).join(' · ');
+
+function greetRow(){
+  const name = personName(myPersonId) || '';
+  return `<div class="greet">
+    ${avatar(myPersonId, 'lg')}
+    <div class="who"><small>${greeting()}</small><b>${esc(name.split(' ')[0] || 'there')}</b></div>
+    <a class="iconbtn" href="#/settings" aria-label="Settings">${icon.cog}</a>
+  </div>`;
+}
+
+/* The dark "where you stand" card: the biggest amount owed to you (or that you owe) up top */
+function heroCard(){
+  const totals = myTotals().sort((a, c) => Math.abs(c[1]) - Math.abs(a[1]));
+  const owed = totals.filter(([, v]) => v > 0), owe = totals.filter(([, v]) => v < 0);
+  const mine = state.groups.map(g => ({ g, me: meIn(g) })).filter(x => x.me);
+  const bal = mine.map(({ g, me }) => balances(g)[me] || 0);
+  const owedIn = bal.filter(v => v > 0).length, oweIn = bal.filter(v => v < 0).length, settled = bal.filter(v => v === 0).length;
+  const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+  let big, sub;
+  if(owed.length){
+    big = `<div class="hero-big pos">+${money(owed[0][1], owed[0][0])}</div>${owed.length > 1 ? `<div class="hero-extra">+${joinMoney(owed.slice(1))}</div>` : ''}`;
+    sub = owedIn ? `you’re owed in ${plural(owedIn, 'group')}` : 'you’re owed';
+  } else if(owe.length){
+    big = `<div class="hero-big neg">−${money(-owe[0][1], owe[0][0])}</div>`;
+    sub = oweIn ? `you owe in ${plural(oweIn, 'group')}` : 'you owe';
+  } else {
+    big = `<div class="hero-big">All square</div>`;
+    sub = 'nobody owes anybody';
+  }
+  const tile1 = owed.length
+    ? `<div class="hero-tile"><span>You owe</span><b class="${owe.length ? 'neg' : ''}">${owe.length ? joinMoney(owe) : 'Nothing'}</b></div>`
+    : `<div class="hero-tile"><span>You’re owed</span><b>Nothing</b></div>`;
+  return `<section class="hero-card" aria-label="Where you stand">
+    <div class="eyebrow">Where you stand</div>
+    <div>${big}<div class="hero-sub">${sub}</div></div>
+    <div class="hero-tiles">${tile1}<div class="hero-tile"><span>Settled</span><b>${plural(settled, 'group')}</b></div></div>
+  </section>`;
+}
 
 export function renderHome(){
   const app = $('#app');
-  const first = (personName(myPersonId) || '').split(' ')[0];
   if(!state.groups.length){
-    app.innerHTML = `
-      <section class="empty">
-        <h1>${first ? `Welcome, ${esc(first)}. ` : ''}You're not part of any groups yet.</h1>
+    app.innerHTML = `<div class="stack">
+      ${greetRow()}
+      <section class="card empty" style="min-height:0;padding:36px 20px">
+        <h1>Start a group to split your first bill.</h1>
         <button class="btn primary" data-action="new-group">Start a group</button>
-        <button class="btn" data-action="join-group" style="margin-top:.6rem">Join with an invite code</button>
-      </section>`;
+        <button class="btn" data-action="join-group">Join with an invite code</button>
+      </section>
+    </div>`;
     return;
   }
-  const totals = myTotals();
-  const groups = state.groups.slice().sort((a,c) => lastActivity(c) - lastActivity(a));
-  const recent = state.groups.flatMap(g => g.expenses.map(e => ({ e, g }))).sort((x,y) => byNewest(x.e, y.e)).slice(0, 6);
-  app.innerHTML = `
-    <section class="hero">
-      <p class="sub" style="margin:0 0 .4rem">${first ? `Hi ${esc(first)} — here's` : "Here's"} where you stand</p>
-      <div class="summary">${totals.length
-        ? totals.map(([c,v]) => `<p class="big ${v>0?'pos':'neg'}">${v>0?"You're owed":'You owe'} ${money(Math.abs(v),c)}</p>`).join('')
-        : `<p class="big">You're all square</p>`}</div>
-      <p class="sub" style="margin:.35rem 0 0">Across ${state.groups.length} ${state.groups.length===1?'group':'groups'}${state.payments.length ? ' and your settlements' : ''}.</p>
-    </section>
+  const groups = state.groups.slice().sort((a, c) => lastActivity(c) - lastActivity(a));
+  const recent = state.groups.flatMap(g => g.expenses.map(e => ({ e, g }))).sort((x, y) => byNewest(x.e, y.e)).slice(0, 5);
+  app.innerHTML = `<div class="stack">
+    ${greetRow()}
+    ${heroCard()}
 
-    <div class="actions">
-      <button class="btn primary" data-action="new-group">New group</button>
-      <button class="btn" data-action="join-group">Join a group</button>
-    </div>
-
-    <section class="block">
-      <h2>Your groups</h2>
-      <ul class="list">${groups.map(g => {
-        const me = meIn(g), v = me ? (balances(g)[me] || 0) : 0, cur = g.currency;
-        const status = !me ? `<span class="lamt zero">Not in it</span>`
-          : v>0 ? `<span class="lamt pos">${money(v,cur)}<small>you're owed</small></span>`
-          : v<0 ? `<span class="lamt neg">${money(-v,cur)}<small>you owe</small></span>`
-          : `<span class="lamt zero">Square</span>`;
-        const n = g.members.length;
-        return `<li><a class="item gcard" href="${groupHref(g)}">
-          <span class="gav ${v>0?'pos':v<0?'neg':''}" aria-hidden="true">${esc(initial(g.name))}</span>
-          <span><span class="idesc">${esc(g.name)}</span><span class="imeta">${n} ${n===1?'person':'people'} · ${money(spentIn(g),cur)} spent · ${ago(lastActivity(g))}</span></span>
-          ${status}</a></li>`;
+    <section class="section">
+      <div class="section-head">
+        <h2>Your groups</h2>
+        <div class="chipbar"><button class="btn small" data-action="join-group">Join</button><button class="btn small" data-action="new-group">New group</button></div>
+      </div>
+      <ul class="cardlist">${groups.map(g => {
+        const me = meIn(g), v = me ? (balances(g)[me] || 0) : 0, n = g.members.length;
+        return `<li><a class="card gcard" href="${groupHref(g)}">
+          ${groupTile(g)}
+          <span class="r-main"><span class="r-title serif">${esc(g.name)}</span><span class="r-meta">${n} ${n === 1 ? 'person' : 'people'} · ${ago(lastActivity(g))}</span></span>
+          ${me ? balancePill(v, g.currency) : '<span class="pill">Not in it</span>'}
+        </a></li>`;
       }).join('')}</ul>
     </section>
 
-    <section class="block">
-      <h2>Recent activity</h2>
-      ${recent.length ? `<ul class="list">${recent.map(({e,g}) => `<li><a class="item ${e.type==='payment'?'payment':''}" href="${groupHref(g)}">${entryInner(e, g, true)}</a></li>`).join('')}</ul>`
-        : `<p class="none">Nothing yet. Open a group and add the first expense.</p>`}
-    </section>`;
+    <section class="section">
+      <div class="section-head"><h2>Lately</h2>${recent.length ? '<a class="btn small" href="#/activity">See all</a>' : ''}</div>
+      <div class="card">${recent.length
+        ? `<ul class="rows">${recent.map(({ e, g }) => `<li><a class="row ${e.type === 'payment' ? 'payment' : ''}" href="${groupHref(g)}">${entryInner(e, g, true)}</a></li>`).join('')}</ul>`
+        : `<p class="none">Nothing yet. Tap + to add the first expense.</p>`}</div>
+    </section>
+  </div>`;
 }

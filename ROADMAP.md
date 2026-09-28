@@ -21,12 +21,14 @@ Everything later builds on these.
 
 ## Phase 1: Look, feel and sign-in
 
-- [ ] **Design direction**: mock up 2–3 clickable directions and pick one before rebuilding
-- [ ] **UI rebuild** in the chosen direction:
-  - bottom tab bar and a floating **+** button
-  - "Add expense" as a bottom sheet with a big amount keypad
+- [x] **Design direction**: mocked up three, chose Pocket's layout with Ledger's look ([canvas](https://claude.ai/artifact/V8tdpBJY55XQg9rvP2fLue))
+- [x] **UI rebuild** in the chosen direction, phone-first with a sidebar on wide screens:
+  - bottom tab bar and a floating **+** button, plus a new Activity tab across all groups
+  - "Add expense" as a bottom sheet with a big amount keypad (typing on desktop), avatar chips for who paid and who it's for
   - coloured avatars for people, and a proper icon set (no emoji)
-  - custom date, person and confirm pickers instead of the browser's built-in ones
+  - every dialog a bottom sheet on phones and a centred panel on desktop
+- [ ] **UI polish**:
+  - custom date and confirm pickers instead of the browser's built-in ones
   - swipe to edit or delete
   - loading placeholders and smooth page transitions
 - [ ] **Sign in without Google**:

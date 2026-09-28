@@ -10,37 +10,33 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="settlr">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#F2EFE9" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#1C1D18" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F3EFE6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1B1C17" media="(prefers-color-scheme: dark)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script type="module" src="/src/main.js"></script>
 </head>
 <body>
-<div class="wrap" id="bootScreen">
-  <section class="empty">
-    <div class="brand" style="font-size:2.5rem;margin:0 0 .5rem">settlr</div>
-    <p class="muted">Loading…</p>
-  </section>
+<div id="bootScreen" class="gate">
+  <div class="wordmark">settlr</div>
+  <p class="muted" style="margin:0">Loading…</p>
 </div>
-<div class="wrap" id="authGate" style="display:none">
-  <section class="empty">
-    <div class="brand" style="font-size:2.5rem;margin:0 0 .5rem">settlr</div>
-    <h1>Split shared expenses without the maths.</h1>
-    <p class="hint" id="authNote" style="margin:-1rem 0 1.25rem"></p>
-    <button class="btn primary" id="signInBtn">Sign in with Google</button>
-  </section>
+<div id="authGate" class="gate" style="display:none">
+  <div class="wordmark">settlr</div>
+  <p class="tagline">Split shared expenses without the maths.</p>
+  <p class="hint" id="authNote"></p>
+  <button class="btn primary wide" id="signInBtn" style="max-width:320px">Sign in with Google</button>
 </div>
-<div class="wrap" id="appWrap" style="display:none">
-  <header class="top">
+<div id="appWrap" class="shell" style="display:none">
+  <nav class="tabbar" aria-label="Main">
     <a class="brand" href="#/">settlr</a>
-    <nav class="topnav" aria-label="Main">
-      <a class="navlink" href="#/" id="navHome">Home</a>
-      <a class="navlink" href="#/people" id="navPeople">People</a>
-      <a class="navlink iconbtn" href="#/settings" id="navSettings" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></a>
-    </nav>
-  </header>
+    <a class="tab" href="#/" id="navHome"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Home</span></a>
+    <a class="tab" href="#/people" id="navPeople"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.4 3.4-5.5 6.5-5.5s5.7 2.1 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.8c1.6.8 2.7 2.6 3 5.2"/></svg><span>People</span></a>
+    <button class="fab" data-action="quick-add" aria-label="Add expense"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="fab-label">Add expense</span></button>
+    <a class="tab" href="#/activity" id="navActivity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Activity</span></a>
+    <a class="tab" href="#/settings" id="navSettings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.2-6 8-6s7 2 8 6"/></svg><span>You</span></a>
+  </nav>
   <main id="app"></main>
 </div>
 <dialog id="dlg"><form id="dlgForm" novalidate></form></dialog>
