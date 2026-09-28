@@ -2,7 +2,7 @@ import { state } from '../store.js';
 import { $, esc, money, byNewest } from '../lib/format.js';
 import { balances, settlements } from '../lib/ledger.js';
 import { group, personName, isMe, spentIn } from '../selectors.js';
-import { avatar, groupTile, balancePill, entryInner, icon } from './shared.js';
+import { avatar, groupTile, balancePill, entryInner, icon, swipeActs } from './shared.js';
 
 /* Search text for an activity row: description, the people in it and the amount */
 export function searchText(e){
@@ -11,7 +11,8 @@ export function searchText(e){
 export function activityList(entries, g0, withGroup){
   return `<ul class="rows" id="activityList">${entries.map(({ e, g }) => {
     const isPay = e.type === 'payment';
-    return `<li data-search="${esc(searchText(e) + (withGroup ? ' ' + g.name.toLowerCase() : ''))}"><button class="row ${isPay ? 'payment' : ''}" data-action="${isPay ? 'edit-payment' : 'edit-expense'}" data-id="${e.id}" data-group="${g.id}">${entryInner(e, g, withGroup)}</button></li>`;
+    const editAction = isPay ? 'edit-payment' : 'edit-expense';
+    return `<li class="swipe" data-search="${esc(searchText(e) + (withGroup ? ' ' + g.name.toLowerCase() : ''))}"><button class="row ${isPay ? 'payment' : ''}" data-action="${editAction}" data-id="${e.id}" data-group="${g.id}">${entryInner(e, g, withGroup)}</button>${swipeActs(editAction, 'del-entry', e.id, g.id)}</li>`;
   }).join('')}</ul><p class="none" id="noMatches" hidden>Nothing matches that search.</p>`;
 }
 

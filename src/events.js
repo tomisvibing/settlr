@@ -19,6 +19,10 @@ import { openGroup, addPendingMember } from './dialogs/group.js';
 import { openJoinGroup } from './dialogs/join.js';
 import { openProfile, openDeleteAccount, signOut } from './dialogs/account.js';
 import { askConfirm } from './dialogs/confirm.js';
+import { removeReceipts, groupReceiptPaths } from './receipts.js';
+
+/* A failed delete shows in the sheet it came from, or as a toast when it came from a swiped row */
+const oops = err => { if(dlg.open) fail(describeError(err)); else toast(describeError(err)); };
 
 export function initEvents(){
   document.addEventListener('click', async ev => {
@@ -51,7 +55,7 @@ export function initEvents(){
     else if(a==='del-settlement'){
       if(await askConfirm({ title: 'Delete this settlement?' })){
         const { error } = await sb.from('payments').delete().eq('id', b.dataset.id);
-        if(error){ fail(describeError(error)); return; }
+        if(error){ oops(error); return; }
         closeDialog(); await refresh();
       }
     }
@@ -66,13 +70,17 @@ export function initEvents(){
     else if(a==='retry') location.reload();
     else if(a==='del-entry'){
       if(await askConfirm({ title: 'Delete this entry?', body: 'Everyone’s balances in the group update straight away.' })){
+        const receipt = g?.expenses.find(e => e.id === b.dataset.id)?.receipt;
         const { error } = await sb.from('expenses').delete().eq('id', b.dataset.id);
-        if(error){ fail(describeError(error)); return; }
+        if(error){ oops(error); return; }
+        if(receipt) removeReceipts([receipt]);
         closeDialog(); await refresh();
       }
     }
     else if(a==='del-group'){
       if(await askConfirm({ title: `Delete “${g.name}”?`, body: 'This deletes the group and all its expenses for everyone in it. The people in it stay saved.', confirmLabel: 'Delete group' })){
+        /* Receipts go first: once the group is gone, nobody is a member who may delete them */
+        if(g.expenses.some(e => e.receipt)) await removeReceipts(await groupReceiptPaths(g.id));
         const { error } = await sb.from('groups').delete().eq('id', g.id);
         if(error){ fail(describeError(error)); return; }
         state.activeGroupId = null;

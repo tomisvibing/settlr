@@ -19,10 +19,12 @@ Google sign-in on `npm run dev` only works if `http://localhost:5173` is listed 
 ## Layout
 
 - `src/main.js`: entry point, wires everything up
-- `src/lib/`: pure logic with unit tests in `test/` (money maths and splitting, settle-up, formatting, CSV, voice parsing)
+- `src/lib/`: pure logic with unit tests in `test/` (money maths and splitting, settle-up, formatting, CSV, voice parsing, receipt paths and sizing)
 - `src/views/`: the Home, Group, People, Activity and You (settings) pages; `shared.js` has avatars, pills, icons and activity rows
 - `src/dialogs/`: add and edit sheets (bottom sheets on phones, centred panels on desktop); `expense.js` is the add-expense sheet with its keypad
 - `src/auth.js`, `src/data.js`, `src/router.js`, `src/events.js`: sign-in, loading data, hash routing, click handling
+- `src/receipts.js`: shrinking, uploading and showing receipt photos and PDFs (Supabase Storage)
+- `src/swipe.js`: swipe a row left for Edit and Delete on touch screens
 - `public/`: manifest and icons, copied into the build as-is
 - `supabase/migrations/`: the database schema (see `supabase/README.md`)
 

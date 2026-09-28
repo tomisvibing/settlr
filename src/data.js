@@ -32,7 +32,7 @@ export async function loadAllData(){
     (expensesByGroup[e.group_id] ||= []).push({
       id: e.id, type: e.type, desc: e.description, amount: e.amount_cents,
       paidBy: e.paid_by, splits: splitsByExpense[e.id] || {}, splitMode: e.split_mode,
-      splitInput: e.split_input || {}, date: e.expense_date, createdAt: new Date(e.created_at).getTime()
+      splitInput: e.split_input || {}, date: e.expense_date, receipt: e.receipt_path || null, createdAt: new Date(e.created_at).getTime()
     });
   });
 

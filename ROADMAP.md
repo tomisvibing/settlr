@@ -28,7 +28,8 @@ Everything later builds on these.
   - coloured avatars for people, and a proper icon set (no emoji)
   - every dialog a bottom sheet on phones and a centred panel on desktop
 - [x] **UI polish**: in-app confirm sheets instead of the browser's pop-ups, loading placeholders, smooth page transitions
-- [ ] **More polish**: swipe to edit or delete; a custom date picker (the phone's own is fine for now)
+- [x] **Swipe** a row left for Edit and Delete (touch screens; on desktop, click a row to edit)
+- [ ] **More polish**: a custom date picker (the phone's own is fine for now)
 - [ ] **Sign in without Google**:
   - [x] email with a 6-digit code (needs the dashboard steps in the README before it works for everyone)
   - [ ] Sign in with Apple (needs an Apple Developer account, $99 a year)
@@ -36,7 +37,7 @@ Everything later builds on these.
 
 ## Phase 2: Smart capture
 
-- [ ] **Receipts**: take a photo or upload an image or PDF, shrunk on the phone before upload, stored in Supabase Storage and visible only to the group, shown on the expense
+- [x] **Receipts**: take a photo or upload an image or PDF, shrunk on the phone before upload, stored in Supabase Storage and visible only to the group, shown on the expense (needs the `receipts` migration applied)
 - [ ] **Receipt reading**: Claude reads the photo and fills in merchant, total, date and line items
 - [ ] **Split by item**: tap who had what from the scanned line items
 - [ ] **AI voice parsing**: send the transcript and the group's member names to Claude and get back clean fields (description, amount, payer, split, date) to confirm in the form. Today's parser just keeps whatever words are left over, so the descriptions come out garbled.

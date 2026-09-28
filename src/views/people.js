@@ -1,7 +1,7 @@
 import { state } from '../store.js';
 import { $, esc, money, byNewest, dayMonth } from '../lib/format.js';
 import { personName, nameWithYou, groupsOf, personCurrencyTotals } from '../selectors.js';
-import { avatar } from './shared.js';
+import { avatar, swipeActs } from './shared.js';
 
 export function renderPeopleView(){
   const app = $('#app');
@@ -29,10 +29,10 @@ export function renderPeopleView(){
       <div class="section-head"><h2>Outside groups</h2><button class="btn small" data-action="add-settlement" ${people.length>1?'':'disabled'}>Record a settlement</button></div>
       <div class="card">${settlements.length ? `<ul class="rows">${settlements.map(p => {
         const { day, mon } = dayMonth(p);
-        return `<li><button class="row payment" data-action="edit-settlement" data-id="${p.id}">
+        return `<li class="swipe"><button class="row payment" data-action="edit-settlement" data-id="${p.id}">
           ${avatar(p.from)}
           <span class="r-main"><span class="r-title">${esc(personName(p.from))} → ${esc(personName(p.to))}</span><span class="r-meta">${esc(p.note || 'Settlement')} · ${day} ${mon}</span></span>
-          <span class="r-end"><span class="r-amt">${money(p.amount,p.currency)}</span></span></button></li>`;
+          <span class="r-end"><span class="r-amt">${money(p.amount,p.currency)}</span></span></button>${swipeActs('edit-settlement', 'del-settlement', p.id)}</li>`;
       }).join('')}</ul>` : `<p class="none">When two people settle up outside any group, record it here.</p>`}</div>
     </section>
   </div>`;
