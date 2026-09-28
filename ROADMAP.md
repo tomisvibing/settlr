@@ -27,14 +27,12 @@ Everything later builds on these.
   - "Add expense" as a bottom sheet with a big amount keypad (typing on desktop), avatar chips for who paid and who it's for
   - coloured avatars for people, and a proper icon set (no emoji)
   - every dialog a bottom sheet on phones and a centred panel on desktop
-- [ ] **UI polish**:
-  - custom date and confirm pickers instead of the browser's built-in ones
-  - swipe to edit or delete
-  - loading placeholders and smooth page transitions
+- [x] **UI polish**: in-app confirm sheets instead of the browser's pop-ups, loading placeholders, smooth page transitions
+- [ ] **More polish**: swipe to edit or delete; a custom date picker (the phone's own is fine for now)
 - [ ] **Sign in without Google**:
-  - email with a 6-digit code (better than magic links, which open in Safari instead of the installed app)
-  - Sign in with Apple (needs an Apple Developer account, $99 a year)
-  - account linking, so the same person gets the same account whichever way they sign in
+  - [x] email with a 6-digit code (needs the dashboard steps in the README before it works for everyone)
+  - [ ] Sign in with Apple (needs an Apple Developer account, $99 a year)
+  - [x] account linking: Supabase links sign-ins that share a verified email automatically
 
 ## Phase 2: Smart capture
 

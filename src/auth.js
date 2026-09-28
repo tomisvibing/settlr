@@ -5,10 +5,14 @@ import { loadAllData } from './data.js';
 import { parseRoute, render } from './router.js';
 import { closeDialog } from './dialogs/dialog.js';
 import { reportError, setMonitoringUser } from './monitoring.js';
+import { initSignIn, resumeSignIn } from './signin.js';
+import { nameFromEmail } from './lib/signin.js';
+import { openProfile } from './dialogs/account.js';
+import { renderSkeleton } from './views/skeleton.js';
 
 async function ensureMyPerson(){
   const uid = session.user.id;
-  const name = session.user.user_metadata?.full_name || session.user.email || 'Me';
+  const name = session.user.user_metadata?.full_name || nameFromEmail(session.user.email);
   /* ignoreDuplicates: create my contact once (race-safe) without overwriting a name I've since changed */
   const { error } = await sb.from('people').upsert({ owner_id: uid, user_id: uid, name }, { onConflict: 'owner_id,user_id', ignoreDuplicates: true });
   if(error) throw error;
@@ -31,6 +35,8 @@ async function onAuthChange(){
   if(session){
     setMonitoringUser(session.user.id);
     $('#authGate').style.display = 'none';
+    $('#appWrap').style.display = '';
+    renderSkeleton();
     try{
       await ensureMyPerson();
       await loadAllData();
@@ -45,6 +51,7 @@ async function onAuthChange(){
     if(pending && parseRoute().name !== 'join') history.replaceState(null, '', location.pathname + location.search + '#/join/' + encodeURIComponent(pending));
     $('#appWrap').style.display = '';
     render();
+    askNameOnce();
   } else {
     setMyPersonId(null);
     setMonitoringUser(null);
@@ -55,6 +62,7 @@ async function onAuthChange(){
     authNote = '';
     $('#appWrap').style.display = 'none';
     $('#authGate').style.display = '';
+    resumeSignIn();
   }
 }
 /* onAuthStateChange fires once immediately with the current session, then again
@@ -71,7 +79,14 @@ export function initAuth(){
     handledUserId = uid;
     authChangeChain = authChangeChain.then(onAuthChange).catch(err => reportError(err, 'auth'));
   });
-  $('#signInBtn').addEventListener('click', () => {
-    sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname + location.search } });
-  });
+  initSignIn();
+}
+
+/* Email sign-ins start with a name guessed from the address: ask once what people should see instead */
+function askNameOnce(){
+  const u = session.user;
+  if(u.user_metadata?.full_name || parseRoute().name === 'join') return;
+  const key = 'settlr:askedName:' + u.id;
+  try{ if(localStorage.getItem(key)) return; localStorage.setItem(key, '1'); }catch(e){ return; }
+  openProfile({ welcome: true });
 }
