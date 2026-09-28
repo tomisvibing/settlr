@@ -17,22 +17,22 @@ Everything later builds on these.
 - [x] Fix what Supabase's security and performance checks flagged (`supabase/migrations/20260927213402_harden_functions_and_policies.sql`)
 - [x] Split the single `index.html` into a small Vite project with modules, deployed to GitHub Pages by GitHub Actions
 - [x] Automated tests for the balance and split maths (Vitest, run on every PR)
-- [ ] Error monitoring (e.g. Sentry) so crashes get reported
+- [x] Error monitoring with Sentry, switched on by the `SENTRY_DSN` repository variable
 
 ## Phase 1: Look, feel and sign-in
 
-- [ ] **Design direction**: mock up 2–3 clickable directions and pick one before rebuilding
-- [ ] **UI rebuild** in the chosen direction:
-  - bottom tab bar and a floating **+** button
-  - "Add expense" as a bottom sheet with a big amount keypad
+- [x] **Design direction**: mocked up three, chose Pocket's layout with Ledger's look ([canvas](https://claude.ai/artifact/V8tdpBJY55XQg9rvP2fLue))
+- [x] **UI rebuild** in the chosen direction, phone-first with a sidebar on wide screens:
+  - bottom tab bar and a floating **+** button, plus a new Activity tab across all groups
+  - "Add expense" as a bottom sheet with a big amount keypad (typing on desktop), avatar chips for who paid and who it's for
   - coloured avatars for people, and a proper icon set (no emoji)
-  - custom date, person and confirm pickers instead of the browser's built-in ones
-  - swipe to edit or delete
-  - loading placeholders and smooth page transitions
+  - every dialog a bottom sheet on phones and a centred panel on desktop
+- [x] **UI polish**: in-app confirm sheets instead of the browser's pop-ups, loading placeholders, smooth page transitions
+- [ ] **More polish**: swipe to edit or delete; a custom date picker (the phone's own is fine for now)
 - [ ] **Sign in without Google**:
-  - email with a 6-digit code (better than magic links, which open in Safari instead of the installed app)
-  - Sign in with Apple (needs an Apple Developer account, $99 a year)
-  - account linking, so the same person gets the same account whichever way they sign in
+  - [x] email with a 6-digit code (needs the dashboard steps in the README before it works for everyone)
+  - [ ] Sign in with Apple (needs an Apple Developer account, $99 a year)
+  - [x] account linking: Supabase links sign-ins that share a verified email automatically
 
 ## Phase 2: Smart capture
 

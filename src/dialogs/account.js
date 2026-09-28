@@ -6,16 +6,17 @@ import { personName } from '../selectors.js';
 import { setAuthNote } from '../auth.js';
 import { form, setDraft, openDialog, closeDialog, fail, describeError } from './dialog.js';
 
-export function openProfile(){
+export function openProfile({ welcome = false } = {}){
   setDraft({});
   openDialog(`
-    <h2>Your name</h2>
+    <h2>${welcome ? 'Welcome to settlr' : 'Your name'}</h2>
+    ${welcome ? '<p class="hint">What should people call you? We guessed from your email.</p>' : ''}
     <label>Name<input name="name" maxlength="30" value="${esc(personName(myPersonId))}" autocomplete="name"></label>
     <p class="hint">This is how you appear to everyone in your groups.</p>
     <p class="err" role="alert"></p>
     <div class="dlg-actions">
       <span class="sp"></span>
-      <button type="button" class="btn" data-action="close">Cancel</button>
+      <button type="button" class="btn" data-action="close">${welcome ? 'Skip' : 'Cancel'}</button>
       <button type="submit" class="btn primary">Save</button>
     </div>`, async () => {
       const name = form.name.value.trim();

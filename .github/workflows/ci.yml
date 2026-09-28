@@ -22,6 +22,9 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+        env:
+          VITE_SENTRY_DSN: ${{ vars.SENTRY_DSN }}
+          VITE_RELEASE: ${{ github.sha }}
       - if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v4
         with:

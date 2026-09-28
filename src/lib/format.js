@@ -16,6 +16,11 @@ export function toPence(v){
   const n = Number(s);
   return Number.isFinite(n) ? Math.round(n*100) : NaN;
 }
+/* "€" for EUR, "CHF" for CHF: whatever the locale puts in front of the number */
+export function currencySymbol(cur){
+  try{ return new Intl.NumberFormat('en-GB',{style:'currency',currency:cur}).formatToParts(0).find(p => p.type === 'currency').value; }
+  catch(e){ return cur; }
+}
 export function dayMonth(e){
   const d = e.date ? new Date(e.date+'T12:00:00') : new Date(e.createdAt);
   return { day: d.getDate(), mon: d.toLocaleDateString('en-GB',{month:'short'}) };

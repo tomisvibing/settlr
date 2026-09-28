@@ -10,7 +10,7 @@ import { rememberPendingJoin } from './auth.js';
 import { shareInvite, exportGroupCsv, exportAll } from './share.js';
 import { filterActivity } from './views/group.js';
 import { dlg, closeDialog, fail, describeError } from './dialogs/dialog.js';
-import { openExpense } from './dialogs/expense.js';
+import { openExpense, openAddExpense } from './dialogs/expense.js';
 import { openVoiceExpense, abortVoice } from './dialogs/voice.js';
 import { openPayment } from './dialogs/payment.js';
 import { openSettlement } from './dialogs/settlement.js';
@@ -18,15 +18,20 @@ import { openPerson } from './dialogs/person.js';
 import { openGroup, addPendingMember } from './dialogs/group.js';
 import { openJoinGroup } from './dialogs/join.js';
 import { openProfile, openDeleteAccount, signOut } from './dialogs/account.js';
+import { askConfirm } from './dialogs/confirm.js';
 
 export function initEvents(){
   document.addEventListener('click', async ev => {
     const b = ev.target.closest('[data-action]'); if(!b || b.disabled) return;
+    /* Rows in the Activity tab belong to different groups */
+    if(b.dataset.group) state.activeGroupId = b.dataset.group;
     const g = group(), a = b.dataset.action;
     if(a==='new-group') openGroup(true);
     else if(a==='edit-group') openGroup(false);
     else if(a==='join-group') openJoinGroup();
     else if(a==='add-expense') openExpense();
+    else if(a==='quick-add') openAddExpense();
+    else if(a==='pick-group'){ state.activeGroupId = b.dataset.id; openExpense(); }
     else if(a==='voice-expense') openVoiceExpense();
     else if(a==='edit-expense') openExpense(b.dataset.id);
     else if(a==='add-payment') openPayment();
@@ -35,7 +40,7 @@ export function initEvents(){
     else if(a==='add-person') openPerson();
     else if(a==='edit-person') openPerson(b.dataset.id);
     else if(a==='del-person'){
-      if(!personLocked(b.dataset.id) && confirm('Delete this person?')){
+      if(!personLocked(b.dataset.id) && await askConfirm({ title: 'Delete this person?', body: 'They’re not in any group or settlement, so nothing else changes.' })){
         const { error } = await sb.from('people').delete().eq('id', b.dataset.id);
         if(error){ fail(describeError(error)); return; }
         closeDialog(); await refresh();
@@ -44,7 +49,7 @@ export function initEvents(){
     else if(a==='add-settlement') openSettlement();
     else if(a==='edit-settlement') openSettlement({id:b.dataset.id});
     else if(a==='del-settlement'){
-      if(confirm('Delete this settlement?')){
+      if(await askConfirm({ title: 'Delete this settlement?' })){
         const { error } = await sb.from('payments').delete().eq('id', b.dataset.id);
         if(error){ fail(describeError(error)); return; }
         closeDialog(); await refresh();
@@ -60,14 +65,14 @@ export function initEvents(){
     else if(a==='sign-out') await signOut();
     else if(a==='retry') location.reload();
     else if(a==='del-entry'){
-      if(confirm('Delete this entry?')){
+      if(await askConfirm({ title: 'Delete this entry?', body: 'Everyone’s balances in the group update straight away.' })){
         const { error } = await sb.from('expenses').delete().eq('id', b.dataset.id);
         if(error){ fail(describeError(error)); return; }
         closeDialog(); await refresh();
       }
     }
     else if(a==='del-group'){
-      if(confirm(`Delete "${g.name}" and all its expenses for everyone in it? The people in it stay saved.`)){
+      if(await askConfirm({ title: `Delete “${g.name}”?`, body: 'This deletes the group and all its expenses for everyone in it. The people in it stay saved.', confirmLabel: 'Delete group' })){
         const { error } = await sb.from('groups').delete().eq('id', g.id);
         if(error){ fail(describeError(error)); return; }
         state.activeGroupId = null;
@@ -86,7 +91,11 @@ export function initEvents(){
   window.addEventListener('hashchange', () => {
     if(!session){ rememberPendingJoin(); return; }
     if(!myPersonId) return;
-    closeDialog(); render(); window.scrollTo(0, 0);
+    closeDialog();
+    /* A short cross-fade between screens where the browser supports it; instant otherwise */
+    const swap = () => { render(); window.scrollTo(0, 0); };
+    if(document.startViewTransition && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) document.startViewTransition(swap);
+    else swap();
   });
   /* Other people edit shared groups too — pick up their changes when the app comes back into view */
   document.addEventListener('visibilitychange', () => {

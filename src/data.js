@@ -2,6 +2,7 @@ import { sb } from './supabase.js';
 import { state, session, myPersonId } from './store.js';
 import { toast } from './ui.js';
 import { render } from './router.js';
+import { reportError } from './monitoring.js';
 
 export let lastLoadedAt = 0;
 
@@ -51,6 +52,6 @@ export async function loadAllData(){
 }
 export async function refresh(){
   try{ await loadAllData(); }
-  catch(err){ toast(`Couldn't refresh: ${err.message || 'check your connection'}`); }
+  catch(err){ reportError(err, 'refresh'); toast(`Couldn't refresh: ${err.message || 'check your connection'}`); }
   render();
 }
