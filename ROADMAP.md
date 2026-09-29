@@ -37,7 +37,7 @@ Everything later builds on these.
 
 ## Phase 2: Smart capture
 
-- [x] **Receipts**: take a photo or upload an image or PDF, shrunk on the phone before upload, stored in Supabase Storage and visible only to the group, shown on the expense (needs the `receipts` migration applied)
+- [x] **Receipts**: take a photo or upload an image or PDF, shrunk on the phone before upload, stored in Supabase Storage and visible only to the group, shown on the expense
 - [ ] **Receipt reading**: Claude reads the photo and fills in merchant, total, date and line items
 - [ ] **Split by item**: tap who had what from the scanned line items
 - [ ] **AI voice parsing**: send the transcript and the group's member names to Claude and get back clean fields (description, amount, payer, split, date) to confirm in the form. Today's parser just keeps whatever words are left over, so the descriptions come out garbled.
