@@ -5,6 +5,7 @@ import { initDialog } from './dialogs/dialog.js';
 import { initExpenseDialog } from './dialogs/expense.js';
 import { initGroupDialog } from './dialogs/group.js';
 import { initEvents } from './events.js';
+import { initSwipe } from './swipe.js';
 import { initAuth } from './auth.js';
 
 initMonitoring();
@@ -13,4 +14,5 @@ initDialog();
 initExpenseDialog();
 initGroupDialog();
 initEvents();
+initSwipe();
 initAuth();

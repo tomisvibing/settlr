@@ -8,6 +8,8 @@ import { toast } from '../ui.js';
 import { avatar, groupTile, icon } from '../views/shared.js';
 import { form, draft, setDraft, openDialog, fail, describeError } from './dialog.js';
 import { openGroup } from './group.js';
+import { prepareReceipt, uploadReceipt, removeReceipts, receiptUrl } from '../receipts.js';
+import { isPdf, pathIsPdf, sizeLabel } from '../lib/receipt.js';
 
 const touch = () => window.matchMedia?.('(pointer: coarse)').matches;
 /* Size the amount box to its digits (a "." is narrow) so the currency sign sits right beside them */
@@ -21,7 +23,8 @@ export function openExpense(eid, prefill){
   const g = group(); const e = eid ? g.expenses.find(x => x.id === eid) : null;
   const def = { equal:{}, exact:{}, shares:{} };
   g.members.forEach(mid => { def.equal[mid] = 1; def.shares[mid] = 1; def.exact[mid] = ''; });
-  setDraft({ id: e?.id, mode: e?.splitMode || prefill?.mode || 'equal', ...def });
+  setDraft({ id: e?.id, mode: e?.splitMode || prefill?.mode || 'equal', ...def,
+    receiptPath: e?.receipt || null, receiptFile: null, receiptPreview: null, receiptRemoved: false });
   if(e){
     const inp = e.splitInput || {};
     g.members.forEach(mid => {
@@ -56,6 +59,7 @@ export function openExpense(eid, prefill){
       <div id="splitRows"></div>
     </fieldset>
     <label class="daterow">Date<input type="date" name="date" value="${dateVal}"></label>
+    <div class="receipt" id="receiptBox"></div>
     <div class="keypad" aria-hidden="true">${keys.map(k => `<button type="button" tabindex="-1" data-key="${k}">${k === 'del' ? icon.backspace : k}</button>`).join('')}</div>
     <p class="err" role="alert"></p>
     <div class="dlg-actions">
@@ -64,6 +68,7 @@ export function openExpense(eid, prefill){
     </div>`, saveExpense);
   fitAmount();
   renderSplitRows();
+  renderReceipt();
 }
 /* From the + button: straight in when there's a group in view (or only one), otherwise ask which */
 export function openAddExpense(){
@@ -111,6 +116,60 @@ function updateHint(){
     hint.textContent = `${money(lo,g.currency)}${hi !== lo ? '–' + money(hi,g.currency) : ''} each`;
   } else hint.textContent = draft.mode === 'equal' ? `${n} ${n === 1 ? 'person' : 'people'}` : '';
 }
+/* The receipt line: an "Add a receipt" button, or a thumbnail of the one attached with Open and Remove */
+function renderReceipt(){
+  const box = $('#receiptBox'); if(!box) return;
+  const d = draft;
+  if(d.receiptFile){
+    const pdf = isPdf(d.receiptFile.type);
+    box.innerHTML = `<span class="rthumb">${pdf ? '<b>PDF</b>' : `<img src="${d.receiptPreview}" alt="">`}</span>
+      <span class="r-main"><span class="r-title">Receipt attached</span><span class="r-meta">${pdf ? 'PDF' : 'Photo'} · ${sizeLabel(d.receiptFile.size)} · saved with the expense</span></span>
+      <button type="button" class="iconbtn" data-receipt="remove" aria-label="Remove receipt" title="Remove receipt">${icon.trash}</button>`;
+    return;
+  }
+  if(d.receiptPath && !d.receiptRemoved){
+    const pdf = pathIsPdf(d.receiptPath);
+    box.innerHTML = `<a class="rthumb" target="_blank" rel="noopener" aria-label="Open the receipt">${pdf ? '<b>PDF</b>' : '<img alt="">'}</a>
+      <span class="r-main"><span class="r-title">Receipt</span><span class="r-meta" data-receipt-status>Loading…</span></span>
+      <button type="button" class="iconbtn" data-receipt="remove" aria-label="Remove receipt" title="Remove receipt">${icon.trash}</button>`;
+    const path = d.receiptPath;
+    receiptUrl(path).then(url => {
+      if(draft !== d || d.receiptRemoved || d.receiptFile) return;
+      const a = box.querySelector('.rthumb'), img = a.querySelector('img');
+      a.href = url; if(img) img.src = url;
+      box.querySelector('[data-receipt-status]').innerHTML = `<a href="${url}" target="_blank" rel="noopener">Open ${pdf ? 'PDF' : 'photo'}</a>`;
+    }).catch(() => {
+      if(draft !== d) return;
+      const st = box.querySelector('[data-receipt-status]'); if(st) st.textContent = 'Couldn’t load it just now';
+    });
+    return;
+  }
+  box.innerHTML = `<label class="btn small receipt-add">${icon.clip}<span>${d.receiptPath ? 'Add a new receipt' : 'Add a receipt'}</span><input type="file" name="receipt" accept="image/*,application/pdf" class="sr"></label>`;
+}
+async function pickReceipt(file){
+  const d = draft;
+  fail('');
+  try{
+    const blob = await prepareReceipt(file);
+    if(draft !== d) return;
+    if(d.receiptPreview) URL.revokeObjectURL(d.receiptPreview);
+    d.receiptFile = blob;
+    d.receiptPreview = isPdf(blob.type) ? null : URL.createObjectURL(blob);
+    renderReceipt();
+  }catch(err){ fail(err.message || 'Couldn’t read that file.'); }
+}
+function removeReceipt(){
+  const d = draft;
+  if(d.receiptFile){
+    if(d.receiptPreview) URL.revokeObjectURL(d.receiptPreview);
+    d.receiptFile = null; d.receiptPreview = null;
+  } else d.receiptRemoved = true;
+  renderReceipt();
+}
+const receiptError = err => /bucket not found/i.test(err?.message || '')
+  ? 'Receipts aren’t switched on yet. Remove the receipt to save without it.'
+  : describeError(err);
+
 /* The on-screen keypad (phones): same rules as typing, at most two decimals */
 function pressKey(k){
   const i = form.amount; let a = i.value;
@@ -126,10 +185,12 @@ export function initExpenseDialog(){
   form.addEventListener('click', ev => {
     const k = ev.target.closest('[data-key]');
     if(k && editing()) pressKey(k.dataset.key);
+    if(ev.target.closest('[data-receipt="remove"]') && editing()) removeReceipt();
   });
   form.addEventListener('change', ev => {
     if(!editing()) return;
     const t = ev.target;
+    if(t.name === 'receipt'){ if(t.files?.[0]) pickReceipt(t.files[0]); return; }
     if(t.name === 'mode'){ draft.mode = t.value; renderSplitRows(); return; }
     if(t.dataset.sid && t.type === 'checkbox'){ draft.equal[t.dataset.sid] = t.checked ? 1 : 0; updateHint(); }
   });
@@ -165,7 +226,19 @@ async function saveExpense(){
     if(!splits) return fail(draft.mode==='equal' ? 'Pick at least one person to split with.' : 'Give at least one person a share above zero.');
   }
   const row = { group_id: g.id, type:'expense', description: desc, amount_cents: amount, paid_by: form.paidBy.value, split_mode: draft.mode, expense_date: form.date.value || today(), split_input: input };
-  return saveExpenseRow(draft.id, row, splits);
+  /* Upload first so the expense never points at a file that isn't there; tidy up whichever file lost */
+  const d = draft, old = d.receiptPath;
+  let added = null;
+  if(d.receiptFile){
+    try{ added = await uploadReceipt(g.id, d.receiptFile); }
+    catch(err){ return fail(receiptError(err)); }
+    row.receipt_path = added;
+  } else if(d.receiptRemoved) row.receipt_path = null;
+  const result = await saveExpenseRow(d.id, row, splits);
+  if(result === false){ if(added) removeReceipts([added]); return false; }
+  if(old && (added || d.receiptRemoved)) removeReceipts([old]);
+  if(d.receiptPreview) URL.revokeObjectURL(d.receiptPreview);
+  return result;
 }
 export async function saveExpenseRow(expenseId, row, splits){
   try{

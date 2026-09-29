@@ -30,7 +30,16 @@ export const icon = {
   cog: svg('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>', 1.7),
   backspace: svg('<path d="M21 5H9l-6 7 6 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z"/><path d="M17 9l-5 6M12 9l5 6"/>'),
   plus: svg('<path d="M12 5v14M5 12h14"/>', 2),
+  clip: svg('<path d="M21 11.5l-8.6 8.6a5 5 0 0 1-7.1-7.1l8.6-8.6a3.3 3.3 0 0 1 4.7 4.7l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l7.9-7.9"/>'),
+  trash: svg('<path d="M4 7h16M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13M9 7V4h6v3"/>'),
 };
+
+/* The Edit and Delete buttons a row reveals when swiped left (touch only, see swipe.js).
+   Hidden from screen readers and the tab order: the same actions are in the edit sheet. */
+export function swipeActs(editAction, delAction, id, gid = ''){
+  const attrs = `data-id="${id}"${gid ? ` data-group="${gid}"` : ''} tabindex="-1"`;
+  return `<span class="swipe-acts" aria-hidden="true"><button type="button" class="sa" data-action="${editAction}" ${attrs}>${icon.edit}Edit</button><button type="button" class="sa del" data-action="${delAction}" ${attrs}>${icon.trash}Delete</button></span>`;
+}
 
 /* What an entry did to my balance: + means I'm owed more, − means I owe more */
 export function myLine(e, g){
@@ -51,6 +60,6 @@ export function entryMeta(e){
 export function entryInner(e, g, groupName){
   const { day, mon } = dayMonth(e), isPay = e.type === 'payment';
   return `${avatar(e.paidBy)}
-    <span class="r-main"><span class="r-title">${esc(isPay ? 'Payment' : e.desc)}</span><span class="r-meta">${groupName ? esc(g.name) + ' · ' : ''}${entryMeta(e)} · ${day} ${mon}</span></span>
+    <span class="r-main"><span class="r-title">${e.receipt ? `<span class="clip" title="Has a receipt"><span class="sr">Has a receipt: </span>${icon.clip}</span>` : ''}${esc(isPay ? 'Payment' : e.desc)}</span><span class="r-meta">${groupName ? esc(g.name) + ' · ' : ''}${entryMeta(e)} · ${day} ${mon}</span></span>
     <span class="r-end"><span class="r-amt">${money(e.amount, g.currency)}</span>${myLine(e, g)}</span>`;
 }
