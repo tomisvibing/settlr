@@ -16,10 +16,12 @@ export async function shareInvite(g){
 }
 export function exportGroupCsv(g){
   const everyone = [...g.members, ...g.left];
-  const rows = [['Date','Description','Type','Amount','Currency','Paid by', ...everyone.map(personName)]];
+  const rows = [['Date','Description','Type','Amount','Currency','Spent','Spent in','Rate','Paid by', ...everyone.map(personName)]];
   [...g.expenses].sort((a,c) => byNewest(c,a)).forEach(e => rows.push([
     e.date || '', e.type === 'payment' ? 'Payment' : e.desc, e.type === 'payment' ? 'Payment' : 'Expense',
-    (e.amount/100).toFixed(2), g.currency, personName(e.paidBy),
+    (e.amount/100).toFixed(2), g.currency,
+    e.origCurrency ? (e.origAmount/100).toFixed(2) : '', e.origCurrency || '', e.origCurrency ? String(e.fxRate) : '',
+    personName(e.paidBy),
     ...everyone.map(mid => e.splits[mid] ? (e.splits[mid]/100).toFixed(2) : '')
   ]));
   download(`${slug(g.name)}.csv`, '﻿' + rows.map(r => r.map(csvCell).join(',')).join('\r\n'), 'text/csv;charset=utf-8');

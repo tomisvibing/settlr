@@ -25,6 +25,8 @@ Google sign-in on `npm run dev` only works if `http://localhost:5173` is listed 
 - `src/auth.js`, `src/data.js`, `src/router.js`, `src/events.js`: sign-in, loading data, hash routing, click handling
 - `src/receipts.js`: shrinking, uploading and showing receipt photos and PDFs (Supabase Storage)
 - `src/swipe.js`: swipe a row left for Edit and Delete on touch screens
+- `src/rates.js`, `src/lib/fx.js`: exchange rates (Frankfurter, European Central Bank) and the conversion maths for spending in another currency
+- `src/dialogs/history.js`, `src/lib/history.js`: a group's History sheet and the sentences it shows
 - `src/live.js`: live updates (Supabase Realtime); reloads when anything in your groups changes, waiting until an open sheet closes
 - `public/`: manifest and icons, copied into the build as-is
 - `supabase/migrations/`: the database schema (see `supabase/README.md`)

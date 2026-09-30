@@ -15,6 +15,10 @@ Each group member has a `role` (`admin` or `member`) and a `left_at`. Whoever cr
 
 Any member can archive a group (`groups.archived_at`) or restore it. While it's archived, `private.group_open` makes its expenses, splits and receipts read-only for everyone.
 
+An expense or payment in another currency keeps `orig_currency`, `orig_amount_cents` and `fx_rate`; `amount_cents` is always in the group's currency, so balances never mix currencies. A group's currency is fixed once it has expenses (`lock_group_currency`).
+
+`activity_log` is written only by triggers (entries added, edited and deleted; groups created, renamed, archived and restored; people joining, leaving and becoming admins) and is read-only for members. A deletion's log row keeps a full copy of the entry, its splits and comments, which `restore_deleted_expense` puts back. `expense_comments` are readable by the group and deletable by their author.
+
 The app's tables are in the `supabase_realtime` publication, so the app gets live updates. Realtime applies the same row-level security as a normal read.
 
 The membership helpers the security rules use (`is_member`, `my_group_ids`, `can_see_person`) live in a `private` schema. The REST API doesn't expose that schema, so the app can't call them directly.

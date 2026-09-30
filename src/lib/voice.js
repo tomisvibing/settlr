@@ -21,6 +21,12 @@ export function parseVoiceExpense(text, members, now = new Date(), meId = null){
   /* amount: prefer an explicit currency mark, then a currency word, then any bare number */
   const am = AMOUNT.map(re => said.match(re)).find(Boolean);
   if(am) result.amount = toPence(am[1].replace(',', '.'));
+  /* the currency, when it was said: "£37", "20 quid", "15 dollars", "€12", "30 euros", "50 francs" */
+  const cm = said.match(/£|\b(?:pounds?|quid)\b|\$|\b(?:dollars?|bucks)\b|€|\beuros?\b|\b(?:swiss\s+)?francs?\b|\byen\b/i);
+  if(cm){
+    const w = cm[0].toLowerCase();
+    result.currency = w === '£' || /pound|quid/.test(w) ? 'GBP' : w === '$' || /dollar|buck/.test(w) ? 'USD' : w === '€' || /euro/.test(w) ? 'EUR' : /franc/.test(w) ? 'CHF' : 'JPY';
+  }
 
   /* date: yesterday / today / a weekday name */
   let dm;

@@ -21,6 +21,7 @@ import { openGroup, addPendingMember, renderMembers } from './dialogs/group.js';
 import { openJoinGroup } from './dialogs/join.js';
 import { openProfile, openDeleteAccount, signOut } from './dialogs/account.js';
 import { askConfirm } from './dialogs/confirm.js';
+import { openHistory, restoreEntry } from './dialogs/history.js';
 import { removeReceipts, groupReceiptPaths } from './receipts.js';
 
 /* A failed delete shows in the sheet it came from, or as a toast when it came from a swiped row */
@@ -40,6 +41,8 @@ export function initEvents(){
     else if(a==='pick-group'){ state.activeGroupId = b.dataset.id; openExpense(); }
     else if(a==='voice-expense') openVoiceExpense();
     else if(a==='voice-done') finishVoice();
+    else if(a==='history') openHistory();
+    else if(a==='restore-entry'){ b.disabled = true; await restoreEntry(b.dataset.id); }
     else if(a==='edit-expense') openExpense(b.dataset.id);
     else if(a==='add-payment') openPayment();
     else if(a==='edit-payment') openPayment({id:b.dataset.id});
@@ -73,11 +76,12 @@ export function initEvents(){
     else if(a==='retry') location.reload();
     else if(a==='del-entry'){
       if(await askConfirm({ title: 'Delete this entry?', body: 'Everyone’s balances in the group update straight away.' })){
-        const receipt = g?.expenses.find(e => e.id === b.dataset.id)?.receipt;
-        const { error } = await sb.from('expenses').delete().eq('id', b.dataset.id);
+        /* The receipt file stays: the history keeps a copy of the entry, so it can be restored */
+        const eid = b.dataset.id, gone = g?.expenses.find(e => e.id === eid);
+        const { error } = await sb.from('expenses').delete().eq('id', eid);
         if(error){ oops(error); return; }
-        if(receipt) removeReceipts([receipt]);
         closeDialog(); await refresh();
+        toast(`Deleted ${gone?.type === 'payment' ? 'the payment' : `“${gone?.desc || 'entry'}”`}.`, { action: 'Undo', onAction: () => restoreEntry(eid) });
       }
     }
     else if(a==='toggle-admin'){
@@ -123,7 +127,7 @@ export function initEvents(){
       if(!g || !canAdmin(g)) return;
       if(await askConfirm({ title: `Delete “${g.name}”?`, body: 'This deletes the group and all its expenses for everyone in it. The people in it stay saved.', confirmLabel: 'Delete group' })){
         /* Receipts go first: once the group is gone, nobody is a member who may delete them */
-        if(g.expenses.some(e => e.receipt)) await removeReceipts(await groupReceiptPaths(g.id));
+        await removeReceipts(await groupReceiptPaths(g.id));
         const { data: gone, error } = await sb.from('groups').delete().eq('id', g.id).select('id');
         if(error){ oops(error); return; }
         /* The security rules turn a non-admin's delete into "nothing deleted" rather than an error */
