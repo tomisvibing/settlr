@@ -13,6 +13,8 @@ Receipts are stored in a private Storage bucket called `receipts`, at `<group id
 
 Each group member has a `role` (`admin` or `member`) and a `left_at`. Whoever creates a group is its admin. Only admins can delete a group, remove someone who has an account, or make others admins (`set_group_admin`); a group with no admin who has an account is run by all its members. Leaving (`leave_group`) needs a zero balance and keeps the member's row, so their name stays on the group's history while `my_group_ids` stops giving them access. An invite link brings them back.
 
+Any member can archive a group (`groups.archived_at`) or restore it. While it's archived, `private.group_open` makes its expenses, splits and receipts read-only for everyone.
+
 The app's tables are in the `supabase_realtime` publication, so the app gets live updates. Realtime applies the same row-level security as a normal read.
 
 The membership helpers the security rules use (`is_member`, `my_group_ids`, `can_see_person`) live in a `private` schema. The REST API doesn't expose that schema, so the app can't call them directly.

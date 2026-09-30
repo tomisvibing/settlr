@@ -1,6 +1,6 @@
 import { state } from '../store.js';
 import { $, esc, money, byNewest, dayMonth } from '../lib/format.js';
-import { personName, nameWithYou, groupsOf, personCurrencyTotals } from '../selectors.js';
+import { personName, nameWithYou, groupsOf, personCurrencyTotals, personLocked, isMe } from '../selectors.js';
 import { avatar, swipeActs } from './shared.js';
 
 export function renderPeopleView(){
@@ -18,10 +18,12 @@ export function renderPeopleView(){
           ? `<span class="r-end">${totals.map(([c,v]) => `<span class="pill ${v>0?'pos':'neg'}">${v>0?'is owed':'owes'} ${money(Math.abs(v),c)}</span>`).join('')}</span>`
           : `<span class="pill">Settled</span>`;
         const gnames = groupsOf(p.id).map(g => esc(g.name)).join(', ');
-        return `<li><button class="row" data-action="edit-person" data-id="${p.id}">
+        /* Swipe for Edit and Delete, but only people who aren't in a group or settlement can be deleted */
+        const locked = personLocked(p.id) || isMe(p.id);
+        return `<li class="${locked ? '' : 'swipe'}"><button class="row" data-action="edit-person" data-id="${p.id}">
           ${avatar(p.id)}
           <span class="r-main"><span class="r-title">${nameWithYou(p.id)}</span><span class="r-meta">${gnames || 'Not in a group yet'}</span></span>
-          ${bal}</button></li>`;
+          ${bal}</button>${locked ? '' : swipeActs('edit-person', 'del-person', p.id)}</li>`;
       }).join('')}</ul>` : `<p class="none">No one saved yet. Add a person to get started.</p>`}</div>
     </section>
 

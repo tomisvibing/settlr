@@ -1,9 +1,28 @@
 import { state, myPersonId } from '../store.js';
 import { $, esc, money, ago, byNewest } from '../lib/format.js';
 import { balances } from '../lib/ledger.js';
-import { personName, meIn, lastActivity, myTotals } from '../selectors.js';
+import { personName, meIn, lastActivity, myTotals, isArchived, canAdmin } from '../selectors.js';
 import { groupHref } from '../router.js';
-import { avatar, groupTile, balancePill, entryInner, icon } from './shared.js';
+import { avatar, groupTile, balancePill, icon, swipeButtons } from './shared.js';
+import { activityList } from './group.js';
+
+/* Whether the Archived list is open, kept across re-renders (live updates redraw the page) */
+let archivedOpen = false;
+
+/* One group card; swipe it left for Edit, Archive and Delete (or Restore when archived) */
+function groupCard(g){
+  const me = meIn(g), v = me ? (balances(g)[me] || 0) : 0, n = g.members.length;
+  const del = canAdmin(g) ? [['del-group', 'Delete', icon.trash, 'del']] : [];
+  const acts = isArchived(g)
+    ? [['restore-group', 'Restore', icon.restore], ...del]
+    : [['edit-group', 'Edit', icon.edit], ['archive-group', 'Archive', icon.archive], ...del];
+  const when = isArchived(g) ? `archived ${ago(g.archivedAt)}` : ago(lastActivity(g));
+  return `<li class="swipe"><a class="card gcard" href="${groupHref(g)}">
+    ${groupTile(g)}
+    <span class="r-main"><span class="r-title serif">${esc(g.name)}</span><span class="r-meta">${n} ${n === 1 ? 'person' : 'people'} · ${when}</span></span>
+    ${me ? balancePill(v, g.currency) : '<span class="pill">Not in it</span>'}
+  </a>${swipeButtons(acts, g.id, g.id)}</li>`;
+}
 
 const greeting = (h = new Date().getHours()) => h < 5 ? 'Evening,' : h < 12 ? 'Morning,' : h < 18 ? 'Afternoon,' : 'Evening,';
 const joinMoney = list => list.map(([c, v]) => money(Math.abs(v), c)).join(' · ');
@@ -59,7 +78,9 @@ export function renderHome(){
     </div>`;
     return;
   }
-  const groups = state.groups.slice().sort((a, c) => lastActivity(c) - lastActivity(a));
+  const byRecent = (a, c) => lastActivity(c) - lastActivity(a);
+  const groups = state.groups.filter(g => !isArchived(g)).sort(byRecent);
+  const archived = state.groups.filter(isArchived).sort((a, c) => c.archivedAt - a.archivedAt);
   const recent = state.groups.flatMap(g => g.expenses.map(e => ({ e, g }))).sort((x, y) => byNewest(x.e, y.e)).slice(0, 5);
   app.innerHTML = `<div class="stack">
     ${greetRow()}
@@ -70,21 +91,18 @@ export function renderHome(){
         <h2>Your groups</h2>
         <div class="chipbar"><button class="btn small" data-action="join-group">Join</button><button class="btn small" data-action="new-group">New group</button></div>
       </div>
-      <ul class="cardlist">${groups.map(g => {
-        const me = meIn(g), v = me ? (balances(g)[me] || 0) : 0, n = g.members.length;
-        return `<li><a class="card gcard" href="${groupHref(g)}">
-          ${groupTile(g)}
-          <span class="r-main"><span class="r-title serif">${esc(g.name)}</span><span class="r-meta">${n} ${n === 1 ? 'person' : 'people'} · ${ago(lastActivity(g))}</span></span>
-          ${me ? balancePill(v, g.currency) : '<span class="pill">Not in it</span>'}
-        </a></li>`;
-      }).join('')}</ul>
+      ${groups.length ? `<ul class="cardlist">${groups.map(groupCard).join('')}</ul>`
+        : `<div class="card"><p class="none">No active groups. Start one, or restore one from Archived below.</p></div>`}
+      ${archived.length ? `<details class="archived" ${archivedOpen ? 'open' : ''}>
+        <summary>${icon.archive}Archived <span class="count">${archived.length}</span></summary>
+        <ul class="cardlist">${archived.map(groupCard).join('')}</ul>
+      </details>` : ''}
     </section>
 
     <section class="section">
       <div class="section-head"><h2>Lately</h2>${recent.length ? '<a class="btn small" href="#/activity">See all</a>' : ''}</div>
-      <div class="card">${recent.length
-        ? `<ul class="rows">${recent.map(({ e, g }) => `<li><a class="row ${e.type === 'payment' ? 'payment' : ''}" href="${groupHref(g)}">${entryInner(e, g, true)}</a></li>`).join('')}</ul>`
-        : `<p class="none">Nothing yet. Tap + to add the first expense.</p>`}</div>
+      <div class="card">${recent.length ? activityList(recent, null, true) : `<p class="none">Nothing yet. Tap + to add the first expense.</p>`}</div>
     </section>
   </div>`;
+  app.querySelector('details.archived')?.addEventListener('toggle', ev => { archivedOpen = ev.target.open; });
 }

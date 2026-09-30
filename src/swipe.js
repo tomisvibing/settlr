@@ -1,4 +1,5 @@
-/* Swipe a row left to reveal Edit and Delete (rows marked li.swipe, buttons from swipeActs).
+/* Swipe a row or card left to reveal its actions (items marked li.swipe, buttons from swipeActs;
+   the li's first child is the part that slides).
    Touch only: with a mouse, a click opens the edit sheet, which has Delete too. */
 
 let openLi = null;
@@ -54,7 +55,7 @@ export function initSwipe(){
 
   /* Capture phase, so these run before the page's data-action handler */
   document.addEventListener('click', ev => {
-    if(swallowClick && ev.target.closest('li.swipe > .row')){ ev.preventDefault(); ev.stopPropagation(); swallowClick = false; return; }
+    if(swallowClick && ev.target.closest('li.swipe > :first-child')){ ev.preventDefault(); ev.stopPropagation(); swallowClick = false; return; }
     if(!openLi) return;
     if(ev.target.closest('.swipe-acts') && openLi.contains(ev.target)){ const li = openLi; setTimeout(() => li.isConnected && closeRow(li), 0); return; }
     /* A tap on an open row (or anywhere else) just closes it */

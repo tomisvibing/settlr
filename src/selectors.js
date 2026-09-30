@@ -3,6 +3,9 @@ import { state } from './store.js';
 import { esc } from './lib/format.js';
 import { balances } from './lib/ledger.js';
 
+/* Archived groups are frozen: readable, but no new or changed entries (the database enforces it) */
+export const isArchived = g => !!g?.archivedAt;
+export const activeGroups = () => state.groups.filter(g => !g.archivedAt);
 export function group(){ return state.groups.find(x => x.id === state.activeGroupId) || null; }
 export function person(id){ return state.people.find(p => p.id === id) || { id, name:'Someone' }; }
 export const personName = id => person(id).name;

@@ -49,7 +49,7 @@ export function initEvents(){
     else if(a==='del-person'){
       if(!personLocked(b.dataset.id) && await askConfirm({ title: 'Delete this person?', body: 'They’re not in any group or settlement, so nothing else changes.' })){
         const { error } = await sb.from('people').delete().eq('id', b.dataset.id);
-        if(error){ fail(describeError(error)); return; }
+        if(error){ oops(error); return; }
         closeDialog(); await refresh();
       }
     }
@@ -100,6 +100,24 @@ export function initEvents(){
         closeDialog(); navigate('#/'); await refresh();
         toast(`You left ${g.name}.`);
       }
+    }
+    else if(a==='archive-group' || a==='restore-group'){
+      if(!g) return;
+      const archiving = a === 'archive-group';
+      if(archiving){
+        const unsettled = Object.values(balances(g)).some(v => v !== 0);
+        const ok = await askConfirm({
+          title: `Archive “${g.name}”?`,
+          body: (unsettled ? 'Some balances aren’t settled yet. They’ll stay as they are, and still count in your totals. ' : '')
+            + 'It moves to Archived on Home and is frozen: nobody can add or change anything until someone restores it.',
+          confirmLabel: 'Archive', danger: false,
+        });
+        if(!ok) return;
+      }
+      const { error } = await sb.from('groups').update({ archived_at: archiving ? new Date().toISOString() : null }).eq('id', g.id);
+      if(error){ oops(error); return; }
+      closeDialog(); await refresh();
+      toast(archiving ? `Archived ${g.name}. It’s under Archived on Home.` : `Restored ${g.name}.`);
     }
     else if(a==='del-group'){
       if(!g || !canAdmin(g)) return;
