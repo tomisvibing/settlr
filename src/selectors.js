@@ -1,5 +1,6 @@
 /* Read-only lookups over the loaded state */
-import { state } from './store.js';
+import { state, session } from './store.js';
+import { accountPhoto } from './lib/avatar.js';
 import { esc } from './lib/format.js';
 import { balances } from './lib/ledger.js';
 
@@ -13,6 +14,8 @@ export const personName = id => person(id).name;
 export const isMe = pid => state.myIds.has(pid);
 export function meIn(g){ return g.members.find(isMe) || null; }
 export function defaultPayer(g){ return meIn(g) || g.members[0]; }
+/* A person's Google photo; my own falls back to my sign-in details until the database has it */
+export const personPhoto = pid => person(pid).photo || (isMe(pid) ? accountPhoto(session?.user) : null);
 export const nameWithYou = pid => esc(personName(pid)) + (isMe(pid) ? ' <span class="you">(you)</span>' : '');
 export function lastActivity(g){ return g.expenses.reduce((m,e) => Math.max(m, e.createdAt), g.createdAt || 0); }
 export function groupsOf(pid){ return state.groups.filter(g => g.members.includes(pid)); }

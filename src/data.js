@@ -4,6 +4,7 @@ import { toast } from './ui.js';
 import { render } from './router.js';
 import { reportError } from './monitoring.js';
 import { filterActivity } from './views/group.js';
+import { safeAvatarUrl } from './lib/avatar.js';
 
 export let lastLoadedAt = 0;
 
@@ -24,7 +25,7 @@ export async function loadAllData(){
   const commentsByExpense = {};
   comments.forEach(c => { (commentsByExpense[c.expense_id] ||= []).push({ id: c.id, body: c.body, authorUser: c.author_user, authorPerson: c.author_person, createdAt: new Date(c.created_at).getTime() }); });
 
-  state.people = people.map(p => ({ id:p.id, name:p.name, userId:p.user_id }));
+  state.people = people.map(p => ({ id:p.id, name:p.name, userId:p.user_id, photo:safeAvatarUrl(p.avatar_url) }));
   state.myIds = new Set(state.people.filter(p => p.userId === session.user.id).map(p => p.id));
   if(myPersonId) state.myIds.add(myPersonId);
 

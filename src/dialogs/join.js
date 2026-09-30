@@ -3,6 +3,7 @@ import { state } from '../store.js';
 import { esc } from '../lib/format.js';
 import { toast } from '../ui.js';
 import { form, setDraft, openDialog, fail } from './dialog.js';
+import { syncMyPhoto } from '../photo.js';
 
 export function openJoinGroup(prefill){
   setDraft({});
@@ -24,6 +25,7 @@ export function openJoinGroup(prefill){
       if(data && data.length){ openClaimPicker(code, data); return false; }
       const { data: gid, error: je } = await sb.rpc('join_group_by_code', { code });
       if(je) return fail(je.message || "Couldn't join — check the code.");
+      syncMyPhoto();
       return '#/g/' + encodeURIComponent(gid);
     });
   if(prefill) form.requestSubmit();
@@ -46,6 +48,7 @@ function openClaimPicker(code, candidates){
       const claimId = form.claim.value || null;
       const { data: gid, error } = await sb.rpc('join_group_by_code', { code, claim_person_id: claimId });
       if(error) return fail(error.message || "Couldn't join — check the code.");
+      syncMyPhoto();
       return '#/g/' + encodeURIComponent(gid);
     });
 }
