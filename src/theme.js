@@ -18,6 +18,11 @@ export function applyTheme(){
   if(t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme;
   syncBarColour(t === 'light' || t === 'dark' ? t : null);
 }
+/* What's on screen now: the chosen theme, or the device's when it's set to match */
+export const isNight = () => {
+  const t = getThemeOverride();
+  return t === 'dark' || (t !== 'light' && !!window.matchMedia?.('(prefers-color-scheme: dark)').matches);
+};
 export function setTheme(t){
   try{ if(t === 'light' || t === 'dark') localStorage.setItem(THEME_KEY, t); else localStorage.removeItem(THEME_KEY); }catch(e){}
   applyTheme();

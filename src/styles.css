@@ -216,6 +216,10 @@ li.swipe{position:relative;overflow:hidden}
 .to-overview{position:fixed;inset-inline-end:16px;bottom:calc(16px + var(--safe-b));display:inline-flex;align-items:center;gap:10px;min-height:52px;padding:0 16px 0 20px;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);font-weight:700;font-size:15px;text-decoration:none;box-shadow:var(--float)}
 .to-overview svg{width:20px;height:20px;flex:none}
 @media (hover:hover){.to-overview:hover{border-color:var(--ink)}}
+/* Day/night, bottom left: just an outline, no fill */
+.theme-toggle{position:fixed;inset-inline-start:16px;bottom:calc(16px + var(--safe-b));width:52px;height:52px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:16px;background:transparent;color:var(--ink);cursor:pointer}
+.theme-toggle svg{width:22px;height:22px}
+@media (hover:hover){.theme-toggle:hover{border-color:var(--ink)}}
 @media (prefers-reduced-motion: no-preference){
   .start-add,.to-overview{transition:scale .15s ease-out}
   .start-add:active:not([disabled]),.to-overview:active{scale:.96}

@@ -1,7 +1,8 @@
 /* Page-wide event delegation: every button carries a data-action */
 import { sb } from './supabase.js';
 import { state, session, myPersonId } from './store.js';
-import { setTheme } from './theme.js';
+import { setTheme, isNight } from './theme.js';
+import { syncThemeToggle } from './views/start.js';
 import { toast, forgetTrigger } from './ui.js';
 import { group, personLocked, meIn, isAdmin, canAdmin } from './selectors.js';
 import { balances } from './lib/ledger.js';
@@ -69,6 +70,7 @@ export function initEvents(){
       }
     }
     else if(a==='close') closeDialog();
+    else if(a==='toggle-theme'){ setTheme(isNight() ? 'light' : 'dark'); syncThemeToggle(); }
     else if(a==='skip') $('#app').focus();
     else if(a==='add-member') await addPendingMember();
     else if(a==='invite'){ if(g) await shareInvite(g); }
