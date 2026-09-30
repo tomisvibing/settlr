@@ -28,7 +28,23 @@ export function describeError(err){
   return [err?.message, err?.details, err?.hint].filter(Boolean).join(' — ') || 'Could not save. Try again.';
 }
 
+/* Tapping the dimmed area around a sheet closes it, like the × or Cancel. A tap has to start and
+   end outside the sheet, so dragging a selection out of a text field doesn't close it by accident. */
+export function closeOnBackdrop(d, close){
+  const outside = ev => {
+    if(ev.target !== d) return false;
+    const r = d.getBoundingClientRect();
+    return ev.clientX < r.left || ev.clientX > r.right || ev.clientY < r.top || ev.clientY > r.bottom;
+  };
+  let startedOutside = false;
+  d.addEventListener('pointerdown', ev => { startedOutside = outside(ev); });
+  d.addEventListener('click', ev => { if(startedOutside && outside(ev)) close(); startedOutside = false; });
+}
+
 export function initDialog(){
+  closeOnBackdrop(dlg, closeDialog);
+  const confirmDlg = $('#confirmDlg');
+  if(confirmDlg) closeOnBackdrop(confirmDlg, () => confirmDlg.close());
   form.addEventListener('submit', async ev => {
     ev.preventDefault();
     if(!onSubmit) return;
