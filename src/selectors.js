@@ -14,6 +14,18 @@ export const nameWithYou = pid => esc(personName(pid)) + (isMe(pid) ? ' <span cl
 export function lastActivity(g){ return g.expenses.reduce((m,e) => Math.max(m, e.createdAt), g.createdAt || 0); }
 export function groupsOf(pid){ return state.groups.filter(g => g.members.includes(pid)); }
 export function personLocked(pid){ return state.groups.some(g => g.members.includes(pid)) || state.payments.some(p => p.from===pid || p.to===pid); }
+/* Runs the group: an admin, or anyone when no admin with an account is left (matches private.is_group_admin) */
+export function canAdmin(g){
+  const linkedAdmins = g.admins.filter(pid => person(pid).userId);
+  return linkedAdmins.some(isMe) || (!linkedAdmins.length && !!meIn(g));
+}
+export const isAdmin = (g, pid) => g.admins.includes(pid);
+export const hasAccount = pid => !!person(pid).userId;
+/* Everyone an entry's editor should see: current members plus anyone who has since left but is on this entry */
+export function rosterFor(g, e){
+  if(!e) return g.members;
+  return [...new Set([...g.members, e.paidBy, ...Object.keys(e.splits)])];
+}
 export function involved(g, mid){ return g.expenses.some(e => e.paidBy === mid || mid in e.splits); }
 export const spentIn = g => g.expenses.filter(e => e.type !== 'payment').reduce((s,e) => s+e.amount, 0);
 /* Every group balance plus every standalone settlement, grouped by currency */

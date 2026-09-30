@@ -240,6 +240,10 @@ legend{font-size:13px;font-weight:600;margin-bottom:6px;padding:0}
 .srow .nm{flex:1;min-width:0}
 .srow input:not([type=checkbox]){width:6.5rem;flex:none;text-align:right;min-height:40px}
 .sval{color:var(--muted);font-size:13px;white-space:nowrap}
+.grp-exit{display:flex;gap:4px;margin:-4px 0 -6px -8px}
+.tag{font-size:12px;font-weight:700;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 8px;white-space:nowrap}
+.srow .btn.small{min-height:30px;padding:0 10px;font-size:13px;border-color:var(--line);flex:none}
+.srow .btn.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .hint{margin:0;font-size:14px;color:var(--muted);font-weight:500}
 .hint.bad{color:var(--neg)}
 .err{margin:0;color:var(--neg);font-weight:600}

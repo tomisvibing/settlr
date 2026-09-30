@@ -1,7 +1,13 @@
 /* The money maths. Amounts are integer pence throughout. */
 
 /* Split an integer total by weights, largest-remainder so pennies always add up */
-export function distribute(total, weights){
+export function distribute(total, weights, step = 1){
+  /* Whole units for currencies without pence (a ¥1,000 bill split three ways is ¥334 + ¥333 + ¥333) */
+  if(step > 1 && total % step === 0){
+    const out = distribute(total / step, weights);
+    if(out) for(const id in out) out[id] *= step;
+    return out;
+  }
   const ids = Object.keys(weights).filter(id => weights[id] > 0);
   const W = ids.reduce((s,id) => s + weights[id], 0);
   if(!W) return null;

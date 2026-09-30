@@ -3,6 +3,7 @@ import { state, session, myPersonId } from './store.js';
 import { toast } from './ui.js';
 import { render } from './router.js';
 import { reportError } from './monitoring.js';
+import { filterActivity } from './views/group.js';
 
 export let lastLoadedAt = 0;
 
@@ -36,12 +37,21 @@ export async function loadAllData(){
     });
   });
 
-  const membersByGroup = {};
-  members.forEach(m => { (membersByGroup[m.group_id] ||= []).push(m.person_id); });
+  /* members: who's in the group now; left: who left (their names stay on its history); admins: who runs it */
+  const membersByGroup = {}, leftByGroup = {}, adminsByGroup = {};
+  members.forEach(m => {
+    if(m.left_at) (leftByGroup[m.group_id] ||= []).push(m.person_id);
+    else (membersByGroup[m.group_id] ||= []).push(m.person_id);
+    if(m.role === 'admin' && !m.left_at) (adminsByGroup[m.group_id] ||= []).push(m.person_id);
+  });
 
-  state.groups = groups.map(g => ({
+  /* Only groups I'm in now. The security rules already hide groups I've left; this keeps the
+     screen right in the moment between leaving and the next load */
+  const mineNow = g => (membersByGroup[g.id] || []).some(pid => state.myIds.has(pid));
+  state.groups = groups.filter(mineNow).map(g => ({
     id: g.id, name: g.name, currency: g.currency, inviteCode: g.invite_code, createdAt: new Date(g.created_at).getTime(),
-    members: membersByGroup[g.id] || [], expenses: expensesByGroup[g.id] || []
+    members: membersByGroup[g.id] || [], left: leftByGroup[g.id] || [], admins: adminsByGroup[g.id] || [],
+    expenses: expensesByGroup[g.id] || []
   }));
 
   state.payments = payments.map(p => ({
@@ -49,6 +59,18 @@ export async function loadAllData(){
     note:p.note, date:p.payment_date, createdAt:new Date(p.created_at).getTime()
   }));
   lastLoadedAt = Date.now();
+}
+/* A reload triggered by someone else's change (live.js): no toast on failure, and the activity
+   search keeps its text and focus so typing isn't interrupted */
+export async function refreshQuietly(){
+  try{ await loadAllData(); }
+  catch(err){ reportError(err, 'live refresh'); return; }
+  const search = document.querySelector('[data-filter=activity]');
+  const q = search?.value || '', focused = search && document.activeElement === search;
+  render();
+  const again = document.querySelector('[data-filter=activity]');
+  if(again && q){ again.value = q; filterActivity(q); }
+  if(again && focused) again.focus();
 }
 export async function refresh(){
   try{ await loadAllData(); }

@@ -15,11 +15,12 @@ export async function shareInvite(g){
   catch(e){ window.prompt('Copy this invite link:', url); }
 }
 export function exportGroupCsv(g){
-  const rows = [['Date','Description','Type','Amount','Currency','Paid by', ...g.members.map(personName)]];
+  const everyone = [...g.members, ...g.left];
+  const rows = [['Date','Description','Type','Amount','Currency','Paid by', ...everyone.map(personName)]];
   [...g.expenses].sort((a,c) => byNewest(c,a)).forEach(e => rows.push([
     e.date || '', e.type === 'payment' ? 'Payment' : e.desc, e.type === 'payment' ? 'Payment' : 'Expense',
     (e.amount/100).toFixed(2), g.currency, personName(e.paidBy),
-    ...g.members.map(mid => e.splits[mid] ? (e.splits[mid]/100).toFixed(2) : '')
+    ...everyone.map(mid => e.splits[mid] ? (e.splits[mid]/100).toFixed(2) : '')
   ]));
   download(`${slug(g.name)}.csv`, '﻿' + rows.map(r => r.map(csvCell).join(',')).join('\r\n'), 'text/csv;charset=utf-8');
 }

@@ -3,7 +3,9 @@ import { sb } from './supabase.js';
 import { state, session, myPersonId } from './store.js';
 import { setTheme } from './theme.js';
 import { toast } from './ui.js';
-import { group, personLocked } from './selectors.js';
+import { group, personLocked, meIn, isAdmin, canAdmin } from './selectors.js';
+import { balances } from './lib/ledger.js';
+import { money } from './lib/format.js';
 import { refresh, lastLoadedAt } from './data.js';
 import { render, navigate } from './router.js';
 import { rememberPendingJoin } from './auth.js';
@@ -15,7 +17,7 @@ import { openVoiceExpense, abortVoice } from './dialogs/voice.js';
 import { openPayment } from './dialogs/payment.js';
 import { openSettlement } from './dialogs/settlement.js';
 import { openPerson } from './dialogs/person.js';
-import { openGroup, addPendingMember } from './dialogs/group.js';
+import { openGroup, addPendingMember, renderMembers } from './dialogs/group.js';
 import { openJoinGroup } from './dialogs/join.js';
 import { openProfile, openDeleteAccount, signOut } from './dialogs/account.js';
 import { askConfirm } from './dialogs/confirm.js';
@@ -77,12 +79,36 @@ export function initEvents(){
         closeDialog(); await refresh();
       }
     }
+    else if(a==='toggle-admin'){
+      ev.preventDefault();
+      if(!g || !canAdmin(g)) return;
+      const make = !isAdmin(g, b.dataset.pid);
+      b.disabled = true;
+      const { error } = await sb.rpc('set_group_admin', { gid: g.id, pid: b.dataset.pid, make_admin: make });
+      if(error){ b.disabled = false; fail(error.message || describeError(error)); return; }
+      await refresh(); renderMembers();
+    }
+    else if(a==='leave-group'){
+      if(!g) return;
+      const me = meIn(g), bal = me ? (balances(g)[me] || 0) : 0;
+      if(bal){ fail(bal < 0 ? `Settle up first: you owe ${money(-bal, g.currency)} in this group.` : `Settle up first: you’re owed ${money(bal, g.currency)} in this group.`); return; }
+      if(await askConfirm({ title: `Leave “${g.name}”?`, body: 'It disappears from your list. Everyone else keeps its history, with your name on the expenses you were part of. An invite link brings you back.', confirmLabel: 'Leave group' })){
+        const { error } = await sb.rpc('leave_group', { gid: g.id });
+        if(error){ oops(error); return; }
+        state.activeGroupId = null;
+        closeDialog(); navigate('#/'); await refresh();
+        toast(`You left ${g.name}.`);
+      }
+    }
     else if(a==='del-group'){
+      if(!g || !canAdmin(g)) return;
       if(await askConfirm({ title: `Delete “${g.name}”?`, body: 'This deletes the group and all its expenses for everyone in it. The people in it stay saved.', confirmLabel: 'Delete group' })){
         /* Receipts go first: once the group is gone, nobody is a member who may delete them */
         if(g.expenses.some(e => e.receipt)) await removeReceipts(await groupReceiptPaths(g.id));
-        const { error } = await sb.from('groups').delete().eq('id', g.id);
-        if(error){ fail(describeError(error)); return; }
+        const { data: gone, error } = await sb.from('groups').delete().eq('id', g.id).select('id');
+        if(error){ oops(error); return; }
+        /* The security rules turn a non-admin's delete into "nothing deleted" rather than an error */
+        if(!gone?.length){ fail('Only an admin can delete this group.'); return; }
         state.activeGroupId = null;
         closeDialog(); navigate('#/'); await refresh();
         toast(`Deleted ${g.name}.`);

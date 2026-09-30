@@ -6,6 +6,7 @@ import { initExpenseDialog } from './dialogs/expense.js';
 import { initGroupDialog } from './dialogs/group.js';
 import { initEvents } from './events.js';
 import { initSwipe } from './swipe.js';
+import { initLive } from './live.js';
 import { initAuth } from './auth.js';
 
 initMonitoring();
@@ -15,4 +16,5 @@ initExpenseDialog();
 initGroupDialog();
 initEvents();
 initSwipe();
+initLive();
 initAuth();

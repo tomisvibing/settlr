@@ -1,7 +1,7 @@
 import { sb } from '../supabase.js';
 import { state, session } from '../store.js';
-import { $, esc, CURRENCIES } from '../lib/format.js';
-import { group, personName, involved } from '../selectors.js';
+import { $, esc, currencyOptions } from '../lib/format.js';
+import { group, personName, involved, isMe, meIn, canAdmin, isAdmin, hasAccount } from '../selectors.js';
 import { form, draft, setDraft, openDialog, fail, describeError } from './dialog.js';
 
 export function openGroup(isNew){
@@ -10,13 +10,16 @@ export function openGroup(isNew){
   openDialog(`
     <h2>${isNew?'New group':'Edit group'}</h2>
     <label>Group name<input name="name" maxlength="50" value="${esc(g?.name||'')}" placeholder="Flat 4B, Lisbon weekend"></label>
-    <label>Currency<select name="currency">${CURRENCIES.map(c => `<option ${c===(g?.currency||'GBP')?'selected':''}>${c}</option>`).join('')}</select></label>
+    <label>Currency<select name="currency">${currencyOptions(g?.currency || 'GBP')}</select></label>
     ${g?`<p class="hint">Invite code: <b>${esc(g.inviteCode)}</b> <button type="button" class="btn small" data-action="invite">Share invite link</button></p>`:''}
     <fieldset><legend>People in this group</legend><div id="mlist" class="srows"></div></fieldset>
     <div class="mrow"><input name="newMember" maxlength="30" placeholder="Add a saved or new name" aria-label="Person's name"><button type="button" class="btn" data-action="add-member">Add</button></div>
     <p class="err" role="alert"></p>
+    ${g ? `<div class="grp-exit">
+      ${meIn(g) ? `<button type="button" class="btn danger" data-action="leave-group">Leave group</button>` : ''}
+      ${canAdmin(g) ? `<button type="button" class="btn danger" data-action="del-group">Delete group</button>` : ''}
+    </div>` : ''}
     <div class="dlg-actions">
-      ${g?`<button type="button" class="btn danger" data-action="del-group">Delete group</button>`:''}
       <span class="sp"></span>
       <button type="button" class="btn" data-action="close">Cancel</button>
       <button type="submit" class="btn primary">${isNew?'Create group':'Save changes'}</button>
@@ -45,14 +48,31 @@ export function openGroup(isNew){
     });
   renderMembers();
 }
-function renderMembers(){
-  const box = $('#mlist');
+/* Why a ticked person can't be unticked, or '' if they can */
+function lockReason(g, pid){
+  if(!g || !g.members.includes(pid)) return '';
+  if(involved(g, pid)) return 'in an expense';
+  if(isMe(pid)) return 'you';
+  if(hasAccount(pid) && !canAdmin(g)) return 'admins can remove';
+  return '';
+}
+export function renderMembers(){
+  const box = $('#mlist'); if(!box) return;
   const list = state.people.slice().sort((a,b) => a.name.localeCompare(b.name));
   const editingGroup = draft.editingGroupId ? state.groups.find(x => x.id === draft.editingGroupId) : null;
   box.innerHTML = list.length ? list.map(p => {
+    const g = editingGroup;
+    /* Someone who left comes back through an invite link, not from here */
+    if(g?.left.includes(p.id) && !draft.members.includes(p.id)) return `<label class="srow"><input type="checkbox" disabled><span class="nm">${esc(p.name)}</span><span class="sval">left the group</span></label>`;
     const checked = draft.members.includes(p.id);
-    const locked = checked && editingGroup && editingGroup.members.includes(p.id) && involved(editingGroup, p.id);
-    return `<label class="srow"><input type="checkbox" data-pid="${p.id}" ${checked?'checked':''} ${locked?'disabled':''}><span class="nm">${esc(p.name)}</span>${locked?'<span class="sval">in an expense</span>':''}</label>`;
+    const why = checked ? lockReason(g, p.id) : '';
+    const inGroup = g?.members.includes(p.id);
+    const admin = inGroup && isAdmin(g, p.id);
+    /* Admins can hand the role to anyone in the group with an account */
+    const roleCtl = inGroup && hasAccount(p.id) && canAdmin(g)
+      ? `<button type="button" class="btn small ${admin ? 'on' : ''}" data-action="toggle-admin" data-pid="${p.id}" aria-pressed="${admin}" title="${admin ? 'Admin. Tap to remove' : 'Let them run the group'}">${admin ? 'Admin' : 'Make admin'}</button>`
+      : admin ? '<span class="tag">Admin</span>' : '';
+    return `<label class="srow"><input type="checkbox" data-pid="${p.id}" ${checked?'checked':''} ${why?'disabled':''}><span class="nm">${esc(p.name)}${isMe(p.id) ? ' <span class="you">(you)</span>' : ''}</span>${why && why !== 'you' ? `<span class="sval">${why}</span>` : ''}${roleCtl}</label>`;
   }).join('') : `<p class="hint" style="margin:0">Nobody's here yet.</p>`;
 }
 export async function addPendingMember(){

@@ -1,6 +1,6 @@
 import { sb } from '../supabase.js';
 import { state, myPersonId } from '../store.js';
-import { esc, toPence, today, CURRENCIES } from '../lib/format.js';
+import { esc, toPence, today, currencyOptions, plainAmount } from '../lib/format.js';
 import { form, draft, setDraft, openDialog, fail, describeError } from './dialog.js';
 
 export function openSettlement(opts = {}){
@@ -14,8 +14,8 @@ export function openSettlement(opts = {}){
     <h2>${e?'Edit settlement':'Record a settlement'}</h2>
     <div class="two"><label>From${sel('from',from)}</label><label>To${sel('to',to)}</label></div>
     <div class="two">
-      <label>Amount<input name="amount" inputmode="decimal" autocomplete="off" value="${e?(e.amount/100).toFixed(2):''}" placeholder="0.00"></label>
-      <label>Currency<select name="currency">${CURRENCIES.map(c => `<option ${c===(e?.currency||'GBP')?'selected':''}>${c}</option>`).join('')}</select></label>
+      <label>Amount<input name="amount" inputmode="decimal" autocomplete="off" value="${e ? plainAmount(e.amount, e.currency) : ''}" placeholder="0.00"></label>
+      <label>Currency<select name="currency">${currencyOptions(e?.currency || 'GBP')}</select></label>
     </div>
     <div class="two">
       <label>Date<input type="date" name="date" value="${e?.date||today()}"></label>
