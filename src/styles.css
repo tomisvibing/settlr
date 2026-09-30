@@ -1,16 +1,17 @@
-/* ---------- Tokens: crisp mono. Flat surfaces, hairline edges, #1a1310 ink. Day by default; night follows the phone or the You screen ---------- */
+/* ---------- Tokens: midnight on cream. Flat surfaces, hairline edges. Day by default; night follows the phone or the You screen ---------- */
 :root{
-  /* Colour is kept for what you owe, deleting, danger and errors; everything else is ink and warm grey */
-  --bg:#FAFAF9; --surface:#FFFFFF; --field:#FFFFFF; --sheet:#FFFFFF; --bar:#FFFFFF;
-  --ink:#1a1310; --muted:#5F5954; --faint:#857F7A;
-  --line:rgba(26,19,16,.12); --line-soft:rgba(26,19,16,.07);
-  --pos:var(--ink); --neg:#B4351F; --neg-soft:rgba(180,53,31,.08); --owe:var(--neg); --owe-soft:var(--neg-soft);
-  --accent:#1a1310; --accent-ink:#FFFFFF; --focus:#1a1310;
-  --pill-on:rgba(26,19,16,.06); --scrim:rgba(26,19,16,.4);
+  /* Midnight ink (#0D1430, near black but blue) on a pale cream paper. Colour beyond that is kept for
+     what you owe, deleting, danger and errors */
+  --bg:#F6F2EA; --surface:#FFFCF6; --field:#FFFCF6; --sheet:#FFFCF6; --bar:#FFFCF6;
+  --ink:#0D1430; --muted:#4E5470; --faint:#7F839A;
+  --line:rgba(13,20,48,.13); --line-soft:rgba(13,20,48,.07);
+  --pos:var(--ink); --neg:#B3321E; --neg-soft:rgba(179,50,30,.08); --owe:var(--neg); --owe-soft:var(--neg-soft);
+  --accent:#0D1430; --accent-ink:#FFFCF6; --focus:#0D1430;
+  --pill-on:rgba(13,20,48,.06); --scrim:rgba(8,13,31,.45);
   /* Only things that float over the page (bars, sheets, the overview button) get a shadow */
-  --float:0 1px 2px rgba(26,19,16,.06),0 8px 24px rgba(26,19,16,.08);
-  /* Faces and group tiles: six flat warm greys */
-  --t1:#F1F0EE; --t2:#E8E6E3; --t3:#EDEBE8; --t4:#E2DFDB; --t5:#EAE7E3; --t6:#DEDAD5;
+  --float:0 1px 2px rgba(13,20,48,.06),0 8px 24px rgba(13,20,48,.09);
+  /* Faces and group tiles: six flat tones between the cream and a mist blue */
+  --t1:#EFE9DD; --t2:#E6E2DA; --t3:#E3E5EC; --t4:#EAE4D6; --t5:#DDE0E9; --t6:#E8E6E1;
   color-scheme:light;
   --font:"Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   /* Form field edges: at least 3:1 against the field and the page, so a field reads as a field */
@@ -21,26 +22,26 @@
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#121010; --surface:#1B1816; --field:#1B1816; --sheet:#1B1816; --bar:#1B1816;
-    --ink:#F4F1EE; --muted:#ADA69F; --faint:#7F7872;
-    --line:rgba(255,255,255,.13); --line-soft:rgba(255,255,255,.07);
+    --bg:#080D1F; --surface:#10172E; --field:#10172E; --sheet:#10172E; --bar:#10172E;
+    --ink:#F4EFE4; --muted:#A8ADC2; --faint:#737995;
+    --line:rgba(244,239,228,.13); --line-soft:rgba(244,239,228,.07);
     --neg:#FF8F7A; --neg-soft:rgba(255,143,122,.12);
-    --accent:#F4F1EE; --accent-ink:#1a1310; --focus:#F4F1EE;
-    --pill-on:rgba(255,255,255,.08); --scrim:rgba(0,0,0,.6);
-    --float:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
-    --t1:#2E2A27; --t2:#36322E; --t3:#2A2624; --t4:#3D3834; --t5:#322E2B; --t6:#443F3A;
+    --accent:#F4EFE4; --accent-ink:#0D1430; --focus:#F4EFE4;
+    --pill-on:rgba(244,239,228,.08); --scrim:rgba(2,4,12,.65);
+    --float:0 1px 2px rgba(0,0,0,.45),0 8px 24px rgba(0,0,0,.4);
+    --t1:#1C2542; --t2:#222B48; --t3:#19213C; --t4:#27304E; --t5:#1F2845; --t6:#2B3453;
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#121010; --surface:#1B1816; --field:#1B1816; --sheet:#1B1816; --bar:#1B1816;
-  --ink:#F4F1EE; --muted:#ADA69F; --faint:#7F7872;
-  --line:rgba(255,255,255,.13); --line-soft:rgba(255,255,255,.07);
+  --bg:#080D1F; --surface:#10172E; --field:#10172E; --sheet:#10172E; --bar:#10172E;
+  --ink:#F4EFE4; --muted:#A8ADC2; --faint:#737995;
+  --line:rgba(244,239,228,.13); --line-soft:rgba(244,239,228,.07);
   --neg:#FF8F7A; --neg-soft:rgba(255,143,122,.12);
-  --accent:#F4F1EE; --accent-ink:#1a1310; --focus:#F4F1EE;
-  --pill-on:rgba(255,255,255,.08); --scrim:rgba(0,0,0,.6);
-  --float:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
-  --t1:#2E2A27; --t2:#36322E; --t3:#2A2624; --t4:#3D3834; --t5:#322E2B; --t6:#443F3A;
+  --accent:#F4EFE4; --accent-ink:#0D1430; --focus:#F4EFE4;
+  --pill-on:rgba(244,239,228,.08); --scrim:rgba(2,4,12,.65);
+  --float:0 1px 2px rgba(0,0,0,.45),0 8px 24px rgba(0,0,0,.4);
+  --t1:#1C2542; --t2:#222B48; --t3:#19213C; --t4:#27304E; --t5:#1F2845; --t6:#2B3453;
   color-scheme:dark;
 }
 
