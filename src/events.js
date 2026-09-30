@@ -11,7 +11,7 @@ import { render, navigate } from './router.js';
 import { rememberPendingJoin } from './auth.js';
 import { shareInvite, exportGroupCsv, exportAll } from './share.js';
 import { filterActivity } from './views/group.js';
-import { dlg, closeDialog, fail, describeError } from './dialogs/dialog.js';
+import { dlg, draft, closeDialog, fail, describeError } from './dialogs/dialog.js';
 import { openExpense, openAddExpense } from './dialogs/expense.js';
 import { openVoiceExpense, abortVoice, finishVoice } from './dialogs/voice.js';
 import { openPayment } from './dialogs/payment.js';
@@ -38,7 +38,9 @@ export function initEvents(){
     else if(a==='join-group') openJoinGroup();
     else if(a==='add-expense') openExpense();
     else if(a==='quick-add') openAddExpense();
-    else if(a==='pick-group'){ state.activeGroupId = b.dataset.id; openExpense(); }
+    /* The expense typed on the way in travels to the group picked for it */
+    else if(a==='pick-group'){ const carry = draft?.pick; state.activeGroupId = b.dataset.id; openExpense(null, carry); }
+    else if(a==='pick-new-group') openGroup(true, { carry: draft?.pick });
     else if(a==='voice-expense') openVoiceExpense();
     else if(a==='voice-done') finishVoice();
     else if(a==='voice-type'){ abortVoice(); openExpense(); }
@@ -103,7 +105,7 @@ export function initEvents(){
         const { error } = await sb.rpc('leave_group', { gid: g.id });
         if(error){ oops(error, 'leave'); return; }
         state.activeGroupId = null;
-        closeDialog(); navigate('#/'); await refresh();
+        closeDialog(); navigate('#/overview'); await refresh();
         toast(`You left ${g.name}.`);
       }
     }
@@ -135,7 +137,7 @@ export function initEvents(){
         /* The security rules turn a non-admin's delete into "nothing deleted" rather than an error */
         if(!gone?.length){ fail('Only an admin can delete this group.'); return; }
         state.activeGroupId = null;
-        closeDialog(); navigate('#/'); await refresh();
+        closeDialog(); navigate('#/overview'); await refresh();
         toast(`Deleted ${g.name}.`);
       }
     }

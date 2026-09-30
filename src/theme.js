@@ -4,7 +4,7 @@ const THEME_KEY = 'settlr:theme';
 export function getThemeOverride(){ try{ return localStorage.getItem(THEME_KEY); }catch(e){ return null; } }
 /* The phone's status bar and app switcher take their colour from theme-color: follow the chosen theme,
    or the device's when it's set to match */
-const BAR = { light: '#F7F6F4', dark: '#26221F' };
+const BAR = { light: '#FAFAF9', dark: '#121010' };
 function syncBarColour(t){
   document.querySelectorAll('meta[name="theme-color"]').forEach(m => {
     m.dataset.media ??= m.media;
