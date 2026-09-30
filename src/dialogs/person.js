@@ -12,7 +12,7 @@ export function openPerson(pid){
   openDialog(`
     <h2>${p?'Edit person':'Add a person'}</h2>
     <label>Name<input name="name" maxlength="30" value="${esc(p?.name||'')}" placeholder="Full name"></label>
-    ${mine?`<p class="hint">This is you — it's the name other people see in shared groups.</p>`:''}
+    ${mine?`<p class="hint">This is you — it’s the name other people see in shared groups.</p>`:''}
     ${locked && !mine?`<p class="hint">To delete them, remove them from every group and settlement first.</p>`:''}
     <p class="err" role="alert"></p>
     <div class="dlg-actions">

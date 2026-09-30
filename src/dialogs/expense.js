@@ -194,8 +194,8 @@ function renderSplitRows(){
   box.innerHTML = draft.roster.map(mid => {
     const name = isMe(mid) ? 'You' : esc(personName(mid));
     if(m==='equal') return `<label class="chip"><input type="checkbox" data-sid="${mid}" ${draft.equal[mid]?'checked':''}>${avatar(mid,'sm')}${name}</label>`;
-    if(m==='exact') return `<label class="srow">${avatar(mid,'sm')}<span class="nm">${name}</span><input inputmode="decimal" autocomplete="off" aria-label="${name}'s amount" data-sid="${mid}" value="${esc(draft.exact[mid])}" placeholder="0.00"></label>`;
-    return `<label class="srow">${avatar(mid,'sm')}<span class="nm">${name}</span><span class="sval" data-share="${mid}"></span><input type="number" min="0" step="1" inputmode="numeric" aria-label="${name}'s shares" data-sid="${mid}" value="${draft.shares[mid]}"></label>`;
+    if(m==='exact') return `<label class="srow">${avatar(mid,'sm')}<span class="nm">${name}</span><input inputmode="decimal" autocomplete="off" aria-label="Amount for ${name}" data-sid="${mid}" value="${esc(draft.exact[mid])}" placeholder="0.00"></label>`;
+    return `<label class="srow">${avatar(mid,'sm')}<span class="nm">${name}</span><span class="sval" data-share="${mid}"></span><input type="number" min="0" step="1" inputmode="numeric" aria-label="Shares for ${name}" data-sid="${mid}" value="${draft.shares[mid]}"></label>`;
   }).join('');
   updateHint();
 }
@@ -337,7 +337,7 @@ async function saveExpense(){
   const desc = form.desc.value.trim();
   /* typed: in the currency it was spent in; amount: in the group's currency, which balances use */
   const typed = toPence(form.amount.value), isForeign = foreign(), step = minorStep(g.currency);
-  if(!desc) return fail('Add a short description, like "Dinner".', form.desc);
+  if(!desc) return fail('Add a short description, like “Dinner”.', form.desc);
   if(!(typed > 0)) return fail('Enter an amount above zero.', form.amount);
   if(isForeign && !(draft.rate > 0)) return fail(`Add the exchange rate: how many ${g.currency} one ${draft.cur} buys.`, form.rate);
   const amount = isForeign ? convert(typed, draft.rate, g.currency) : typed;

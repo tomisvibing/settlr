@@ -26,6 +26,8 @@ function groupCard(g){
 
 const greeting = (h = new Date().getHours()) => h < 5 ? 'Evening,' : h < 12 ? 'Morning,' : h < 18 ? 'Afternoon,' : 'Evening,';
 const joinMoney = list => list.map(([c, v]) => money(Math.abs(v), c)).join(' · ');
+/* One amount per line: a tile is too narrow for "JP¥2,400 · €329.00 · US$90.00" */
+const stackMoney = list => list.map(([c, v]) => `<span>${money(Math.abs(v), c)}</span>`).join('');
 
 function greetRow(){
   const name = personName(myPersonId) || '';
@@ -56,7 +58,7 @@ function heroCard(){
     sub = 'nobody owes anybody';
   }
   const tile1 = owed.length
-    ? `<div class="hero-tile"><span>You owe</span><b class="${owe.length ? 'neg' : ''}">${owe.length ? joinMoney(owe) : 'Nothing'}</b></div>`
+    ? `<div class="hero-tile"><span>You owe</span><b class="${owe.length ? 'neg' : ''}">${owe.length ? stackMoney(owe) : 'Nothing'}</b></div>`
     : `<div class="hero-tile"><span>You’re owed</span><b>Nothing</b></div>`;
   return `<section class="hero-card" aria-labelledby="standTitle">
     <h1 class="eyebrow" id="standTitle">Where you stand</h1>

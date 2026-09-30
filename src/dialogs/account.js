@@ -30,7 +30,7 @@ export function openDeleteAccount(){
   setDraft({});
   openDialog(`
     <h2>Delete your account?</h2>
-    <p style="margin:0">This permanently deletes your settlr account. Here's what happens:</p>
+    <p style="margin:0">This permanently deletes your settlr account. Here’s what happens:</p>
     <ul class="bullets">
       <li>Groups where nobody else has signed in are deleted, along with their expenses.</li>
       <li>Groups shared with other signed-in people stay, so their balances remain correct. Your name stays on past expenses there.</li>
@@ -48,7 +48,7 @@ export function openDeleteAccount(){
       const { error } = await sb.rpc('delete_my_account');
       if(error){
         /* PGRST202: the RPC doesn't exist yet — supabase/delete_my_account.sql hasn't been run */
-        if(error.code === 'PGRST202'){ console.warn('delete_my_account RPC missing', error); return fail("Account deletion isn't available yet. Please try again later."); }
+        if(error.code === 'PGRST202'){ console.warn('delete_my_account RPC missing', error); return fail('Account deletion isn’t available yet. Try again later.'); }
         return fail(describeError(error));
       }
       clearLocalData();

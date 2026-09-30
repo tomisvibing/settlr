@@ -19,7 +19,7 @@ export function openJoinGroup(prefill){
       const code = form.code.value.trim().toLowerCase();
       if(!code) return fail('Enter the invite code.', form.code);
       const existing = state.groups.find(x => x.inviteCode === code);
-      if(existing){ toast(`You're already in ${existing.name}.`); return '#/g/' + encodeURIComponent(existing.id); }
+      if(existing){ toast(`You’re already in ${existing.name}.`); return '#/g/' + encodeURIComponent(existing.id); }
       const { data, error } = await sb.rpc('preview_group_by_code', { code });
       if(error) return fail(describeError(error, 'join'), form.code);
       if(data && data.length){ openClaimPicker(code, data); return false; }
@@ -34,10 +34,10 @@ function openClaimPicker(code, candidates){
   setDraft({});
   openDialog(`
     <h2>Is that you?</h2>
-    <p class="hint">This group already has people who haven't signed in yet. If one of them is you, pick your name so your past expenses stay attached to you.</p>
+    <p class="hint">This group already has people who haven’t signed in yet. If one of them is you, pick your name so your past expenses stay attached to you.</p>
     <fieldset><div class="srows">
       ${candidates.map(c => `<label class="srow"><input type="radio" name="claim" value="${c.person_id}"><span class="nm">${esc(c.name)}</span></label>`).join('')}
-      <label class="srow"><input type="radio" name="claim" value="" checked><span class="nm">None of these — I'm new</span></label>
+      <label class="srow"><input type="radio" name="claim" value="" checked><span class="nm">None of these — I’m new</span></label>
     </div></fieldset>
     <p class="err" role="alert"></p>
     <div class="dlg-actions">

@@ -18,8 +18,8 @@ export function openVoiceExpense(){
   const g = group(); if(!g) return;
   if(!SpeechRecognitionCtor){
     openDialog(`
-      <h2>Voice isn't available here</h2>
-      <p class="hint">This browser doesn't support voice input. Try Chrome, Edge or Safari, or type the expense in.</p>
+      <h2>Voice isn’t available here</h2>
+      <p class="hint">This browser doesn’t support voice input. Try Chrome, Edge or Safari, or type the expense in.</p>
       <div class="dlg-actions"><span class="sp"></span><button type="button" class="btn" data-action="close">Close</button><button type="button" class="btn primary" data-action="voice-type">Type it in</button></div>`, () => false);
     return;
   }
