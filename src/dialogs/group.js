@@ -13,7 +13,7 @@ export function openGroup(isNew){
     <label>Currency<select name="currency" ${g?.expenses.length ? 'disabled' : ''}>${currencyOptions(g?.currency || 'GBP')}</select>${g?.expenses.length ? '<span class="hint" style="font-weight:400">Fixed now the group has expenses. Each expense can still be in any currency.</span>' : ''}</label>
     ${g?`<p class="hint">Invite code: <b>${esc(g.inviteCode)}</b> <button type="button" class="btn small" data-action="invite">Share invite link</button></p>`:''}
     <fieldset><legend>People in this group</legend><div id="mlist" class="srows"></div></fieldset>
-    <div class="mrow"><input name="newMember" maxlength="30" placeholder="Add a saved or new name" aria-label="Person's name"><button type="button" class="btn" data-action="add-member">Add</button></div>
+    <div class="mrow"><label>Add someone<input name="newMember" maxlength="30" placeholder="A saved or new name" autocomplete="off"></label><button type="button" class="btn" data-action="add-member">Add</button></div>
     <p class="err" role="alert"></p>
     ${g ? `<div class="grp-exit">
       ${isArchived(g) ? `<button type="button" class="btn" data-action="restore-group">Restore group</button>` : `<button type="button" class="btn" data-action="archive-group">Archive group</button>`}
@@ -27,8 +27,8 @@ export function openGroup(isNew){
     </div>`, async () => {
       await addPendingMember();
       const name = form.name.value.trim();
-      if(!name) return fail('Give the group a name.');
-      if(draft.members.length < 2) return fail('Add at least two people.');
+      if(!name) return fail('Give the group a name.', form.name);
+      if(draft.members.length < 2) return fail('Add at least two people.', form.newMember);
       const chosen = draft.members.map(id => personName(id).toLowerCase());
       if(new Set(chosen).size !== chosen.length) return fail('Two of the people you picked share a name. Rename one so the ledger stays clear.');
       try{
@@ -64,7 +64,7 @@ export function renderMembers(){
   box.innerHTML = list.length ? list.map(p => {
     const g = editingGroup;
     /* Someone who left comes back through an invite link, not from here */
-    if(g?.left.includes(p.id) && !draft.members.includes(p.id)) return `<label class="srow"><input type="checkbox" disabled><span class="nm">${esc(p.name)}</span><span class="sval">left the group</span></label>`;
+    if(g?.left.includes(p.id) && !draft.members.includes(p.id)) return `<div class="srow"><label class="srow-pick"><input type="checkbox" disabled aria-describedby="why-${p.id}"><span class="nm">${esc(p.name)}</span></label><span class="sval" id="why-${p.id}">left the group</span></div>`;
     const checked = draft.members.includes(p.id);
     const why = checked ? lockReason(g, p.id) : '';
     const inGroup = g?.members.includes(p.id);
@@ -73,8 +73,9 @@ export function renderMembers(){
     const roleCtl = inGroup && hasAccount(p.id) && canAdmin(g)
       ? `<button type="button" class="btn small ${admin ? 'on' : ''}" data-action="toggle-admin" data-pid="${p.id}" aria-pressed="${admin}" title="${admin ? 'Admin. Tap to remove' : 'Let them run the group'}">${admin ? 'Admin' : 'Make admin'}</button>`
       : admin ? '<span class="tag">Admin</span>' : '';
-    return `<label class="srow"><input type="checkbox" data-pid="${p.id}" ${checked?'checked':''} ${why?'disabled':''}><span class="nm">${esc(p.name)}${isMe(p.id) ? ' <span class="you">(you)</span>' : ''}</span>${why && why !== 'you' ? `<span class="sval">${why}</span>` : ''}${roleCtl}</label>`;
-  }).join('') : `<p class="hint" style="margin:0">Nobody's here yet.</p>`;
+    const shown = why && why !== 'you';
+    return `<div class="srow"><label class="srow-pick"><input type="checkbox" data-pid="${p.id}" ${checked?'checked':''} ${why?'disabled':''}${shown ? ` aria-describedby="why-${p.id}"` : ''}><span class="nm">${esc(p.name)}${isMe(p.id) ? ' <span class="you">(you)</span>' : ''}</span></label>${shown ? `<span class="sval" id="why-${p.id}">${why}</span>` : ''}${roleCtl}</div>`;
+  }).join('') : `<p class="hint" style="margin:0">No one saved yet. Add people below.</p>`;
 }
 export async function addPendingMember(){
   const inp = form.newMember; if(!inp) return;
@@ -82,7 +83,7 @@ export async function addPendingMember(){
   let p = state.people.find(x => x.name.toLowerCase() === n.toLowerCase());
   if(!p){
     const { data, error } = await sb.from('people').insert({ name: n, owner_id: session.user.id }).select('id,name').single();
-    if(error){ const el = form.querySelector('.err'); if(el) el.textContent = error.message; return; }
+    if(error){ fail(describeError(error, 'add them'), inp); return; }
     p = { id: data.id, name: data.name };
     state.people.push(p);
   }

@@ -20,7 +20,7 @@ export function renderPeopleView(){
         const gnames = groupsOf(p.id).map(g => esc(g.name)).join(', ');
         /* Swipe for Edit and Delete, but only people who aren't in a group or settlement can be deleted */
         const locked = personLocked(p.id) || isMe(p.id);
-        return `<li class="${locked ? '' : 'swipe'}"><button class="row" data-action="edit-person" data-id="${p.id}">
+        return `<li class="${locked ? '' : 'swipe'}"><button class="row wrap-end" data-action="edit-person" data-id="${p.id}">
           ${avatar(p.id)}
           <span class="r-main"><span class="r-title">${nameWithYou(p.id)}</span><span class="r-meta">${gnames || 'Not in a group yet'}</span></span>
           ${bal}</button>${locked ? '' : swipeActs('edit-person', 'del-person', p.id)}</li>`;

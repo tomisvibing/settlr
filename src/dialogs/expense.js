@@ -11,10 +11,13 @@ import { avatar, groupTile, icon } from '../views/shared.js';
 import { dlg, form, draft, setDraft, openDialog, fail, describeError } from './dialog.js';
 import { refresh } from '../data.js';
 import { openGroup } from './group.js';
+import { askConfirm } from './confirm.js';
 import { prepareReceipt, uploadReceipt, removeReceipts, receiptUrl } from '../receipts.js';
 import { isPdf, pathIsPdf, sizeLabel } from '../lib/receipt.js';
 
 const touch = () => window.matchMedia?.('(pointer: coarse)').matches;
+/* Names for the keypad keys a screen reader would otherwise read as punctuation or nothing */
+const keyLabel = k => k === 'del' ? ' aria-label="Delete last digit"' : k === '.' ? ' aria-label="Decimal point"' : k === '00' ? ' aria-label="Double zero"' : '';
 /* Size the amount box to its digits (a "." is narrow) so the currency sign sits right beside them */
 const fitAmount = () => {
   const i = form.amount; if(!i) return;
@@ -84,13 +87,14 @@ export function openExpense(eid, prefill){
     </fieldset>
     <label class="daterow">Date<input type="date" name="date" value="${dateVal}"></label>
     <div class="receipt" id="receiptBox"></div>
-    <div class="keypad" aria-hidden="true">${keys.map(k => `<button type="button" tabindex="-1" data-key="${k}">${k === 'del' ? icon.backspace : k}</button>`).join('')}</div>
+    <div class="keypad" role="group" aria-label="Amount keypad">${keys.map(k => `<button type="button" data-key="${k}"${keyLabel(k)}>${k === 'del' ? icon.backspace : k}</button>`).join('')}</div>
+    <p class="sr" id="amountSaid" role="status"></p>
+    ${e ? '<section class="comments" id="commentsBox" aria-label="Comments"></section>' : ''}
     <p class="err" role="alert"></p>
     <div class="dlg-actions">
       ${e ? `<button type="button" class="btn danger" data-action="del-entry" data-id="${e.id}">Delete</button><span class="sp"></span><button type="submit" class="btn primary">Save changes</button>`
           : `<button type="submit" class="btn primary wide">Add expense</button>`}
-    </div>
-    ${e ? '<section class="comments" id="commentsBox" aria-label="Comments"></section>' : ''}`, saveExpense);
+    </div>`, saveExpense);
   fitAmount();
   renderFx();
   renderSplitRows();
@@ -126,6 +130,7 @@ async function postComment(){
 }
 async function deleteComment(id){
   const d = draft;
+  if(!await askConfirm({ title: 'Delete this comment?', body: 'Everyone in the group stops seeing it.', confirmLabel: 'Delete comment' }) || draft !== d) return;
   const { error } = await sb.from('expense_comments').delete().eq('id', id);
   if(draft !== d) return;
   if(error) return fail(describeError(error));
@@ -149,7 +154,7 @@ function renderFx(){
   if(document.activeElement !== form.rate) form.rate.value = draft.rate ? formatRate(draft.rate) : '';
   $('#fxNote').textContent = draft.rateNote;
   const whole = minorDigits(draft.cur) === 0, point = form.querySelector('.keypad [data-key="."], .keypad [data-key="00"]');
-  if(point){ point.dataset.key = whole ? '00' : '.'; point.textContent = whole ? '00' : '.'; }
+  if(point){ point.dataset.key = whole ? '00' : '.'; point.textContent = whole ? '00' : '.'; point.setAttribute('aria-label', whole ? 'Double zero' : 'Decimal point'); }
   if(!touch()) form.amount.inputMode = whole ? 'numeric' : 'decimal';
   fitAmount();
 }
@@ -191,8 +196,8 @@ function renderSplitRows(){
   box.innerHTML = draft.roster.map(mid => {
     const name = isMe(mid) ? 'You' : esc(personName(mid));
     if(m==='equal') return `<label class="chip"><input type="checkbox" data-sid="${mid}" ${draft.equal[mid]?'checked':''}>${avatar(mid,'sm')}${name}</label>`;
-    if(m==='exact') return `<label class="srow">${avatar(mid,'sm')}<span class="nm">${name}</span><input inputmode="decimal" autocomplete="off" aria-label="${name}'s amount" data-sid="${mid}" value="${esc(draft.exact[mid])}" placeholder="0.00"></label>`;
-    return `<label class="srow">${avatar(mid,'sm')}<span class="nm">${name}</span><span class="sval" data-share="${mid}"></span><input type="number" min="0" step="1" inputmode="numeric" aria-label="${name}'s shares" data-sid="${mid}" value="${draft.shares[mid]}"></label>`;
+    if(m==='exact') return `<label class="srow">${avatar(mid,'sm')}<span class="nm">${name}</span><input inputmode="decimal" autocomplete="off" aria-label="Amount for ${name}" data-sid="${mid}" value="${esc(draft.exact[mid])}" placeholder="0.00"></label>`;
+    return `<label class="srow">${avatar(mid,'sm')}<span class="nm">${name}</span><span class="sval" data-share="${mid}"></span><input type="number" min="0" step="1" inputmode="numeric" aria-label="Shares for ${name}" data-sid="${mid}" value="${draft.shares[mid]}"></label>`;
   }).join('');
   updateHint();
 }
@@ -287,6 +292,7 @@ function pressKey(k){
   else { if(a.length + k.length > maxWhole) return; a += k; }
   i.value = a;
   i.dispatchEvent(new Event('input', { bubbles: true }));
+  const said = $('#amountSaid'); if(said) said.textContent = `Amount ${a || '0'}`;
 }
 export function initExpenseDialog(){
   /* Enter in the comment box posts the comment, not the whole expense */
@@ -333,25 +339,25 @@ async function saveExpense(){
   const desc = form.desc.value.trim();
   /* typed: in the currency it was spent in; amount: in the group's currency, which balances use */
   const typed = toPence(form.amount.value), isForeign = foreign(), step = minorStep(g.currency);
-  if(!desc) return fail('Add a short description, like "Dinner".');
-  if(!(typed > 0)) return fail('Enter an amount above zero.');
-  if(isForeign && !(draft.rate > 0)) return fail(`Add the exchange rate: how many ${g.currency} one ${draft.cur} buys.`);
+  if(!desc) return fail('Add a short description, like “Dinner”.', form.desc);
+  if(!(typed > 0)) return fail('Enter an amount above zero.', form.amount);
+  if(isForeign && !(draft.rate > 0)) return fail(`Add the exchange rate: how many ${g.currency} one ${draft.cur} buys.`, form.rate);
   const amount = isForeign ? convert(typed, draft.rate, g.currency) : typed;
   let splits, input = {};
   if(draft.mode === 'exact'){
     let sum = 0;
     for(const mid of draft.roster){
       const p = toPence(draft.exact[mid]);
-      if(Number.isNaN(p) || p < 0) return fail(`Check the amount for ${personName(mid)}.`);
+      if(Number.isNaN(p) || p < 0) return fail(`Check the amount for ${personName(mid)}.`, form.querySelector(`#splitRows [data-sid="${mid}"]`));
       if(p > 0){ input[mid] = p; sum += p; }
     }
-    if(sum !== typed) return fail(`The split adds up to ${money(sum,draft.cur)}, but the expense is ${money(typed,draft.cur)}.`);
+    if(sum !== typed) return fail(`The split adds up to ${money(sum,draft.cur)}, but the expense is ${money(typed,draft.cur)}.`, form.querySelector('#splitRows input'));
     /* Converted shares that still add up exactly to the converted total */
     splits = isForeign ? distribute(amount, input, step) : { ...input };
   } else {
     draft.roster.forEach(mid => input[mid] = draft.mode==='equal' ? (draft.equal[mid]?1:0) : Math.max(0, Math.floor(Number(draft.shares[mid])||0)));
     splits = distribute(amount, input, step);
-    if(!splits) return fail(draft.mode==='equal' ? 'Pick at least one person to split with.' : 'Give at least one person a share above zero.');
+    if(!splits) return fail(draft.mode==='equal' ? 'Pick at least one person to split with.' : 'Give at least one person a share above zero.', form.querySelector('#splitRows input'));
   }
   const row = { group_id: g.id, type:'expense', description: desc, amount_cents: amount, paid_by: form.paidBy.value, split_mode: draft.mode, expense_date: form.date.value || today(), split_input: input,
     orig_currency: isForeign ? draft.cur : null, orig_amount_cents: isForeign ? typed : null, fx_rate: isForeign ? draft.rate : null };

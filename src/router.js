@@ -6,6 +6,7 @@ import { renderPeopleView } from './views/people.js';
 import { renderSettings } from './views/settings.js';
 import { renderActivity } from './views/activity.js';
 import { openJoinGroup } from './dialogs/join.js';
+import { restoreFocus } from './ui.js';
 
 export function parseRoute(){
   const h = location.hash;
@@ -40,4 +41,5 @@ function renderRoute(r){
   else if(r.name === 'settings') renderSettings();
   else if(r.name === 'activity') renderActivity();
   else renderHome();
+  restoreFocus();
 }

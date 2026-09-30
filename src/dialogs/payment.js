@@ -34,9 +34,9 @@ export function openPayment(opts = {}){
       <button type="submit" class="btn primary">${e?'Save changes':'Record payment'}</button>
     </div>`, async () => {
       const f = form.from.value, t = form.to.value, typed = toPence(form.amount.value), isForeign = draft.cur !== g.currency;
-      if(f === t) return fail('Pick two different people.');
-      if(!(typed > 0)) return fail('Enter an amount above zero.');
-      if(isForeign && !(draft.rate > 0)) return fail(`Add the exchange rate: how many ${g.currency} one ${draft.cur} buys.`);
+      if(f === t) return fail('Pick two different people.', form.to);
+      if(!(typed > 0)) return fail('Enter an amount above zero.', form.amount);
+      if(isForeign && !(draft.rate > 0)) return fail(`Add the exchange rate: how many ${g.currency} one ${draft.cur} buys.`, form.rate);
       const a = isForeign ? convert(typed, draft.rate, g.currency) : typed;
       const row = { group_id: g.id, type:'payment', description:'Payment', amount_cents:a, paid_by:f, split_mode:'payment', expense_date: form.date.value || today(), split_input: {},
         orig_currency: isForeign ? draft.cur : null, orig_amount_cents: isForeign ? typed : null, fx_rate: isForeign ? draft.rate : null };

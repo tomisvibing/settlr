@@ -42,7 +42,7 @@ export function renderGroupView(id){
     <div class="topbar">
       <a class="iconbtn" href="#/" aria-label="Back to all groups">${icon.back}</a>
       <span class="sp"></span>
-      <button class="btn small topbar-invite" data-action="invite" aria-label="Invite">${icon.invite}<span class="lbl">Invite</span></button>
+      <button class="btn small topbar-invite" data-action="invite" aria-label="Invite people">${icon.invite}<span class="lbl">Invite</span></button>
       <button class="iconbtn" data-action="history" aria-label="History" title="History">${icon.history}</button>
       <button class="iconbtn" data-action="edit-group" aria-label="Edit group" title="Edit group">${icon.edit}</button>
       <button class="iconbtn" data-action="export-group" aria-label="Export as CSV" title="Export as CSV" ${g.expenses.length ? '' : 'disabled'}>${icon.download}</button>
@@ -67,14 +67,14 @@ export function renderGroupView(id){
       <div class="section-head"><h2>Settle up</h2>${frozen ? '' : `<button class="btn small" data-action="add-payment" ${n > 1 ? '' : 'disabled'}>Record a payment</button>`}</div>
       ${plan.length ? `<ul class="settle">${plan.map(p => `
         <li class="${isMe(p.from) ? 'owe' : ''}"><p>${pays(p.from, p.to)} ${money(p.amount, cur)}</p>
-        ${frozen ? '' : `<button class="btn small primary" data-action="settle" data-from="${p.from}" data-to="${p.to}" data-amount="${p.amount}">Mark paid</button>`}</li>`).join('')}</ul>`
+        ${frozen ? '' : `<button class="btn small" data-action="settle" data-from="${p.from}" data-to="${p.to}" data-amount="${p.amount}">Mark paid</button>`}</li>`).join('')}</ul>`
       : `<div class="card"><p class="none">${g.expenses.length ? 'Everyone is square.' : 'Add the first expense to see who owes whom.'}</p></div>`}
     </section>
 
     <section class="section">
       <div class="section-head"><h2>Activity</h2></div>
       ${sorted.length > 6 ? `<input class="search" type="search" data-filter="activity" placeholder="Search activity" aria-label="Search activity" autocomplete="off">` : ''}
-      <div class="card">${sorted.length ? activityList(sorted.map(e => ({ e, g })), g, false) : `<p class="none">No expenses yet. Use Add expense above to add the first one.</p>`}</div>
+      <div class="card">${sorted.length ? activityList(sorted.map(e => ({ e, g })), g, false) : `<p class="none">No expenses yet. Add the first one with Add expense.</p>`}</div>
     </section>
   </div>`;
 }

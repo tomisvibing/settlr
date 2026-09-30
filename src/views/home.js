@@ -26,13 +26,15 @@ function groupCard(g){
 
 const greeting = (h = new Date().getHours()) => h < 5 ? 'Evening,' : h < 12 ? 'Morning,' : h < 18 ? 'Afternoon,' : 'Evening,';
 const joinMoney = list => list.map(([c, v]) => money(Math.abs(v), c)).join(' · ');
+/* One amount per line: a tile is too narrow for "JP¥2,400 · €329.00 · US$90.00" */
+const stackMoney = list => list.map(([c, v]) => `<span>${money(Math.abs(v), c)}</span>`).join('');
 
 function greetRow(){
   const name = personName(myPersonId) || '';
   return `<div class="greet">
     ${avatar(myPersonId, 'lg')}
     <div class="who"><small>${greeting()}</small><b>${esc(name.split(' ')[0] || 'there')}</b></div>
-    <a class="iconbtn" href="#/settings" aria-label="Settings">${icon.cog}</a>
+    <a class="iconbtn" href="#/settings" aria-label="Your account and settings">${icon.cog}</a>
   </div>`;
 }
 
@@ -56,10 +58,10 @@ function heroCard(){
     sub = 'nobody owes anybody';
   }
   const tile1 = owed.length
-    ? `<div class="hero-tile"><span>You owe</span><b class="${owe.length ? 'neg' : ''}">${owe.length ? joinMoney(owe) : 'Nothing'}</b></div>`
+    ? `<div class="hero-tile"><span>You owe</span><b class="${owe.length ? 'neg' : ''}">${owe.length ? stackMoney(owe) : 'Nothing'}</b></div>`
     : `<div class="hero-tile"><span>You’re owed</span><b>Nothing</b></div>`;
-  return `<section class="hero-card" aria-label="Where you stand">
-    <div class="eyebrow">Where you stand</div>
+  return `<section class="hero-card" aria-labelledby="standTitle">
+    <h1 class="eyebrow" id="standTitle">Where you stand</h1>
     <div>${big}<div class="hero-sub">${sub}</div></div>
     <div class="hero-tiles">${tile1}<div class="hero-tile"><span>Settled</span><b>${plural(settled, 'group')}</b></div></div>
   </section>`;
@@ -101,7 +103,7 @@ export function renderHome(){
 
     <section class="section">
       <div class="section-head"><h2>Lately</h2>${recent.length ? '<a class="btn small" href="#/activity">See all</a>' : ''}</div>
-      <div class="card">${recent.length ? activityList(recent, null, true) : `<p class="none">Nothing yet. Tap + to add the first expense.</p>`}</div>
+      <div class="card">${recent.length ? activityList(recent, null, true) : `<div class="none"><p>No expenses yet. Everything you and your groups add shows up here.</p><button class="btn small" data-action="quick-add">Add expense</button></div>`}</div>
     </section>
   </div>`;
   app.querySelector('details.archived')?.addEventListener('toggle', ev => { archivedOpen = ev.target.open; });

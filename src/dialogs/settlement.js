@@ -29,8 +29,8 @@ export function openSettlement(opts = {}){
       <button type="submit" class="btn primary">${e?'Save changes':'Record settlement'}</button>
     </div>`, async () => {
       const f = form.from.value, t = form.to.value, a = toPence(form.amount.value);
-      if(!f || !t || f === t) return fail('Pick two different people.');
-      if(!(a > 0)) return fail('Enter an amount above zero.');
+      if(!f || !t || f === t) return fail('Pick two different people.', form.to);
+      if(!(a > 0)) return fail('Enter an amount above zero.', form.amount);
       const row = { from_person:f, to_person:t, amount_cents:a, currency: form.currency.value, payment_date: form.date.value || today(), note: form.note.value.trim() || null };
       try{
         if(draft.id){ const { error } = await sb.from('payments').update(row).eq('id', draft.id); if(error) throw error; }

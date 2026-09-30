@@ -3,6 +3,8 @@ import { $ } from '../lib/format.js';
 import { refresh } from '../data.js';
 import { navigate } from '../router.js';
 import { reportError } from '../monitoring.js';
+import { friendlyError } from '../lib/errors.js';
+import { rememberTrigger, sheetClosed } from '../ui.js';
 
 export const dlg = $('#dlg'), form = $('#dlgForm');
 let onSubmit = null;
@@ -11,7 +13,10 @@ export let draft = null;
 export const setDraft = d => { draft = d; };
 
 export function openDialog(html, submit){
+  if(!dlg.open) rememberTrigger();
   form.innerHTML = html; onSubmit = submit;
+  /* The sheet is named by its heading */
+  const title = form.querySelector('h2'); if(title) title.id = 'dlgTitle';
   if(!dlg.open) dlg.showModal();
   const first = form.querySelector('input:not([type=hidden]):not([type=radio]):not([type=checkbox]):not([type=date]),textarea');
   /* On touch screens, focusing a text field pops the keyboard over half the sheet: focus the heading
@@ -21,11 +26,35 @@ export function openDialog(html, submit){
   else { const h = form.querySelector('h2'); if(h){ h.tabIndex = -1; h.focus(); } }
 }
 export function closeDialog(){ if(dlg.open) dlg.close(); onSubmit = null; draft = null; }
-export function fail(msg){ const e = form.querySelector('.err'); if(e) e.textContent = msg; return false; }
-/* Every failed save comes through here, so it's also where they get reported */
-export function describeError(err){
-  reportError(err, 'save');
-  return [err?.message, err?.details, err?.hint].filter(Boolean).join(' — ') || 'Could not save. Try again.';
+/* Show why a save didn't happen. With a field, the message sits under that field, the field is
+   marked invalid and focused; without one, it goes in the sheet's general error line */
+export function fail(msg, field){
+  clearFieldError();
+  if(field && msg){
+    const p = document.createElement('p');
+    p.className = 'err field-err'; p.id = 'fieldErr'; p.textContent = msg;
+    let at = field.closest('label, fieldset, .amount, .srow, .mrow') || field;
+    /* Side-by-side fields, the rate line and chip rows: the message goes under the whole row */
+    if(at.parentElement?.matches('.two, .fxrow, .chips')) at = at.parentElement;
+    at.after(p);
+    field.setAttribute('aria-invalid', 'true');
+    field.setAttribute('aria-describedby', 'fieldErr');
+    field.focus({ preventScroll: true });
+    p.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+    return false;
+  }
+  const e = form.querySelector('.err:not(.field-err)'); if(e) e.textContent = msg;
+  return false;
+}
+function clearFieldError(){
+  form.querySelector('#fieldErr')?.remove();
+  form.querySelectorAll('[aria-invalid]').forEach(f => { f.removeAttribute('aria-invalid'); f.removeAttribute('aria-describedby'); });
+}
+/* Every failed save comes through here, so it's also where they get reported: the details go to
+   Sentry, and the person gets a sentence that says what to do */
+export function describeError(err, action = 'save'){
+  reportError(err, action);
+  return friendlyError(err, action);
 }
 
 /* Tapping the dimmed area around a sheet closes it, like the × or Cancel. A tap has to start and
@@ -58,5 +87,8 @@ export function initDialog(){
       if(submitBtn) submitBtn.disabled = false;
     }
   });
-  dlg.addEventListener('close', () => { onSubmit = null; draft = null; });
+  /* Fixing the field clears its error */
+  form.addEventListener('input', ev => { if(ev.target.getAttribute?.('aria-invalid')) clearFieldError(); });
+  form.addEventListener('change', ev => { if(ev.target.closest?.('fieldset')?.querySelector('[aria-invalid]')) clearFieldError(); });
+  dlg.addEventListener('close', () => { onSubmit = null; draft = null; sheetClosed(); });
 }

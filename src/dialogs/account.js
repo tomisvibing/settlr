@@ -20,7 +20,7 @@ export function openProfile({ welcome = false } = {}){
       <button type="submit" class="btn primary">Save</button>
     </div>`, async () => {
       const name = form.name.value.trim();
-      if(!name) return fail('Enter your name.');
+      if(!name) return fail('Enter your name.', form.name);
       const { error } = await sb.from('people').update({ name }).eq('id', myPersonId);
       if(error) return fail(describeError(error));
       toast('Name updated.');
@@ -30,7 +30,7 @@ export function openDeleteAccount(){
   setDraft({});
   openDialog(`
     <h2>Delete your account?</h2>
-    <p style="margin:0">This permanently deletes your settlr account. Here's what happens:</p>
+    <p style="margin:0">This permanently deletes your settlr account. Here’s what happens:</p>
     <ul class="bullets">
       <li>Groups where nobody else has signed in are deleted, along with their expenses.</li>
       <li>Groups shared with other signed-in people stay, so their balances remain correct. Your name stays on past expenses there.</li>
@@ -44,11 +44,11 @@ export function openDeleteAccount(){
       <button type="button" class="btn" data-action="close">Cancel</button>
       <button type="submit" class="btn destroy">Delete account</button>
     </div>`, async () => {
-      if(form.confirm.value.trim().toUpperCase() !== 'DELETE') return fail('Type DELETE to confirm.');
+      if(form.confirm.value.trim().toUpperCase() !== 'DELETE') return fail('Type DELETE to confirm.', form.confirm);
       const { error } = await sb.rpc('delete_my_account');
       if(error){
         /* PGRST202: the RPC doesn't exist yet — supabase/delete_my_account.sql hasn't been run */
-        if(error.code === 'PGRST202'){ console.warn('delete_my_account RPC missing', error); return fail("Account deletion isn't available yet. Please try again later."); }
+        if(error.code === 'PGRST202'){ console.warn('delete_my_account RPC missing', error); return fail('Account deletion isn’t available yet. Try again later.'); }
         return fail(describeError(error));
       }
       clearLocalData();
