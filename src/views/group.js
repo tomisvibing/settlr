@@ -42,7 +42,8 @@ export function renderGroupView(id){
     <div class="topbar">
       <a class="iconbtn" href="#/" aria-label="Back to all groups">${icon.back}</a>
       <span class="sp"></span>
-      <button class="btn small" data-action="invite">${icon.invite}Invite</button>
+      <button class="btn small topbar-invite" data-action="invite" aria-label="Invite">${icon.invite}<span class="lbl">Invite</span></button>
+      <button class="iconbtn" data-action="history" aria-label="History" title="History">${icon.history}</button>
       <button class="iconbtn" data-action="edit-group" aria-label="Edit group" title="Edit group">${icon.edit}</button>
       <button class="iconbtn" data-action="export-group" aria-label="Export as CSV" title="Export as CSV" ${g.expenses.length ? '' : 'disabled'}>${icon.download}</button>
     </div>

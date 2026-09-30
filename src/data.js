@@ -16,10 +16,13 @@ export async function loadAllData(){
     sb.from('expenses').select('*').order('expense_date', { ascending:false }),
     sb.from('expense_splits').select('*'),
     sb.from('payments').select('*').order('payment_date', { ascending:false }),
+    sb.from('expense_comments').select('*').order('created_at'),
   ]);
   const failed = results.find(r => r.error);
   if(failed) throw failed.error;
-  const [groups, people, members, expenses, splits, payments] = results.map(r => r.data || []);
+  const [groups, people, members, expenses, splits, payments, comments] = results.map(r => r.data || []);
+  const commentsByExpense = {};
+  comments.forEach(c => { (commentsByExpense[c.expense_id] ||= []).push({ id: c.id, body: c.body, authorUser: c.author_user, authorPerson: c.author_person, createdAt: new Date(c.created_at).getTime() }); });
 
   state.people = people.map(p => ({ id:p.id, name:p.name, userId:p.user_id }));
   state.myIds = new Set(state.people.filter(p => p.userId === session.user.id).map(p => p.id));
@@ -33,7 +36,9 @@ export async function loadAllData(){
     (expensesByGroup[e.group_id] ||= []).push({
       id: e.id, type: e.type, desc: e.description, amount: e.amount_cents,
       paidBy: e.paid_by, splits: splitsByExpense[e.id] || {}, splitMode: e.split_mode,
-      splitInput: e.split_input || {}, date: e.expense_date, receipt: e.receipt_path || null, createdAt: new Date(e.created_at).getTime()
+      splitInput: e.split_input || {}, date: e.expense_date, receipt: e.receipt_path || null,
+      comments: commentsByExpense[e.id] || [],
+      origCurrency: e.orig_currency || null, origAmount: e.orig_amount_cents ?? null, fxRate: e.fx_rate != null ? Number(e.fx_rate) : null, createdAt: new Date(e.created_at).getTime()
     });
   });
 

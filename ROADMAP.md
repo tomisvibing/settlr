@@ -42,16 +42,17 @@ Everything later builds on these.
 ## Phase 3: Using it together
 
 - [x] Live updates: see new expenses the moment someone adds them (Supabase Realtime)
-- [ ] Change history ("Bob edited *Dinner*: £40 → £45") and undo for deletes
+- [x] Change history ("Bob edited *Dinner*: £40 → £45") in each group's History sheet, with Undo after a delete and Restore for any deleted entry
 - [ ] Push notifications: "You owe Sam £20" reminders and a weekly summary
 - [x] Leave a group (once settled up); admin role so only admins can delete a group or remove someone with an account
-- [ ] Comments on expenses
+- [x] Comments on expenses
 
 ## Phase 4: Money features
 
 - [ ] Payment links: "Mark paid" opens Monzo.me, PayPal.me or Revolut with the amount filled in
 - [x] 50 currencies to pick from, with names, and whole-number amounts for currencies without pence (yen, won, forint…)
-- [ ] Multiple currencies in one group: expenses in the local currency on trips, converted to the group's currency, and one overall total on Home
+- [x] Multiple currencies in one group: each expense or payment in any currency, converted into the group's at the European Central Bank rate for its date (or your own), keeping both amounts
+- [ ] One overall total on Home in your own currency, across groups in different currencies
 - [ ] Recurring expenses (rent, bills)
 - [ ] Categories and insights: spending by group and month, trip totals, who paid most
 - [x] Archive finished groups: frozen and read-only for everyone, kept under Archived on Home, and restorable by any member

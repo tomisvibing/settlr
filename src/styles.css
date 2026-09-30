@@ -141,6 +141,23 @@ li.swipe{position:relative;overflow:hidden}
 .r-end{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex:none}
 .r-amt{font-weight:700;font-size:15px}
 .r-mine{font-size:12px;font-weight:500;color:var(--muted)}
+.r-conv{font-size:12px;color:var(--muted)}
+.ccount{display:inline-flex;align-items:center;gap:2px;margin-left:6px;font-size:12px;font-weight:600;color:var(--muted);vertical-align:1px}
+.ccount svg{width:13px;height:13px}
+/* Comments in the expense sheet */
+.comments{display:grid;gap:10px;padding-top:6px;border-top:1px solid var(--line)}
+.comments h3{font-family:var(--font);font-size:13px;font-weight:600;letter-spacing:0}
+.comments ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.comment{display:flex;gap:10px;align-items:flex-start}
+.comment .c-main{flex:1;min-width:0;background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;padding:8px 12px}
+.comment .c-who{font-size:12px;font-weight:600;color:var(--muted)}
+.comment .c-body{margin:2px 0 0;font-size:15px;line-height:1.4;white-space:pre-wrap;overflow-wrap:anywhere}
+.comment .c-del{border:0;background:none;color:var(--muted);font:inherit;font-size:12px;cursor:pointer;padding:6px 0 0;text-decoration:underline}
+.composer{display:flex;gap:8px}
+.composer input{flex:1;min-width:0}
+.rows.history .row{align-items:flex-start}
+.hist-text{font-size:15px;line-height:1.4;overflow-wrap:anywhere}
+.rows.history .btn{flex:none;align-self:center}
 .r-mine.pos{color:var(--pos)}.r-mine.neg{color:var(--neg)}
 .row.payment .r-title{color:var(--pos)}
 .you{color:var(--muted);font-weight:400}
@@ -246,6 +263,8 @@ legend{font-size:13px;font-weight:600;margin-bottom:6px;padding:0}
 .srow .nm{flex:1;min-width:0}
 .srow input:not([type=checkbox]){width:6.5rem;flex:none;text-align:right;min-height:40px}
 .sval{color:var(--muted);font-size:13px;white-space:nowrap}
+/* Five buttons in a group's top bar: on the narrowest phones Invite keeps just its icon */
+@media (max-width:374px){.topbar-invite{width:44px;min-height:44px;padding:0;justify-content:center;border-color:var(--line)}.topbar-invite .lbl{display:none}}
 .grp-exit{display:flex;flex-wrap:wrap;gap:4px;margin:-4px 0 -6px -8px}
 .grp-exit .btn:not(.danger){border-color:transparent;padding:0 8px}
 .grp-exit .btn:not(.danger):hover{background:var(--line-soft)}
@@ -282,6 +301,19 @@ details.archived .gcard{opacity:.85}
 .amount .cur{color:var(--faint);font-size:.8em}
 .amount input{font:inherit;color:inherit;letter-spacing:0;border:0;border-bottom:2px solid transparent;border-radius:0;background:none;padding:0;min-height:0;width:2ch;max-width:100%;text-align:left}
 .amount input::placeholder{color:var(--faint)}
+/* The currency symbol is a switch: an invisible native picker sits over it */
+.curpick{position:relative;display:inline-flex;align-items:center;gap:0;font:inherit;cursor:pointer}
+.curpick select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:16px;min-height:0;padding:0;border:0}
+.curpick::after{content:"";width:7px;height:7px;border-right:2px solid var(--faint);border-bottom:2px solid var(--faint);transform:rotate(45deg);margin:0 6px 10px 4px;align-self:center}
+.curpick:focus-within .cur{text-decoration:underline;text-decoration-color:var(--focus);text-underline-offset:6px}
+.fxrow{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px 8px;margin-top:-6px;font-size:14px;color:var(--muted)}
+.fxrow[hidden]{display:none}
+.fxrow label{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink)}
+.fxrow input{width:7.5em;min-height:38px;text-align:right}
+.amtcur{display:flex;gap:6px}
+.amtcur input{flex:1;min-width:0}
+.amtcur select{flex:none;width:auto;max-width:6.5em}
+.fxnote{flex-basis:100%;text-align:center;font-size:12px;line-height:1.4}
 .amount input:focus{outline:none;border-bottom-color:var(--line)}
 .amount input:focus-visible{outline:none;border-bottom-color:var(--focus)}
 .field{display:grid;gap:8px}
@@ -357,5 +389,7 @@ input.code{font-size:24px;letter-spacing:.3em;text-align:center;font-variant-num
 /* ---------- Toast ---------- */
 #toast{position:fixed;left:50%;bottom:calc(var(--tabbar-h) + var(--safe-b) + 20px);transform:translate(-50%,1rem);background:var(--accent);color:var(--accent-ink);padding:12px 16px;border-radius:16px;font-weight:500;font-size:15px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:30;max-width:calc(100vw - 32px)}
 #toast.show{opacity:1;transform:translate(-50%,0)}
+#toast.has-action.show{pointer-events:auto;display:flex;align-items:center;gap:14px}
+#toast button{border:0;background:none;color:inherit;font:inherit;font-weight:700;text-decoration:underline;text-underline-offset:3px;padding:6px 2px;cursor:pointer;flex:none}
 @media (min-width:900px){#toast{bottom:24px;margin-left:116px}}
 @media (prefers-reduced-motion: reduce){#toast{transition:none}}

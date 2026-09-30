@@ -51,3 +51,16 @@ describe('parseVoiceExpense', () => {
     expect(parse('£20').desc).toBe('£20');
   });
 });
+
+describe('parseVoiceExpense currencies', () => {
+  const parse = text => parseVoiceExpense(text, [{ id: 'me', name: 'Alice' }], new Date(2026, 8, 27), 'me');
+  it('picks up the currency when it was said', () => {
+    expect(parse('Dinner £37').currency).toBe('GBP');
+    expect(parse('Taxi 20 quid').currency).toBe('GBP');
+    expect(parse('Museum 15 dollars').currency).toBe('USD');
+    expect(parse('Crepes €12').currency).toBe('EUR');
+    expect(parse('Fondue 45 Swiss francs').currency).toBe('CHF');
+    expect(parse('Ramen 1500 yen').currency).toBe('JPY');
+    expect(parse('Coffee 4').currency).toBeUndefined();
+  });
+});
