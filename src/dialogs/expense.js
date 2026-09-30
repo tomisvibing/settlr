@@ -2,7 +2,7 @@ import { sb } from '../supabase.js';
 import { state } from '../store.js';
 import { $, esc, money, toPence, today, currencySymbol, plainAmount, minorDigits, minorStep } from '../lib/format.js';
 import { distribute } from '../lib/ledger.js';
-import { group, personName, defaultPayer, isMe, lastActivity, rosterFor } from '../selectors.js';
+import { group, personName, defaultPayer, isMe, lastActivity, rosterFor, isArchived, activeGroups } from '../selectors.js';
 import { parseRoute } from '../router.js';
 import { toast } from '../ui.js';
 import { avatar, groupTile, icon } from '../views/shared.js';
@@ -78,11 +78,15 @@ export function openExpense(eid, prefill){
 /* From the + button: straight in when there's a group in view (or only one), otherwise ask which */
 export function openAddExpense(){
   const r = parseRoute();
-  if(r.name === 'group' && group()) return openExpense();
-  if(!state.groups.length){ toast('Start a group first, then add expenses to it.'); return openGroup(true); }
-  if(state.groups.length === 1){ state.activeGroupId = state.groups[0].id; return openExpense(); }
+  if(r.name === 'group' && group()){
+    if(isArchived(group())) return toast(`${group().name} is archived. Restore it to add expenses.`);
+    return openExpense();
+  }
+  const open = activeGroups();
+  if(!open.length){ toast(state.groups.length ? 'All your groups are archived. Restore one, or start a new group.' : 'Start a group first, then add expenses to it.'); return openGroup(true); }
+  if(open.length === 1){ state.activeGroupId = open[0].id; return openExpense(); }
   setDraft({});
-  const groups = state.groups.slice().sort((a, c) => lastActivity(c) - lastActivity(a));
+  const groups = open.slice().sort((a, c) => lastActivity(c) - lastActivity(a));
   openDialog(`
     <div class="sheet-head"><h2 style="flex:1">Add to which group?</h2><button type="button" class="iconbtn" data-action="close" aria-label="Close">${icon.close}</button></div>
     <ul class="cardlist">${groups.map(g => `<li><button type="button" class="card gcard" data-action="pick-group" data-id="${g.id}" style="font:inherit;text-align:left;cursor:pointer">

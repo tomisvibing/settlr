@@ -123,16 +123,17 @@ button.row:hover .r-title,a.row:hover .r-title{text-decoration:underline;text-un
 .r-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .r-title .clip svg{width:14px;height:14px;vertical-align:-2px;margin-right:4px;color:var(--muted)}
 
-/* Swipe a row left for Edit and Delete (swipe.js) */
-.rows > li.swipe{position:relative;overflow:hidden}
-.swipe > .row{position:relative;z-index:1;background:var(--surface);touch-action:pan-y;transform:translateX(var(--dx,0));transition:transform .22s cubic-bezier(.2,.8,.2,1)}
-.swipe.swiping > .row{transition:none}
+/* Swipe a row or card left for its actions (swipe.js); the first child is the part that slides */
+li.swipe{position:relative;overflow:hidden}
+.cardlist > li.swipe{border-radius:var(--r-card)}
+.swipe > :first-child{position:relative;z-index:1;background:var(--surface);touch-action:pan-y;transform:translateX(var(--dx,0));transition:transform .22s cubic-bezier(.2,.8,.2,1)}
+.swipe.swiping > :first-child{transition:none}
 .swipe-acts{position:absolute;top:0;right:0;bottom:0;display:flex;align-items:center;gap:6px;padding-left:8px;visibility:hidden}
 .swipe.open .swipe-acts,.swipe.swiping .swipe-acts{visibility:visible}
 .sa{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:64px;height:calc(100% - 12px);border:0;border-radius:14px;background:var(--line-soft);color:var(--ink);font:inherit;font-size:12px;font-weight:600;cursor:pointer}
 .sa svg{width:20px;height:20px}
 .sa.del{background:var(--neg);color:var(--surface)}
-@media (prefers-reduced-motion: reduce){.swipe > .row{transition:none}}
+@media (prefers-reduced-motion: reduce){.swipe > :first-child{transition:none}}
 
 .r-title{font-weight:600;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .r-title.serif{font-family:var(--display);font-weight:500;font-size:18px;letter-spacing:-.01em}
@@ -245,7 +246,22 @@ legend{font-size:13px;font-weight:600;margin-bottom:6px;padding:0}
 .srow .nm{flex:1;min-width:0}
 .srow input:not([type=checkbox]){width:6.5rem;flex:none;text-align:right;min-height:40px}
 .sval{color:var(--muted);font-size:13px;white-space:nowrap}
-.grp-exit{display:flex;gap:4px;margin:-4px 0 -6px -8px}
+.grp-exit{display:flex;flex-wrap:wrap;gap:4px;margin:-4px 0 -6px -8px}
+.grp-exit .btn:not(.danger){border-color:transparent;padding:0 8px}
+.grp-exit .btn:not(.danger):hover{background:var(--line-soft)}
+/* Archived groups */
+.archived-note{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r-card);background:var(--zero-soft);color:var(--ink)}
+.archived-note > svg{width:22px;height:22px;flex:none;color:var(--muted)}
+.archived-note p{margin:0;flex:1;font-size:14px;line-height:1.4}
+.archived-note .btn{flex:none}
+details.archived{margin-top:4px}
+details.archived > summary{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 4px;cursor:pointer;list-style:none;font-weight:600;color:var(--muted)}
+details.archived > summary::-webkit-details-marker{display:none}
+details.archived > summary svg{width:18px;height:18px}
+details.archived > summary::after{content:"";width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin:-4px 0 0 4px;transition:transform .15s}
+details.archived[open] > summary::after{transform:rotate(-135deg);margin-top:4px}
+details.archived .count{font-size:12px;font-weight:700;background:var(--line-soft);border-radius:999px;padding:1px 8px}
+details.archived .gcard{opacity:.85}
 .tag{font-size:12px;font-weight:700;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 8px;white-space:nowrap}
 .srow .btn.small{min-height:30px;padding:0 10px;font-size:13px;border-color:var(--line);flex:none}
 .srow .btn.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}

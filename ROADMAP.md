@@ -28,7 +28,7 @@ Everything later builds on these.
   - coloured avatars for people, and a proper icon set (no emoji)
   - every dialog a bottom sheet on phones and a centred panel on desktop
 - [x] **UI polish**: in-app confirm sheets instead of the browser's pop-ups, loading placeholders, smooth page transitions
-- [x] **Swipe** a row left for Edit and Delete (touch screens; on desktop, click a row to edit)
+- [x] **Swipe** left for actions everywhere on touch screens: expenses and payments (Edit, Delete), group cards on Home (Edit, Archive, Delete for admins; Restore on archived ones), people who aren't in anything yet, and settlements
 - [ ] **More polish**: a custom date picker (the phone's own is fine for now)
 - [x] **Sign in without Google**:
   - [x] email with a 6-digit code (needs the email sender set up in Supabase, see the README, before codes reach everyone)
@@ -54,7 +54,8 @@ Everything later builds on these.
 - [ ] Multiple currencies in one group: expenses in the local currency on trips, converted to the group's currency, and one overall total on Home
 - [ ] Recurring expenses (rent, bills)
 - [ ] Categories and insights: spending by group and month, trip totals, who paid most
-- [ ] "Simplify debts" as a setting; archive finished groups
+- [x] Archive finished groups: frozen and read-only for everyone, kept under Archived on Home, and restorable by any member
+- [ ] "Simplify debts" as a setting
 
 ## Phase 5: Reach
 

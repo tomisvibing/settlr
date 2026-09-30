@@ -1,7 +1,7 @@
 import { sb } from '../supabase.js';
 import { state, session } from '../store.js';
 import { $, esc, currencyOptions } from '../lib/format.js';
-import { group, personName, involved, isMe, meIn, canAdmin, isAdmin, hasAccount } from '../selectors.js';
+import { group, personName, involved, isMe, meIn, canAdmin, isAdmin, hasAccount, isArchived } from '../selectors.js';
 import { form, draft, setDraft, openDialog, fail, describeError } from './dialog.js';
 
 export function openGroup(isNew){
@@ -16,6 +16,7 @@ export function openGroup(isNew){
     <div class="mrow"><input name="newMember" maxlength="30" placeholder="Add a saved or new name" aria-label="Person's name"><button type="button" class="btn" data-action="add-member">Add</button></div>
     <p class="err" role="alert"></p>
     ${g ? `<div class="grp-exit">
+      ${isArchived(g) ? `<button type="button" class="btn" data-action="restore-group">Restore group</button>` : `<button type="button" class="btn" data-action="archive-group">Archive group</button>`}
       ${meIn(g) ? `<button type="button" class="btn danger" data-action="leave-group">Leave group</button>` : ''}
       ${canAdmin(g) ? `<button type="button" class="btn danger" data-action="del-group">Delete group</button>` : ''}
     </div>` : ''}

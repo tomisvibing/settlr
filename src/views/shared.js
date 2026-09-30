@@ -31,15 +31,21 @@ export const icon = {
   backspace: svg('<path d="M21 5H9l-6 7 6 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z"/><path d="M17 9l-5 6M12 9l5 6"/>'),
   plus: svg('<path d="M12 5v14M5 12h14"/>', 2),
   clip: svg('<path d="M21 11.5l-8.6 8.6a5 5 0 0 1-7.1-7.1l8.6-8.6a3.3 3.3 0 0 1 4.7 4.7l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l7.9-7.9"/>'),
+  archive: svg('<rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/>'),
+  restore: svg('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>'),
   trash: svg('<path d="M4 7h16M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13M9 7V4h6v3"/>'),
 };
 
-/* The Edit and Delete buttons a row reveals when swiped left (touch only, see swipe.js).
+/* The buttons a row reveals when swiped left (touch only, see swipe.js): [action, label, icon, 'del'?].
    Hidden from screen readers and the tab order: the same actions are in the edit sheet. */
-export function swipeActs(editAction, delAction, id, gid = ''){
+export function swipeButtons(buttons, id, gid = ''){
   const attrs = `data-id="${id}"${gid ? ` data-group="${gid}"` : ''} tabindex="-1"`;
-  return `<span class="swipe-acts" aria-hidden="true"><button type="button" class="sa" data-action="${editAction}" ${attrs}>${icon.edit}Edit</button><button type="button" class="sa del" data-action="${delAction}" ${attrs}>${icon.trash}Delete</button></span>`;
+  return `<span class="swipe-acts" aria-hidden="true">${buttons.map(([action, label, ic, kind = '']) =>
+    `<button type="button" class="sa ${kind}" data-action="${action}" ${attrs}>${ic}${label}</button>`).join('')}</span>`;
 }
+/* The usual pair: Edit and Delete */
+export const swipeActs = (editAction, delAction, id, gid = '') =>
+  swipeButtons([[editAction, 'Edit', icon.edit], [delAction, 'Delete', icon.trash, 'del']], id, gid);
 
 /* What an entry did to my balance: + means I'm owed more, − means I owe more */
 export function myLine(e, g){
