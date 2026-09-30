@@ -20,7 +20,7 @@ export async function openHistory(){
     <div class="card" id="histList"><p class="none">Loading…</p></div>`, () => false);
   const { data, error } = await sb.from('activity_log').select('*').eq('group_id', g.id).order('created_at', { ascending: false }).limit(200);
   const box = $('#histList'); if(!box || !dlg.open) return;
-  if(error){ box.innerHTML = `<p class="none">Couldn’t load the history: ${esc(error.message)}</p>`; return; }
+  if(error){ box.innerHTML = `<p class="none">${esc(describeError(error, 'load the history'))}</p><p class="none" style="padding-top:0"><button type="button" class="btn small" data-action="history">Try again</button></p>`; return; }
   if(!data.length){ box.innerHTML = '<p class="none">Nothing yet. Changes show up here from now on.</p>'; return; }
   const frozen = isArchived(g);
   const ctx = {
@@ -41,8 +41,8 @@ export async function openHistory(){
 /* Bring a deleted entry back (from the Undo toast or the History sheet) */
 export async function restoreEntry(eid){
   const { error } = await sb.rpc('restore_deleted_expense', { eid });
-  if(error){ toast(describeError(error), { error: true }); return; }
+  if(error){ toast(describeError(error, 'restore'), { error: true }); return; }
   await refresh();
-  toast('Brought it back.');
+  toast('Restored.');
   if(dlg.open && $('#histList')) openHistory();
 }

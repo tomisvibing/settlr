@@ -8,6 +8,7 @@ import { closeDialog } from './dialogs/dialog.js';
 import { reportError, setMonitoringUser } from './monitoring.js';
 import { initSignIn, resumeSignIn } from './signin.js';
 import { nameFromEmail } from './lib/signin.js';
+import { friendlyError } from './lib/errors.js';
 import { syncMyPhoto } from './photo.js';
 import { openProfile } from './dialogs/account.js';
 import { renderSkeleton } from './views/skeleton.js';
@@ -46,7 +47,7 @@ async function onAuthChange(){
     }catch(err){
       reportError(err, 'load');
       $('#appWrap').style.display = '';
-      $('#app').innerHTML = `<section class="empty"><h1>Couldn't load your data: ${esc(err.message||'unknown error')}</h1><button class="btn primary" data-action="retry">Try again</button></section>`;
+      $('#app').innerHTML = `<section class="empty"><h1>Your groups didn’t load</h1><p class="muted" style="margin:0;max-width:34ch">${esc(friendlyError(err, 'load your groups'))}</p><button class="btn primary" data-action="retry">Try again</button></section>`;
       return;
     }
     let pending = null;

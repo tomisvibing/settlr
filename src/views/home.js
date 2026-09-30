@@ -32,7 +32,7 @@ function greetRow(){
   return `<div class="greet">
     ${avatar(myPersonId, 'lg')}
     <div class="who"><small>${greeting()}</small><b>${esc(name.split(' ')[0] || 'there')}</b></div>
-    <a class="iconbtn" href="#/settings" aria-label="Settings">${icon.cog}</a>
+    <a class="iconbtn" href="#/settings" aria-label="Your account and settings">${icon.cog}</a>
   </div>`;
 }
 
@@ -101,7 +101,7 @@ export function renderHome(){
 
     <section class="section">
       <div class="section-head"><h2>Lately</h2>${recent.length ? '<a class="btn small" href="#/activity">See all</a>' : ''}</div>
-      <div class="card">${recent.length ? activityList(recent, null, true) : `<p class="none">Nothing yet. Tap + to add the first expense.</p>`}</div>
+      <div class="card">${recent.length ? activityList(recent, null, true) : `<div class="none"><p>No expenses yet. Everything you and your groups add shows up here.</p><button class="btn small" data-action="quick-add">Add expense</button></div>`}</div>
     </section>
   </div>`;
   app.querySelector('details.archived')?.addEventListener('toggle', ev => { archivedOpen = ev.target.open; });

@@ -3,6 +3,7 @@ import { $ } from '../lib/format.js';
 import { refresh } from '../data.js';
 import { navigate } from '../router.js';
 import { reportError } from '../monitoring.js';
+import { friendlyError } from '../lib/errors.js';
 import { rememberTrigger, sheetClosed } from '../ui.js';
 
 export const dlg = $('#dlg'), form = $('#dlgForm');
@@ -49,10 +50,11 @@ function clearFieldError(){
   form.querySelector('#fieldErr')?.remove();
   form.querySelectorAll('[aria-invalid]').forEach(f => { f.removeAttribute('aria-invalid'); f.removeAttribute('aria-describedby'); });
 }
-/* Every failed save comes through here, so it's also where they get reported */
-export function describeError(err){
-  reportError(err, 'save');
-  return [err?.message, err?.details, err?.hint].filter(Boolean).join(' — ') || 'Could not save. Try again.';
+/* Every failed save comes through here, so it's also where they get reported: the details go to
+   Sentry, and the person gets a sentence that says what to do */
+export function describeError(err, action = 'save'){
+  reportError(err, action);
+  return friendlyError(err, action);
 }
 
 /* Tapping the dimmed area around a sheet closes it, like the × or Cancel. A tap has to start and

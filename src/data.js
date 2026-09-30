@@ -3,6 +3,7 @@ import { state, session, myPersonId } from './store.js';
 import { toast } from './ui.js';
 import { render } from './router.js';
 import { reportError } from './monitoring.js';
+import { friendlyError } from './lib/errors.js';
 import { filterActivity } from './views/group.js';
 import { safeAvatarUrl } from './lib/avatar.js';
 
@@ -81,6 +82,6 @@ export async function refreshQuietly(){
 }
 export async function refresh(){
   try{ await loadAllData(); }
-  catch(err){ reportError(err, 'refresh'); toast(`Couldn't refresh: ${err.message || 'check your connection'}`, { error: true }); }
+  catch(err){ reportError(err, 'refresh'); toast(friendlyError(err, 'refresh'), { error: true }); }
   render();
 }

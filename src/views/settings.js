@@ -19,7 +19,7 @@ export function renderSettings(){
         <button class="btn small" data-action="edit-profile">Edit name</button>
       </div>
       <div class="setrow" style="border-top:1px solid var(--line-soft)"><p>Join a group<small>Got an invite code? Enter it here.</small></p><button class="btn small" data-action="join-group">Join</button></div>
-      <div class="setrow"><p>Sign out<small>You can sign back in any time with Google.</small></p><button class="btn small" data-action="sign-out">Sign out</button></div>
+      <div class="setrow"><p>Sign out<small>You can sign back in any time.</small></p><button class="btn small" data-action="sign-out">Sign out</button></div>
     </section>
 
     <section class="section">

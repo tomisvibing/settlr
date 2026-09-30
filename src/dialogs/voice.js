@@ -19,8 +19,8 @@ export function openVoiceExpense(){
   if(!SpeechRecognitionCtor){
     openDialog(`
       <h2>Voice isn't available here</h2>
-      <p class="hint">This browser doesn't support voice input. Try Chrome, Edge or Safari, or add the expense the usual way.</p>
-      <div class="dlg-actions"><span class="sp"></span><button type="button" class="btn primary" data-action="close">OK</button></div>`, () => false);
+      <p class="hint">This browser doesn't support voice input. Try Chrome, Edge or Safari, or type the expense in.</p>
+      <div class="dlg-actions"><span class="sp"></span><button type="button" class="btn" data-action="close">Close</button><button type="button" class="btn primary" data-action="voice-type">Type it in</button></div>`, () => false);
     return;
   }
   setDraft(null);
@@ -46,7 +46,7 @@ export function openVoiceExpense(){
     <p class="hint">Start with the thing itself. No need for “yesterday we went for…”.</p>
     <p id="voiceText" class="hint voice-text" aria-live="polite"></p>
     <p class="err" role="alert"></p>
-    <div class="dlg-actions"><span class="sp"></span><button type="button" class="btn" data-action="close">Cancel</button><button type="button" class="btn primary" data-action="voice-done">Done</button></div>`, () => false);
+    <div class="dlg-actions"><button type="button" class="btn" data-action="voice-type">Type it in</button><span class="sp"></span><button type="button" class="btn" data-action="close">Cancel</button><button type="button" class="btn primary" data-action="voice-done">Done</button><button type="button" class="btn primary" data-action="voice-expense" hidden>Try again</button></div>`, () => false);
   const textEl = $('#voiceText');
   rec.onresult = ev => {
     let interim = '';
@@ -60,18 +60,25 @@ export function openVoiceExpense(){
   rec.onerror = ev => {
     const err = form.querySelector('.err');
     if(err) err.textContent = ev.error === 'not-allowed'
-      ? 'Microphone access was blocked. If you opened this from inside the Claude app, tap the share icon and choose "Open in Safari" — mic permission has to be granted there, not inside another app.'
-      : "Didn't catch that — try again.";
+      ? 'Microphone access is blocked. Allow it for this site in your browser’s settings, or type the expense in. If settlr is open inside another app, open it in your browser first.'
+      : 'Didn’t catch that. Try again, or type the expense in.';
+    offerRetry();
   };
   rec.onend = () => {
     clearTimeout(quiet);
     activeRecognition = null;
     if(!dlg.open) return;
     const text = finalText.trim();
-    if(!text){ const err = form.querySelector('.err'); if(err) err.textContent = "Didn't catch that — try again, or add the expense the usual way."; return; }
+    if(!text){ const err = form.querySelector('.err'); if(err) err.textContent = 'Didn’t catch that. Try again, or type the expense in.'; offerRetry(); return; }
     openExpense(null, { ...parseVoiceExpense(text, g.members.map(id => ({ id, name: personName(id) })), new Date(), meIn(g)), heard: text });
   };
-  try{ rec.start(); }catch(err){ const e = form.querySelector('.err'); if(e) e.textContent = "Couldn't start the microphone."; }
+  try{ rec.start(); }catch(err){ const e = form.querySelector('.err'); if(e) e.textContent = 'Couldn’t start the microphone. Try again, or type the expense in.'; offerRetry(); }
+}
+/* After a failed attempt, Done has nothing to finish: swap it for Try again */
+function offerRetry(){
+  const done = form.querySelector('[data-action="voice-done"]'), again = form.querySelector('[data-action="voice-expense"]');
+  if(done) done.hidden = true; if(again) again.hidden = false;
+  const t = $('#voiceText'); if(t && t.textContent === 'Listening…') t.textContent = '';
 }
 /* "Done": stop listening and use what was said so far */
 export function finishVoice(){ activeRecognition?.stop(); }

@@ -8,6 +8,6 @@ export function renderActivity(){
   $('#app').innerHTML = `<div class="stack">
     <div class="ghead" style="padding-top:8px"><div><h1>Activity</h1><p>Everything across your groups.</p></div></div>
     ${entries.length > 6 ? `<input class="search" type="search" data-filter="activity" placeholder="Search by what, who or group" aria-label="Search activity" autocomplete="off">` : ''}
-    <div class="card">${entries.length ? activityList(entries, null, true) : `<p class="none">Nothing yet. Tap + to add the first expense.</p>`}</div>
+    <div class="card">${entries.length ? activityList(entries, null, true) : `<div class="none"><p>No expenses yet. Everything you and your groups add shows up here.</p><button class="btn small" data-action="quick-add">Add expense</button></div>`}</div>
   </div>`;
 }

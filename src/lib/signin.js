@@ -21,5 +21,5 @@ export function friendlyAuthError(err){
   if(m.includes('signups not allowed') || m.includes('not allowed')) return 'Email sign-in isn’t switched on yet.';
   if(m.includes('expired') || m.includes('invalid') || m.includes('otp')) return 'That code didn’t work. Check it, or send a new one.';
   if(m.includes('fetch') || m.includes('network')) return 'Couldn’t reach settlr. Check your connection.';
-  return err?.message || 'Something went wrong. Try again.';
+  return 'Couldn’t sign in. Check your connection and try again.';
 }

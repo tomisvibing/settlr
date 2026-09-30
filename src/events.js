@@ -25,7 +25,7 @@ import { openHistory, restoreEntry } from './dialogs/history.js';
 import { removeReceipts, groupReceiptPaths } from './receipts.js';
 
 /* A failed delete shows in the sheet it came from, or as a toast when it came from a swiped row */
-const oops = err => { if(dlg.open) fail(describeError(err)); else toast(describeError(err), { error: true }); };
+const oops = (err, action = 'delete') => { if(dlg.open) fail(describeError(err, action)); else toast(describeError(err, action), { error: true }); };
 
 export function initEvents(){
   document.addEventListener('click', async ev => {
@@ -41,6 +41,7 @@ export function initEvents(){
     else if(a==='pick-group'){ state.activeGroupId = b.dataset.id; openExpense(); }
     else if(a==='voice-expense') openVoiceExpense();
     else if(a==='voice-done') finishVoice();
+    else if(a==='voice-type'){ abortVoice(); openExpense(); }
     else if(a==='history') openHistory();
     else if(a==='restore-entry'){ b.disabled = true; await restoreEntry(b.dataset.id); }
     else if(a==='edit-expense') openExpense(b.dataset.id);
@@ -50,7 +51,7 @@ export function initEvents(){
     else if(a==='add-person') openPerson();
     else if(a==='edit-person') openPerson(b.dataset.id);
     else if(a==='del-person'){
-      if(!personLocked(b.dataset.id) && await askConfirm({ title: 'Delete this person?', body: 'They’re not in any group or settlement, so nothing else changes.' })){
+      if(!personLocked(b.dataset.id) && await askConfirm({ title: 'Delete this person?', body: 'They’re not in any group or settlement, so nothing else changes.', confirmLabel: 'Delete person' })){
         const { error } = await sb.from('people').delete().eq('id', b.dataset.id);
         if(error){ oops(error); return; }
         closeDialog(); await refresh();
@@ -59,7 +60,7 @@ export function initEvents(){
     else if(a==='add-settlement') openSettlement();
     else if(a==='edit-settlement') openSettlement({id:b.dataset.id});
     else if(a==='del-settlement'){
-      if(await askConfirm({ title: 'Delete this settlement?' })){
+      if(await askConfirm({ title: 'Delete this settlement?', body: 'Both people’s balances update straight away.', confirmLabel: 'Delete settlement' })){
         const { error } = await sb.from('payments').delete().eq('id', b.dataset.id);
         if(error){ oops(error); return; }
         closeDialog(); await refresh();
@@ -76,9 +77,9 @@ export function initEvents(){
     else if(a==='sign-out') await signOut();
     else if(a==='retry') location.reload();
     else if(a==='del-entry'){
-      if(await askConfirm({ title: 'Delete this entry?', body: 'Everyone’s balances in the group update straight away.' })){
+      const eid = b.dataset.id, gone = g?.expenses.find(e => e.id === eid), pay = gone?.type === 'payment';
+      if(await askConfirm({ title: pay ? 'Delete this payment?' : 'Delete this expense?', body: 'Everyone’s balances in the group update straight away. You can restore it from History.', confirmLabel: pay ? 'Delete payment' : 'Delete expense' })){
         /* The receipt file stays: the history keeps a copy of the entry, so it can be restored */
-        const eid = b.dataset.id, gone = g?.expenses.find(e => e.id === eid);
         const { error } = await sb.from('expenses').delete().eq('id', eid);
         if(error){ oops(error); return; }
         closeDialog(); await refresh();
@@ -91,7 +92,7 @@ export function initEvents(){
       const make = !isAdmin(g, b.dataset.pid);
       b.disabled = true;
       const { error } = await sb.rpc('set_group_admin', { gid: g.id, pid: b.dataset.pid, make_admin: make });
-      if(error){ b.disabled = false; fail(error.message || describeError(error)); return; }
+      if(error){ b.disabled = false; fail(describeError(error)); return; }
       await refresh(); renderMembers();
     }
     else if(a==='leave-group'){
@@ -100,7 +101,7 @@ export function initEvents(){
       if(bal){ fail(bal < 0 ? `Settle up first: you owe ${money(-bal, g.currency)} in this group.` : `Settle up first: you’re owed ${money(bal, g.currency)} in this group.`); return; }
       if(await askConfirm({ title: `Leave “${g.name}”?`, body: 'It disappears from your list. Everyone else keeps its history, with your name on the expenses you were part of. An invite link brings you back.', confirmLabel: 'Leave group' })){
         const { error } = await sb.rpc('leave_group', { gid: g.id });
-        if(error){ oops(error); return; }
+        if(error){ oops(error, 'leave'); return; }
         state.activeGroupId = null;
         closeDialog(); navigate('#/'); await refresh();
         toast(`You left ${g.name}.`);
@@ -115,12 +116,12 @@ export function initEvents(){
           title: `Archive “${g.name}”?`,
           body: (unsettled ? 'Some balances aren’t settled yet. They’ll stay as they are, and still count in your totals. ' : '')
             + 'It moves to Archived on Home and is frozen: nobody can add or change anything until someone restores it.',
-          confirmLabel: 'Archive', danger: false,
+          confirmLabel: 'Archive group', danger: false,
         });
         if(!ok) return;
       }
       const { error } = await sb.from('groups').update({ archived_at: archiving ? new Date().toISOString() : null }).eq('id', g.id);
-      if(error){ oops(error); return; }
+      if(error){ oops(error, archiving ? 'archive' : 'restore'); return; }
       closeDialog(); await refresh();
       toast(archiving ? `Archived ${g.name}. It’s under Archived on Home.` : `Restored ${g.name}.`);
     }
