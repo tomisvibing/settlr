@@ -1,21 +1,20 @@
 import { session, myPersonId } from '../store.js';
-import { $, esc, initial } from '../lib/format.js';
+import { $, esc } from '../lib/format.js';
 import { personName } from '../selectors.js';
 import { getThemeOverride } from '../theme.js';
-import { tintOf } from './shared.js';
+import { avatar } from './shared.js';
 
 export function renderSettings(){
   const app = $('#app');
-  const u = session.user, meta = u.user_metadata || {};
+  const u = session.user;
   const name = personName(myPersonId);
-  const avatar = meta.avatar_url || meta.picture;
   const theme = getThemeOverride() || 'system';
   app.innerHTML = `<div class="stack">
     <div class="ghead" style="padding-top:8px"><div><h1>You</h1><p>Your account, settings and data.</p></div></div>
 
     <section class="card" aria-label="Account">
       <div class="profile">
-        <span class="av lg ${tintOf(myPersonId)}">${avatar ? `<img src="${esc(avatar)}" alt="" referrerpolicy="no-referrer">` : esc(initial(name))}</span>
+        ${avatar(myPersonId, 'lg')}
         <span class="who"><b>${esc(name)}</b><span>${esc(u.email || 'Signed in with Google')}</span></span>
         <button class="btn small" data-action="edit-profile">Edit name</button>
       </div>

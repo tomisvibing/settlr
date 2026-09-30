@@ -1,5 +1,5 @@
 import { esc, money, dayMonth, initial } from '../lib/format.js';
-import { meIn, personName, isMe } from '../selectors.js';
+import { meIn, personName, personPhoto, isMe } from '../selectors.js';
 
 /* A stable tint per person or group, so the same face always has the same colour */
 export function tintOf(id){
@@ -7,8 +7,11 @@ export function tintOf(id){
   for(const c of String(id)) h = (h * 31 + c.charCodeAt(0)) | 0;
   return 't' + (1 + Math.abs(h) % 6);
 }
-export const avatar = (pid, size = '') =>
-  `<span class="av ${size} ${tintOf(pid)}" aria-hidden="true">${esc(initial(personName(pid)))}</span>`;
+/* The initial sits under the photo, so a photo that fails to load (see main.js) leaves the initial */
+export function avatar(pid, size = ''){
+  const photo = personPhoto(pid);
+  return `<span class="av ${size} ${tintOf(pid)}" aria-hidden="true">${esc(initial(personName(pid)))}${photo ? `<img src="${esc(photo)}" alt="" referrerpolicy="no-referrer" loading="lazy" decoding="async">` : ''}</span>`;
+}
 export const groupTile = (g, size = '') =>
   `<span class="tile ${size} ${tintOf(g.id)}" aria-hidden="true">${esc(initial(g.name))}</span>`;
 

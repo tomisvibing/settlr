@@ -19,7 +19,7 @@ function groupCard(g){
   const when = isArchived(g) ? `archived ${ago(g.archivedAt)}` : ago(lastActivity(g));
   return `<li class="swipe"><a class="card gcard" href="${groupHref(g)}">
     ${groupTile(g)}
-    <span class="r-main"><span class="r-title serif">${esc(g.name)}</span><span class="r-meta">${n} ${n === 1 ? 'person' : 'people'} · ${when}</span></span>
+    <span class="r-main"><span class="r-title lead">${esc(g.name)}</span><span class="r-meta">${n} ${n === 1 ? 'person' : 'people'} · ${when}</span></span>
     ${me ? balancePill(v, g.currency) : '<span class="pill">Not in it</span>'}
   </a>${swipeButtons(acts, g.id, g.id)}</li>`;
 }

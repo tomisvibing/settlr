@@ -8,6 +8,7 @@ import { initEvents } from './events.js';
 import { initSwipe } from './swipe.js';
 import { initLive } from './live.js';
 import { initAuth } from './auth.js';
+import { initPhotoFallback } from './photo.js';
 
 initMonitoring();
 applyTheme();
@@ -16,5 +17,6 @@ initExpenseDialog();
 initGroupDialog();
 initEvents();
 initSwipe();
+initPhotoFallback();
 initLive();
 initAuth();

@@ -8,6 +8,7 @@ import { closeDialog } from './dialogs/dialog.js';
 import { reportError, setMonitoringUser } from './monitoring.js';
 import { initSignIn, resumeSignIn } from './signin.js';
 import { nameFromEmail } from './lib/signin.js';
+import { syncMyPhoto } from './photo.js';
 import { openProfile } from './dialogs/account.js';
 import { renderSkeleton } from './views/skeleton.js';
 
@@ -20,6 +21,7 @@ async function ensureMyPerson(){
   const { data, error: se } = await sb.from('people').select('id').eq('owner_id', uid).eq('user_id', uid).single();
   if(se) throw se;
   setMyPersonId(data.id);
+  syncMyPhoto();
 }
 /* An invite link opened while signed out survives the Google round-trip in localStorage */
 let authNote = '';

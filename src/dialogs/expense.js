@@ -183,7 +183,7 @@ export function openAddExpense(){
   openDialog(`
     <div class="sheet-head"><h2 style="flex:1">Add to which group?</h2><button type="button" class="iconbtn" data-action="close" aria-label="Close">${icon.close}</button></div>
     <ul class="cardlist">${groups.map(g => `<li><button type="button" class="card gcard" data-action="pick-group" data-id="${g.id}" style="font:inherit;text-align:left;cursor:pointer">
-      ${groupTile(g)}<span class="r-main"><span class="r-title serif">${esc(g.name)}</span><span class="r-meta">${g.members.length} people · ${esc(g.currency)}</span></span></button></li>`).join('')}</ul>`, () => false);
+      ${groupTile(g)}<span class="r-main"><span class="r-title lead">${esc(g.name)}</span><span class="r-meta">${g.members.length} people · ${esc(g.currency)}</span></span></button></li>`).join('')}</ul>`, () => false);
 }
 function renderSplitRows(){
   const m = draft.mode, box = $('#splitRows');
