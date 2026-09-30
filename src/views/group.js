@@ -45,7 +45,8 @@ export function renderGroupView(id){
 
     <div class="ghead">
       ${groupTile(g, 'lg')}
-      <div style="min-width:0"><h1>${esc(g.name)}</h1><p>${n} ${n === 1 ? 'person' : 'people'} · ${money(spentIn(g), cur)} spent</p></div>
+      <div class="ghead-title"><h1>${esc(g.name)}</h1><p>${n} ${n === 1 ? 'person' : 'people'} · ${money(spentIn(g), cur)} spent</p></div>
+      <button class="btn primary ghead-add" data-action="add-expense">${icon.plus}Add expense</button>
     </div>
 
     <section class="card" aria-label="Balances">
@@ -67,7 +68,7 @@ export function renderGroupView(id){
     <section class="section">
       <div class="section-head"><h2>Activity</h2></div>
       ${sorted.length > 6 ? `<input class="search" type="search" data-filter="activity" placeholder="Search activity" aria-label="Search activity" autocomplete="off">` : ''}
-      <div class="card">${sorted.length ? activityList(sorted.map(e => ({ e, g })), g, false) : `<p class="none">No expenses yet. Tap + to add one.</p>`}</div>
+      <div class="card">${sorted.length ? activityList(sorted.map(e => ({ e, g })), g, false) : `<p class="none">No expenses yet. Use Add expense above to add the first one.</p>`}</div>
     </section>
   </div>`;
 }

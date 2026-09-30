@@ -176,6 +176,11 @@ button.row:hover .r-title,a.row:hover .r-title{text-decoration:underline;text-un
 .ghead{display:flex;align-items:center;gap:14px;padding:0 4px}
 .ghead h1{font-size:clamp(28px,8vw,34px);line-height:1.05;letter-spacing:-.03em;overflow-wrap:anywhere}
 .ghead p{margin:2px 0 0;font-size:14px;color:var(--muted)}
+/* The group's own Add expense: beside the name, or on its own line under a long name on a narrow phone */
+.ghead:has(.ghead-add){flex-wrap:wrap}
+.ghead-title{flex:1 1 150px;min-width:0}
+.ghead-add{flex:none;margin-left:auto}
+@media (max-width:559px){.ghead-add{flex:1 1 100%;margin-left:0}}
 .settle{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
 .settle li{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:var(--pos-soft)}
 .settle li.owe{background:var(--neg-soft)}
