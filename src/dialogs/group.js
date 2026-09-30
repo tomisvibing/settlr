@@ -1,16 +1,21 @@
 import { sb } from '../supabase.js';
 import { state, session } from '../store.js';
-import { $, esc, currencyOptions } from '../lib/format.js';
+import { $, esc, money, currencyOptions } from '../lib/format.js';
 import { group, personName, involved, isMe, meIn, canAdmin, isAdmin, hasAccount, isArchived } from '../selectors.js';
 import { form, draft, setDraft, openDialog, fail, describeError } from './dialog.js';
+import { refresh } from '../data.js';
+import { openExpense } from './expense.js';
 
-export function openGroup(isNew){
+/* carry: an expense typed before it had a group (see openAddExpense). Once the group exists, that
+   expense's sheet opens in it, filled in, instead of the group's page */
+export function openGroup(isNew, { carry = null, note = '' } = {}){
   const g = isNew ? null : group();
   setDraft({ editingGroupId: g?.id || null, members: g ? g.members.slice() : [] });
   openDialog(`
     <h2>${isNew?'New group':'Edit group'}</h2>
+    ${note || carry ? `<p class="hint">${note || `A new group for ${esc(carry.desc)} · ${money(carry.amount, carry.currency)}. Add the people you’re splitting it with.`}</p>` : ''}
     <label>Group name<input name="name" maxlength="50" value="${esc(g?.name||'')}" placeholder="Flat 4B, Lisbon weekend"></label>
-    <label>Currency<select name="currency" ${g?.expenses.length ? 'disabled' : ''}>${currencyOptions(g?.currency || 'GBP')}</select>${g?.expenses.length ? '<span class="hint" style="font-weight:400">Fixed now the group has expenses. Each expense can still be in any currency.</span>' : ''}</label>
+    <label>Currency<select name="currency" ${g?.expenses.length ? 'disabled' : ''}>${currencyOptions(g?.currency || carry?.currency || 'GBP')}</select>${g?.expenses.length ? '<span class="hint" style="font-weight:400">Fixed now the group has expenses. Each expense can still be in any currency.</span>' : ''}</label>
     ${g?`<p class="hint">Invite code: <b>${esc(g.inviteCode)}</b> <button type="button" class="btn small" data-action="invite">Share invite link</button></p>`:''}
     <fieldset><legend>People in this group</legend><div id="mlist" class="srows"></div></fieldset>
     <div class="mrow"><label>Add someone<input name="newMember" maxlength="30" placeholder="A saved or new name" autocomplete="off"></label><button type="button" class="btn" data-action="add-member">Add</button></div>
@@ -23,7 +28,7 @@ export function openGroup(isNew){
     <div class="dlg-actions">
       <span class="sp"></span>
       <button type="button" class="btn" data-action="close">Cancel</button>
-      <button type="submit" class="btn primary">${isNew?'Create group':'Save changes'}</button>
+      <button type="submit" class="btn primary">${carry ? 'Create and continue' : isNew ? 'Create group' : 'Save changes'}</button>
     </div>`, async () => {
       await addPendingMember();
       const name = form.name.value.trim();
@@ -43,6 +48,7 @@ export function openGroup(isNew){
         } else {
           const { data: gid, error } = await sb.rpc('create_group', { name, currency: form.currency.value, member_person_ids: draft.members });
           if(error) throw error;
+          if(carry){ await refresh(); state.activeGroupId = gid; openExpense(null, carry); return false; }
           return '#/g/' + encodeURIComponent(gid);
         }
       }catch(err){ return fail(describeError(err)); }

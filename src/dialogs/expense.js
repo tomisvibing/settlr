@@ -1,5 +1,5 @@
 import { sb } from '../supabase.js';
-import { state, session } from '../store.js';
+import { session } from '../store.js';
 import { $, esc, ago, money, toPence, today, currencySymbol, currencyOptions, plainAmount, minorDigits, minorStep } from '../lib/format.js';
 import { convert, parseRate, formatRate, canFetch } from '../lib/fx.js';
 import { fetchRate } from '../rates.js';
@@ -18,6 +18,17 @@ import { isPdf, pathIsPdf, sizeLabel } from '../lib/receipt.js';
 const touch = () => window.matchMedia?.('(pointer: coarse)').matches;
 /* Names for the keypad keys a screen reader would otherwise read as punctuation or nothing */
 const keyLabel = k => k === 'del' ? ' aria-label="Delete last digit"' : k === '.' ? ' aria-label="Decimal point"' : k === '00' ? ' aria-label="Double zero"' : '';
+/* No pence in yen, won, forint…: the point key becomes 00 */
+const keypad = cur => {
+  const keys = ['1','2','3','4','5','6','7','8','9', minorDigits(cur) === 0 ? '00' : '.','0','del'];
+  return `<div class="keypad" role="group" aria-label="Amount keypad">${keys.map(k => `<button type="button" data-key="${k}"${keyLabel(k)}>${k === 'del' ? icon.backspace : k}</button>`).join('')}</div>
+    <p class="sr" id="amountSaid" role="status"></p>`;
+};
+/* The amount line: the currency symbol is a picker, then the digits */
+const amountLine = (cur, value) => `<div class="amount">
+      <label class="curpick" title="Change currency"><span class="cur" id="curSym">${esc(currencySymbol(cur))}</span><select name="cur" aria-label="Currency">${currencyOptions(cur)}</select></label>
+      <input name="amount" aria-label="Amount" inputmode="${touch() ? 'none' : minorDigits(cur) === 0 ? 'numeric' : 'decimal'}" autocomplete="off" value="${value}" placeholder="0">
+    </div>`;
 /* Size the amount box to its digits (a "." is narrow) so the currency sign sits right beside them */
 const fitAmount = () => {
   const i = form.amount; if(!i) return;
@@ -28,7 +39,10 @@ const fitAmount = () => {
 /* The last currency used in each group, so a week of Swiss receipts doesn't mean a week of switching */
 const LAST_CUR_KEY = gid => 'settlr:cur:' + gid;
 const lastCur = g => { try{ return localStorage.getItem(LAST_CUR_KEY(g.id)); }catch{ return null; } };
-const rememberCur = (g, cur) => { try{ localStorage.setItem(LAST_CUR_KEY(g.id), cur); }catch{ /* private mode */ } };
+/* …and the last one used anywhere, where a new expense starts before it has a group */
+const LAST_ANY_KEY = 'settlr:cur:last';
+const lastAnyCur = () => { try{ return localStorage.getItem(LAST_ANY_KEY); }catch{ return null; } };
+const rememberCur = (g, cur) => { try{ if(g) localStorage.setItem(LAST_CUR_KEY(g.id), cur); localStorage.setItem(LAST_ANY_KEY, cur); }catch{ /* private mode */ } };
 
 export function openExpense(eid, prefill){
   const g = group(); const e = eid ? g.expenses.find(x => x.id === eid) : null;
@@ -56,9 +70,6 @@ export function openExpense(eid, prefill){
   const dateVal = prefill?.date || e?.date || today();
   const paidByVal = prefill?.paidBy || e?.paidBy || defaultPayer(g);
   const modes = [['equal','Equally'],['shares','Shares'],['exact','Exact']];
-  /* No pence in yen, won, forint…: the point key becomes 00 */
-  const whole = minorDigits(cur) === 0;
-  const keys = ['1','2','3','4','5','6','7','8','9', whole ? '00' : '.','0','del'];
   const who = mid => isMe(mid) ? 'You' : esc(personName(mid));
   openDialog(`
     <h2 class="sr">${e ? 'Edit expense' : 'Add expense'}</h2>
@@ -68,10 +79,7 @@ export function openExpense(eid, prefill){
       <button type="button" class="iconbtn" data-action="close" aria-label="Close">${icon.close}</button>
     </div>
     ${prefill?.heard ? `<p class="heard">Heard: “${esc(prefill.heard)}”. Check the details below.</p>` : ''}
-    <div class="amount">
-      <label class="curpick" title="Change currency"><span class="cur" id="curSym">${esc(currencySymbol(cur))}</span><select name="cur" aria-label="Currency">${currencyOptions(cur)}</select></label>
-      <input name="amount" aria-label="Amount" inputmode="${touch() ? 'none' : whole ? 'numeric' : 'decimal'}" autocomplete="off" value="${amountVal}" placeholder="0">
-    </div>
+    ${amountLine(cur, amountVal)}
     <div class="fxrow" id="fxRow" hidden>
       <label>1 <span data-fx="from"></span> =<input name="rate" inputmode="decimal" autocomplete="off" aria-label="Exchange rate"></label><span data-fx="to">${esc(g.currency)}</span>
       <span class="fxnote" id="fxNote" aria-live="polite"></span>
@@ -87,8 +95,7 @@ export function openExpense(eid, prefill){
     </fieldset>
     <label class="daterow">Date<input type="date" name="date" value="${dateVal}"></label>
     <div class="receipt" id="receiptBox"></div>
-    <div class="keypad" role="group" aria-label="Amount keypad">${keys.map(k => `<button type="button" data-key="${k}"${keyLabel(k)}>${k === 'del' ? icon.backspace : k}</button>`).join('')}</div>
-    <p class="sr" id="amountSaid" role="status"></p>
+    ${keypad(cur)}
     ${e ? '<section class="comments" id="commentsBox" aria-label="Comments"></section>' : ''}
     <p class="err" role="alert"></p>
     <div class="dlg-actions">
@@ -148,11 +155,15 @@ function groupAmount(){
 /* Show or hide the rate line, and match the symbol and keypad to the currency */
 function renderFx(){
   const row = $('#fxRow'); if(!row) return;
-  $('#curSym').textContent = currencySymbol(draft.cur);
+  syncAmountLine();
   row.hidden = !foreign();
   row.querySelector('[data-fx="from"]').textContent = draft.cur;
   if(document.activeElement !== form.rate) form.rate.value = draft.rate ? formatRate(draft.rate) : '';
   $('#fxNote').textContent = draft.rateNote;
+}
+/* Match the symbol, the keypad's point key and the keyboard to the currency */
+function syncAmountLine(){
+  $('#curSym').textContent = currencySymbol(draft.cur);
   const whole = minorDigits(draft.cur) === 0, point = form.querySelector('.keypad [data-key="."], .keypad [data-key="00"]');
   if(point){ point.dataset.key = whole ? '00' : '.'; point.textContent = whole ? '00' : '.'; point.setAttribute('aria-label', whole ? 'Double zero' : 'Decimal point'); }
   if(!touch()) form.amount.inputMode = whole ? 'numeric' : 'decimal';
@@ -173,22 +184,49 @@ async function loadRate(){
   else { d.rate = null; d.rateNote = 'Couldn’t get a rate just now. Type one in.'; }
   renderFx(); updateHint();
 }
-/* From the + button: straight in when there's a group in view (or only one), otherwise ask which */
+/* From any + or Add expense: straight in on a group's own page; everywhere else the expense
+   comes first (how much, what for) and the group second */
 export function openAddExpense(){
   const r = parseRoute();
   if(r.name === 'group' && group()){
     if(isArchived(group())) return toast(`${group().name} is archived. Restore it to add expenses.`);
     return openExpense();
   }
-  const open = activeGroups();
-  if(!open.length){ toast(state.groups.length ? 'All your groups are archived. Restore one, or start a new group.' : 'Start a group first, then add expenses to it.'); return openGroup(true); }
-  if(open.length === 1){ state.activeGroupId = open[0].id; return openExpense(); }
-  setDraft({});
-  const groups = open.slice().sort((a, c) => lastActivity(c) - lastActivity(a));
+  openQuickEntry();
+}
+const byRecent = (a, c) => lastActivity(c) - lastActivity(a);
+/* Step 1: the amount and what it was for */
+function openQuickEntry(){
+  const cur = lastAnyCur() || activeGroups().slice().sort(byRecent)[0]?.currency || 'GBP';
+  setDraft({ quick: true, cur });
   openDialog(`
-    <div class="sheet-head"><h2 style="flex:1">Add to which group?</h2><button type="button" class="iconbtn" data-action="close" aria-label="Close">${icon.close}</button></div>
-    <ul class="cardlist">${groups.map(g => `<li><button type="button" class="card gcard" data-action="pick-group" data-id="${g.id}" style="font:inherit;text-align:left;cursor:pointer">
-      ${groupTile(g)}<span class="r-main"><span class="r-title lead">${esc(g.name)}</span><span class="r-meta">${g.members.length} people · ${esc(g.currency)}</span></span></button></li>`).join('')}</ul>`, () => false);
+    <div class="sheet-head"><h2 class="sheet-title">New expense</h2><button type="button" class="iconbtn" data-action="close" aria-label="Close">${icon.close}</button></div>
+    ${amountLine(cur, '')}
+    <label>What for?<input name="desc" maxlength="80" placeholder="Dinner, taxi, tickets…" autocomplete="off" enterkeyhint="next"></label>
+    ${keypad(cur)}
+    <p class="err" role="alert"></p>
+    <div class="dlg-actions"><button type="submit" class="btn primary wide">Continue</button></div>`, () => {
+      const amount = toPence(form.amount.value), desc = form.desc.value.trim();
+      if(!(amount > 0)) return fail('Enter an amount above zero.', form.amount);
+      if(!desc) return fail('Add a short description, like “Dinner”.', form.desc);
+      chooseGroup({ amount, desc, currency: draft.cur });
+      return false;
+    });
+  fitAmount();
+}
+/* Step 2: which group it belongs to. With none yet, straight to starting one */
+function chooseGroup(carry){
+  const open = activeGroups().slice().sort(byRecent);
+  const what = `${esc(carry.desc)} · ${money(carry.amount, carry.currency)}`;
+  if(!open.length) return openGroup(true, { carry, note: `Where does ${what} go? Start a group with the people you’re splitting it with.` });
+  setDraft({ pick: carry });
+  openDialog(`
+    <div class="sheet-head"><h2 class="sheet-title">Which group?</h2><button type="button" class="iconbtn" data-action="close" aria-label="Close">${icon.close}</button></div>
+    <p class="pick-what">${what}</p>
+    <ul class="picklist">${open.map(g => `<li><button type="button" class="pick" data-action="pick-group" data-id="${g.id}">
+      ${groupTile(g)}<span class="r-main"><span class="r-title">${esc(g.name)}</span><span class="r-meta">${g.members.length} people · ${esc(g.currency)}</span></span>
+      <svg class="pick-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></li>`).join('')}</ul>
+    <button type="button" class="btn wide" data-action="pick-new-group">${icon.plus}New group</button>`, () => false);
 }
 function renderSplitRows(){
   const m = draft.mode, box = $('#splitRows');
@@ -300,7 +338,7 @@ export function initExpenseDialog(){
     if(ev.key === 'Enter' && ev.target.name === 'comment'){ ev.preventDefault(); postComment(); }
   });
   /* The form is shared by every dialog; only react while the expense split editor is showing */
-  const editing = () => draft && form.querySelector('#splitRows');
+  const editing = () => draft && (draft.quick || form.querySelector('#splitRows'));
   form.addEventListener('click', ev => {
     const k = ev.target.closest('[data-key]');
     if(k && editing()) pressKey(k.dataset.key);
@@ -312,6 +350,7 @@ export function initExpenseDialog(){
   form.addEventListener('change', ev => {
     if(!editing()) return;
     const t = ev.target;
+    if(draft.quick){ if(t.name === 'cur'){ draft.cur = t.value; rememberCur(null, t.value); syncAmountLine(); } return; }
     if(t.name === 'receipt'){ if(t.files?.[0]) pickReceipt(t.files[0]); return; }
     if(t.name === 'cur'){
       draft.cur = t.value; draft.rate = null; draft.rateManual = false; draft.rateNote = '';
@@ -325,6 +364,7 @@ export function initExpenseDialog(){
   form.addEventListener('input', ev => {
     if(!editing()) return;
     const t = ev.target;
+    if(draft.quick){ if(t.name === 'amount') fitAmount(); return; }
     if(t.dataset.sid && t.type !== 'checkbox'){
       const id = t.dataset.sid;
       if(draft.mode==='exact') draft.exact[id] = t.value; else draft.shares[id] = t.value;
@@ -373,6 +413,7 @@ async function saveExpense(){
   if(result === false){ if(added) removeReceipts([added]); return false; }
   if(old && (added || d.receiptRemoved)) removeReceipts([old]);
   if(d.receiptPreview) URL.revokeObjectURL(d.receiptPreview);
+  if(!d.id) toast(`Added “${desc}” to ${g.name}.`);
   return result;
 }
 export async function saveExpenseRow(expenseId, row, splits){

@@ -1,7 +1,8 @@
 /* Page-wide event delegation: every button carries a data-action */
 import { sb } from './supabase.js';
 import { state, session, myPersonId } from './store.js';
-import { setTheme } from './theme.js';
+import { setTheme, isNight } from './theme.js';
+import { syncThemeToggle } from './views/start.js';
 import { toast, forgetTrigger } from './ui.js';
 import { group, personLocked, meIn, isAdmin, canAdmin } from './selectors.js';
 import { balances } from './lib/ledger.js';
@@ -11,7 +12,7 @@ import { render, navigate } from './router.js';
 import { rememberPendingJoin } from './auth.js';
 import { shareInvite, exportGroupCsv, exportAll } from './share.js';
 import { filterActivity } from './views/group.js';
-import { dlg, closeDialog, fail, describeError } from './dialogs/dialog.js';
+import { dlg, draft, closeDialog, fail, describeError } from './dialogs/dialog.js';
 import { openExpense, openAddExpense } from './dialogs/expense.js';
 import { openVoiceExpense, abortVoice, finishVoice } from './dialogs/voice.js';
 import { openPayment } from './dialogs/payment.js';
@@ -38,7 +39,9 @@ export function initEvents(){
     else if(a==='join-group') openJoinGroup();
     else if(a==='add-expense') openExpense();
     else if(a==='quick-add') openAddExpense();
-    else if(a==='pick-group'){ state.activeGroupId = b.dataset.id; openExpense(); }
+    /* The expense typed on the way in travels to the group picked for it */
+    else if(a==='pick-group'){ const carry = draft?.pick; state.activeGroupId = b.dataset.id; openExpense(null, carry); }
+    else if(a==='pick-new-group') openGroup(true, { carry: draft?.pick });
     else if(a==='voice-expense') openVoiceExpense();
     else if(a==='voice-done') finishVoice();
     else if(a==='voice-type'){ abortVoice(); openExpense(); }
@@ -67,6 +70,7 @@ export function initEvents(){
       }
     }
     else if(a==='close') closeDialog();
+    else if(a==='toggle-theme'){ setTheme(isNight() ? 'light' : 'dark'); syncThemeToggle(); }
     else if(a==='skip') $('#app').focus();
     else if(a==='add-member') await addPendingMember();
     else if(a==='invite'){ if(g) await shareInvite(g); }
@@ -103,7 +107,7 @@ export function initEvents(){
         const { error } = await sb.rpc('leave_group', { gid: g.id });
         if(error){ oops(error, 'leave'); return; }
         state.activeGroupId = null;
-        closeDialog(); navigate('#/'); await refresh();
+        closeDialog(); navigate('#/overview'); await refresh();
         toast(`You left ${g.name}.`);
       }
     }
@@ -135,7 +139,7 @@ export function initEvents(){
         /* The security rules turn a non-admin's delete into "nothing deleted" rather than an error */
         if(!gone?.length){ fail('Only an admin can delete this group.'); return; }
         state.activeGroupId = null;
-        closeDialog(); navigate('#/'); await refresh();
+        closeDialog(); navigate('#/overview'); await refresh();
         toast(`Deleted ${g.name}.`);
       }
     }

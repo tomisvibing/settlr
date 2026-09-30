@@ -26,7 +26,7 @@ export function renderGroupView(id){
   if(!g){
     app.innerHTML = `<section class="empty">
       <h1>This group isn’t available. It may have been deleted, or you’re no longer in it.</h1>
-      <a class="btn primary" href="#/">Back to your groups</a>
+      <a class="btn primary" href="#/overview">Back to your groups</a>
     </section>`;
     return;
   }
@@ -40,7 +40,7 @@ export function renderGroupView(id){
 
   app.innerHTML = `<div class="stack">
     <div class="topbar">
-      <a class="iconbtn" href="#/" aria-label="Back to all groups">${icon.back}</a>
+      <a class="iconbtn" href="#/overview" aria-label="Back to all groups">${icon.back}</a>
       <span class="sp"></span>
       <button class="btn small topbar-invite" data-action="invite" aria-label="Invite people">${icon.invite}<span class="lbl">Invite</span></button>
       <button class="iconbtn" data-action="history" aria-label="History" title="History">${icon.history}</button>
