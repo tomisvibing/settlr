@@ -37,7 +37,7 @@ Everything later builds on these.
 
 ## Phase 2: Smart capture
 
-- [x] **Receipts**: take a photo or upload an image or PDF, shrunk on the phone before upload, stored in Supabase Storage and visible only to the group, shown on the expense (needs the `receipts` migration applied)
+- [x] **Receipts**: take a photo or upload an image or PDF, shrunk on the phone before upload, stored in Supabase Storage and visible only to the group, shown on the expense
 - [ ] **Receipt reading**: Claude reads the photo and fills in merchant, total, date and line items
 - [ ] **Split by item**: tap who had what from the scanned line items
 - [ ] **AI voice parsing**: send the transcript and the group's member names to Claude and get back clean fields (description, amount, payer, split, date) to confirm in the form. Today's parser just keeps whatever words are left over, so the descriptions come out garbled.
@@ -46,16 +46,17 @@ Both AI features share one Supabase Edge Function, so the Claude API key never r
 
 ## Phase 3: Using it together
 
-- [ ] Live updates: see new expenses the moment someone adds them (Supabase Realtime)
+- [x] Live updates: see new expenses the moment someone adds them (Supabase Realtime)
 - [ ] Change history ("Bob edited *Dinner*: £40 → £45") and undo for deletes
 - [ ] Push notifications: "You owe Sam £20" reminders and a weekly summary
-- [ ] Leave a group; admin role so only admins can delete a group
+- [x] Leave a group (once settled up); admin role so only admins can delete a group or remove someone with an account
 - [ ] Comments on expenses
 
 ## Phase 4: Money features
 
 - [ ] Payment links: "Mark paid" opens Monzo.me, PayPal.me or Revolut with the amount filled in
-- [ ] Multiple currencies: expenses in the local currency on trips, converted to the group's currency, and one overall total on Home
+- [x] 50 currencies to pick from, with names, and whole-number amounts for currencies without pence (yen, won, forint…)
+- [ ] Multiple currencies in one group: expenses in the local currency on trips, converted to the group's currency, and one overall total on Home
 - [ ] Recurring expenses (rent, bills)
 - [ ] Categories and insights: spending by group and month, trip totals, who paid most
 - [ ] "Simplify debts" as a setting; archive finished groups
@@ -63,7 +64,7 @@ Both AI features share one Supabase Edge Function, so the Claude API key never r
 ## Phase 5: Reach
 
 - [ ] Offline support: open the app and queue entries without signal
-- [ ] Import from Splitwise
+- [ ] Import from Splitwise: upload the CSV Splitwise exports for each group, match its people to settlr's, and bring in every expense and payment
 - [ ] App Store and Play Store versions from the same code (Capacitor)
 - [ ] Custom domain
 

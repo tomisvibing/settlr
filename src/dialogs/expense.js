@@ -1,8 +1,8 @@
 import { sb } from '../supabase.js';
 import { state } from '../store.js';
-import { $, esc, money, toPence, today, currencySymbol } from '../lib/format.js';
+import { $, esc, money, toPence, today, currencySymbol, plainAmount, minorDigits, minorStep } from '../lib/format.js';
 import { distribute } from '../lib/ledger.js';
-import { group, personName, defaultPayer, isMe, lastActivity } from '../selectors.js';
+import { group, personName, defaultPayer, isMe, lastActivity, rosterFor } from '../selectors.js';
 import { parseRoute } from '../router.js';
 import { toast } from '../ui.js';
 import { avatar, groupTile, icon } from '../views/shared.js';
@@ -22,24 +22,28 @@ const fitAmount = () => {
 export function openExpense(eid, prefill){
   const g = group(); const e = eid ? g.expenses.find(x => x.id === eid) : null;
   const def = { equal:{}, exact:{}, shares:{} };
-  g.members.forEach(mid => { def.equal[mid] = 1; def.shares[mid] = 1; def.exact[mid] = ''; });
-  setDraft({ id: e?.id, mode: e?.splitMode || prefill?.mode || 'equal', ...def,
+  /* Who can pay or share: the members, plus anyone on this entry who has since left the group */
+  const roster = rosterFor(g, e);
+  roster.forEach(mid => { def.equal[mid] = 1; def.shares[mid] = 1; def.exact[mid] = ''; });
+  setDraft({ id: e?.id, mode: e?.splitMode || prefill?.mode || 'equal', ...def, roster,
     receiptPath: e?.receipt || null, receiptFile: null, receiptPreview: null, receiptRemoved: false });
   if(e){
     const inp = e.splitInput || {};
-    g.members.forEach(mid => {
+    roster.forEach(mid => {
       if(e.splitMode==='equal') draft.equal[mid] = inp[mid] ? 1 : 0;
       if(e.splitMode==='shares') draft.shares[mid] = inp[mid] ?? 0;
-      if(e.splitMode==='exact') draft.exact[mid] = inp[mid] ? (inp[mid]/100).toFixed(2) : '';
+      if(e.splitMode==='exact') draft.exact[mid] = inp[mid] ? plainAmount(inp[mid], g.currency) : '';
     });
   }
-  if(prefill?.subset) g.members.forEach(mid => draft.equal[mid] = prefill.subset.includes(mid) ? 1 : 0);
+  if(prefill?.subset) roster.forEach(mid => draft.equal[mid] = prefill.subset.includes(mid) ? 1 : 0);
   const descVal = prefill?.desc ?? e?.desc ?? '';
-  const amountVal = prefill?.amount != null ? (prefill.amount/100).toFixed(2) : (e ? (e.amount/100).toFixed(2) : '');
+  const amountVal = prefill?.amount != null ? plainAmount(prefill.amount, g.currency) : (e ? plainAmount(e.amount, g.currency) : '');
   const dateVal = prefill?.date || e?.date || today();
   const paidByVal = prefill?.paidBy || e?.paidBy || defaultPayer(g);
   const modes = [['equal','Equally'],['shares','Shares'],['exact','Exact']];
-  const keys = ['1','2','3','4','5','6','7','8','9','.','0','del'];
+  /* No pence in yen, won, forint…: the point key becomes 00 */
+  const whole = minorDigits(g.currency) === 0;
+  const keys = ['1','2','3','4','5','6','7','8','9', whole ? '00' : '.','0','del'];
   const who = mid => isMe(mid) ? 'You' : esc(personName(mid));
   openDialog(`
     <h2 class="sr">${e ? 'Edit expense' : 'Add expense'}</h2>
@@ -48,10 +52,10 @@ export function openExpense(eid, prefill){
       ${e ? '' : `<button type="button" class="iconbtn" data-action="voice-expense" aria-label="Add by voice" title="Add by voice">${icon.mic}</button>`}
       <button type="button" class="iconbtn" data-action="close" aria-label="Close">${icon.close}</button>
     </div>
-    <label class="amount"><span class="sr">Amount in ${g.currency}</span><span class="cur" aria-hidden="true">${esc(currencySymbol(g.currency))}</span><input name="amount" inputmode="${touch() ? 'none' : 'decimal'}" autocomplete="off" value="${amountVal}" placeholder="0"></label>
+    <label class="amount"><span class="sr">Amount in ${g.currency}</span><span class="cur" aria-hidden="true">${esc(currencySymbol(g.currency))}</span><input name="amount" inputmode="${touch() ? 'none' : whole ? 'numeric' : 'decimal'}" autocomplete="off" value="${amountVal}" placeholder="0"></label>
     <label>What for?<input name="desc" maxlength="80" value="${esc(descVal)}" placeholder="Dinner, taxi, tickets…"></label>
     <fieldset class="field"><legend class="flabel">Paid by</legend>
-      <div class="chips">${g.members.map(mid => `<label class="chip"><input type="radio" name="paidBy" value="${mid}" ${mid===paidByVal?'checked':''}>${avatar(mid,'sm')}${who(mid)}</label>`).join('')}</div>
+      <div class="chips">${roster.map(mid => `<label class="chip"><input type="radio" name="paidBy" value="${mid}" ${mid===paidByVal?'checked':''}>${avatar(mid,'sm')}${who(mid)}</label>`).join('')}</div>
     </fieldset>
     <fieldset class="field"><legend class="sr">Split</legend>
       <div class="flabel"><span>Split</span><span class="hint" id="splitHint" aria-live="polite"></span></div>
@@ -84,9 +88,9 @@ export function openAddExpense(){
       ${groupTile(g)}<span class="r-main"><span class="r-title serif">${esc(g.name)}</span><span class="r-meta">${g.members.length} people · ${esc(g.currency)}</span></span></button></li>`).join('')}</ul>`, () => false);
 }
 function renderSplitRows(){
-  const g = group(), m = draft.mode, box = $('#splitRows');
+  const m = draft.mode, box = $('#splitRows');
   box.className = m === 'equal' ? 'chips' : 'srows';
-  box.innerHTML = g.members.map(mid => {
+  box.innerHTML = draft.roster.map(mid => {
     const name = isMe(mid) ? 'You' : esc(personName(mid));
     if(m==='equal') return `<label class="chip"><input type="checkbox" data-sid="${mid}" ${draft.equal[mid]?'checked':''}>${avatar(mid,'sm')}${name}</label>`;
     if(m==='exact') return `<label class="srow">${avatar(mid,'sm')}<span class="nm">${name}</span><input inputmode="decimal" autocomplete="off" aria-label="${name}'s amount" data-sid="${mid}" value="${esc(draft.exact[mid])}" placeholder="0.00"></label>`;
@@ -106,8 +110,8 @@ function updateHint(){
     else { hint.textContent = left>0 ? `${money(left,g.currency)} left to assign` : `${money(-left,g.currency)} too much`; hint.classList.add('bad'); }
     return;
   }
-  const w = {}; g.members.forEach(mid => w[mid] = draft.mode==='equal' ? (draft.equal[mid]?1:0) : Math.max(0, Number(draft.shares[mid])||0));
-  const split = amount>0 ? distribute(amount, w) : null;
+  const w = {}; draft.roster.forEach(mid => w[mid] = draft.mode==='equal' ? (draft.equal[mid]?1:0) : Math.max(0, Number(draft.shares[mid])||0));
+  const split = amount>0 ? distribute(amount, w, minorStep(g.currency)) : null;
   if(split) for(const [id,v] of Object.entries(split)){ const el = form.querySelector(`[data-share="${id}"]`); if(el) el.textContent = money(v,g.currency); }
   const n = Object.values(w).filter(x => x>0).length;
   if(!n){ hint.textContent = draft.mode==='equal' ? 'Pick at least one person' : 'Give at least one person a share'; hint.classList.add('bad'); return; }
@@ -173,9 +177,13 @@ const receiptError = err => /bucket not found/i.test(err?.message || '')
 /* The on-screen keypad (phones): same rules as typing, at most two decimals */
 function pressKey(k){
   const i = form.amount; let a = i.value;
+  /* Up to 9,999,999.99, or 9,999,999,999 in a currency without pence */
+  const maxWhole = minorDigits(group().currency) ? 7 : 10;
   if(k === 'del') a = a.slice(0, -1);
   else if(k === '.'){ if(!a.includes('.')) a = (a || '0') + '.'; }
-  else { if(/\.\d\d$/.test(a) || a.replace('.', '').length >= 7) return; a = a === '0' ? k : a + k; }
+  else if(a.includes('.')){ if(/\.\d\d$/.test(a)) return; a += k; }
+  else if(a === '' || a === '0') a = k.replace(/^0+/, '') || '0';
+  else { if(a.length + k.length > maxWhole) return; a += k; }
   i.value = a;
   i.dispatchEvent(new Event('input', { bubbles: true }));
 }
@@ -214,15 +222,15 @@ async function saveExpense(){
   let splits, input = {};
   if(draft.mode === 'exact'){
     splits = {}; let sum = 0;
-    for(const mid of g.members){
+    for(const mid of draft.roster){
       const p = toPence(draft.exact[mid]);
       if(Number.isNaN(p) || p < 0) return fail(`Check the amount for ${personName(mid)}.`);
       if(p > 0){ splits[mid] = p; input[mid] = p; sum += p; }
     }
     if(sum !== amount) return fail(`The split adds up to ${money(sum,g.currency)}, but the expense is ${money(amount,g.currency)}.`);
   } else {
-    g.members.forEach(mid => input[mid] = draft.mode==='equal' ? (draft.equal[mid]?1:0) : Math.max(0, Math.floor(Number(draft.shares[mid])||0)));
-    splits = distribute(amount, input);
+    draft.roster.forEach(mid => input[mid] = draft.mode==='equal' ? (draft.equal[mid]?1:0) : Math.max(0, Math.floor(Number(draft.shares[mid])||0)));
+    splits = distribute(amount, input, minorStep(g.currency));
     if(!splits) return fail(draft.mode==='equal' ? 'Pick at least one person to split with.' : 'Give at least one person a share above zero.');
   }
   const row = { group_id: g.id, type:'expense', description: desc, amount_cents: amount, paid_by: form.paidBy.value, split_mode: draft.mode, expense_date: form.date.value || today(), split_input: input };

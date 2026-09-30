@@ -1,7 +1,8 @@
 import { sb } from './supabase.js';
 import { session, setSession, setMyPersonId, resetState, PENDING_JOIN_KEY } from './store.js';
 import { $, esc } from './lib/format.js';
-import { loadAllData } from './data.js';
+import { loadAllData, refreshQuietly } from './data.js';
+import { startLive, stopLive } from './live.js';
 import { parseRoute, render } from './router.js';
 import { closeDialog } from './dialogs/dialog.js';
 import { reportError, setMonitoringUser } from './monitoring.js';
@@ -51,8 +52,10 @@ async function onAuthChange(){
     if(pending && parseRoute().name !== 'join') history.replaceState(null, '', location.pathname + location.search + '#/join/' + encodeURIComponent(pending));
     $('#appWrap').style.display = '';
     render();
+    startLive(refreshQuietly);
     askNameOnce();
   } else {
+    stopLive();
     setMyPersonId(null);
     setMonitoringUser(null);
     resetState();

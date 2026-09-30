@@ -1,7 +1,7 @@
 import { state } from '../store.js';
 import { $, esc, money, byNewest } from '../lib/format.js';
 import { balances, settlements } from '../lib/ledger.js';
-import { group, personName, isMe, spentIn } from '../selectors.js';
+import { group, personName, isMe, spentIn, isAdmin } from '../selectors.js';
 import { avatar, groupTile, balancePill, entryInner, icon, swipeActs } from './shared.js';
 
 /* Search text for an activity row: description, the people in it and the amount */
@@ -51,7 +51,7 @@ export function renderGroupView(id){
     <section class="card" aria-label="Balances">
       <ul class="rows">${members.map(mid => `<li class="row">
         ${avatar(mid)}
-        <span class="r-main"><span class="r-title">${isMe(mid) ? 'You' : esc(personName(mid))}</span></span>
+        <span class="r-main"><span class="r-title">${isMe(mid) ? 'You' : esc(personName(mid))}</span>${isAdmin(g, mid) ? '<span class="r-meta">Admin</span>' : ''}</span>
         ${balancePill(b[mid] || 0, cur)}
       </li>`).join('')}</ul>
     </section>

@@ -3,7 +3,30 @@ export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','
 /* A date as YYYY-MM-DD in local time */
 export const isoDate = d => { const x = new Date(d); x.setMinutes(x.getMinutes()-x.getTimezoneOffset()); return x.toISOString().slice(0,10); };
 export const today = () => isoDate(new Date());
-export const CURRENCIES = ['GBP','EUR','USD','CHF','SEK','NOK','DKK','AUD','CAD','NZD'];
+/* The usual three first, then the rest: Europe, the Americas, Asia-Pacific, Middle East and Africa */
+export const CURRENCIES = [
+  'GBP','EUR','USD',
+  'BGN','CHF','CZK','DKK','HUF','ISK','NOK','PLN','RON','RSD','SEK','TRY','UAH',
+  'ARS','BRL','CAD','CLP','COP','MXN','PEN','UYU',
+  'AUD','CNY','HKD','IDR','INR','JPY','KRW','LKR','MYR','NZD','PHP','SGD','THB','TWD','VND',
+  'AED','EGP','ILS','JOD','KES','MAD','NGN','QAR','SAR','TZS','ZAR',
+];
+const names = (() => { try{ return new Intl.DisplayNames(['en-GB'], { type:'currency' }); }catch(e){ return null; } })();
+export const currencyName = cur => names?.of(cur) || cur;
+/* <option>s for a currency picker: "GBP · British Pound", plus the current value if it's not in the list */
+export function currencyOptions(selected = 'GBP'){
+  const list = CURRENCIES.includes(selected) ? CURRENCIES : [selected, ...CURRENCIES];
+  return list.map(c => `<option value="${c}" ${c === selected ? 'selected' : ''}>${c} · ${esc(currencyName(c))}</option>`).join('');
+}
+/* Digits after the point: 2 for most, 0 for yen, won, forint… Amounts are always stored in hundredths */
+export function minorDigits(cur){
+  try{ return new Intl.NumberFormat('en-GB',{style:'currency',currency:cur}).resolvedOptions().maximumFractionDigits; }
+  catch(e){ return 2; }
+}
+/* Hundredths → what goes in an amount box: "12.50", or "1500" for yen */
+export const plainAmount = (p, cur) => (p/100).toFixed(minorDigits(cur));
+/* Smallest amount a share can be, in hundredths: 1 (a penny) or 100 (a whole yen) */
+export const minorStep = cur => 10 ** (2 - Math.min(2, minorDigits(cur)));
 
 export function money(p, cur){
   try{ return new Intl.NumberFormat('en-GB',{style:'currency',currency:cur}).format(p/100); }
