@@ -67,7 +67,7 @@ export function renderGroupView(id){
       <div class="section-head"><h2>Settle up</h2>${frozen ? '' : `<button class="btn small" data-action="add-payment" ${n > 1 ? '' : 'disabled'}>Record a payment</button>`}</div>
       ${plan.length ? `<ul class="settle">${plan.map(p => `
         <li class="${isMe(p.from) ? 'owe' : ''}"><p>${pays(p.from, p.to)} ${money(p.amount, cur)}</p>
-        ${frozen ? '' : `<button class="btn small primary" data-action="settle" data-from="${p.from}" data-to="${p.to}" data-amount="${p.amount}">Mark paid</button>`}</li>`).join('')}</ul>`
+        ${frozen ? '' : `<button class="btn small" data-action="settle" data-from="${p.from}" data-to="${p.to}" data-amount="${p.amount}">Mark paid</button>`}</li>`).join('')}</ul>`
       : `<div class="card"><p class="none">${g.expenses.length ? 'Everyone is square.' : 'Add the first expense to see who owes whom.'}</p></div>`}
     </section>
 

@@ -11,6 +11,7 @@ import { avatar, groupTile, icon } from '../views/shared.js';
 import { dlg, form, draft, setDraft, openDialog, fail, describeError } from './dialog.js';
 import { refresh } from '../data.js';
 import { openGroup } from './group.js';
+import { askConfirm } from './confirm.js';
 import { prepareReceipt, uploadReceipt, removeReceipts, receiptUrl } from '../receipts.js';
 import { isPdf, pathIsPdf, sizeLabel } from '../lib/receipt.js';
 
@@ -88,12 +89,12 @@ export function openExpense(eid, prefill){
     <div class="receipt" id="receiptBox"></div>
     <div class="keypad" role="group" aria-label="Amount keypad">${keys.map(k => `<button type="button" data-key="${k}"${keyLabel(k)}>${k === 'del' ? icon.backspace : k}</button>`).join('')}</div>
     <p class="sr" id="amountSaid" role="status"></p>
+    ${e ? '<section class="comments" id="commentsBox" aria-label="Comments"></section>' : ''}
     <p class="err" role="alert"></p>
     <div class="dlg-actions">
       ${e ? `<button type="button" class="btn danger" data-action="del-entry" data-id="${e.id}">Delete</button><span class="sp"></span><button type="submit" class="btn primary">Save changes</button>`
           : `<button type="submit" class="btn primary wide">Add expense</button>`}
-    </div>
-    ${e ? '<section class="comments" id="commentsBox" aria-label="Comments"></section>' : ''}`, saveExpense);
+    </div>`, saveExpense);
   fitAmount();
   renderFx();
   renderSplitRows();
@@ -129,6 +130,7 @@ async function postComment(){
 }
 async function deleteComment(id){
   const d = draft;
+  if(!await askConfirm({ title: 'Delete this comment?', body: 'Everyone in the group stops seeing it.', confirmLabel: 'Delete comment' }) || draft !== d) return;
   const { error } = await sb.from('expense_comments').delete().eq('id', id);
   if(draft !== d) return;
   if(error) return fail(describeError(error));

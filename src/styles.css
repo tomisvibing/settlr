@@ -74,12 +74,12 @@ main{max-width:640px;margin:0 auto;padding:12px 16px calc(var(--tabbar-h) + var(
 .tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:52px;color:var(--muted);text-decoration:none;font-size:12px;font-weight:500;border-radius:26px}
 .tab svg{width:22px;height:22px}
 .tab[aria-current="page"]{color:var(--ink);font-weight:600;background:var(--pill-on)}
-.tab:hover{color:var(--ink)}
+@media (hover:hover){.tab:hover{color:var(--ink)}}
 /* Add sits apart from the tab capsule, as its own round button */
 .fab{position:absolute;right:-75px;top:-1px;width:64px;height:64px;border-radius:32px;border:0;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;box-shadow:inset 0 1px 0 var(--glass-hi),var(--lift)}
 .fab svg{width:24px;height:24px}
 .fab .fab-label{display:none}
-.fab:hover{opacity:.92}
+@media (hover:hover){.fab:hover{opacity:.92}}
 
 @media (min-width:900px){
   main{padding:40px 32px 64px}
@@ -90,10 +90,11 @@ main{max-width:640px;margin:0 auto;padding:12px 16px calc(var(--tabbar-h) + var(
   .fab svg{width:20px;height:20px}
   .fab .fab-label{display:inline}
   .tab{flex-direction:row;justify-content:flex-start;gap:12px;height:44px;padding:0 12px;font-size:15px;border-radius:22px}
-  .tab:hover{background:var(--pill-on)}
+  @media (hover:hover){.tab:hover{background:var(--pill-on)}}
 }
 
 /* ---------- Building blocks ---------- */
+/* Hover styles sit in (hover:hover) queries, so a tap on a phone doesn't leave them stuck on */
 .card{background:var(--glass);border:1px solid var(--glass-edge);border-radius:var(--r-card);box-shadow:inset 0 1px 0 var(--glass-hi),var(--glass-shadow)}
 .stack{display:flex;flex-direction:column;gap:22px}
 .section{display:flex;flex-direction:column;gap:10px}
@@ -102,26 +103,34 @@ main{max-width:640px;margin:0 auto;padding:12px 16px calc(var(--tabbar-h) + var(
 .section-head .btn{flex:none}
 
 .btn{appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 18px;border:1px solid var(--glass-edge);border-radius:999px;background:var(--glass);box-shadow:inset 0 1px 0 var(--glass-hi);color:var(--ink);font-weight:500;font-size:15px;cursor:pointer;white-space:nowrap;text-decoration:none}
-.btn:hover{background:var(--pill-on)}
+@media (hover:hover){.btn:hover{background:var(--pill-on)}}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:500;box-shadow:inset 0 1px 0 var(--glass-hi),0 8px 22px rgba(0,0,0,.14)}
-.btn.primary:hover{opacity:.9;background:var(--accent)}
+@media (hover:hover){.btn.primary:hover{opacity:.9;background:var(--accent)}}
 .btn.small{min-height:36px;padding:0 14px;font-size:14px}
 .btn.wide{width:100%;min-height:54px;font-size:16px}
 .btn.danger{border-color:transparent;background:transparent;box-shadow:none;color:var(--neg);padding:0 8px}
-.btn.danger:hover{background:var(--neg-soft)}
+@media (hover:hover){.btn.danger:hover{background:var(--neg-soft)}}
 .btn.destroy{background:var(--neg);border-color:var(--neg);color:var(--accent-ink);box-shadow:none}
-.btn.destroy:hover{opacity:.9;background:var(--neg)}
+@media (hover:hover){.btn.destroy:hover{opacity:.9;background:var(--neg)}}
 .btn.outline-neg{border-color:var(--neg);color:var(--neg)}
-.btn.outline-neg:hover{background:var(--neg-soft)}
+@media (hover:hover){.btn.outline-neg:hover{background:var(--neg-soft)}}
 .btn[disabled]{opacity:.4;cursor:default}
+/* A small press-in on buttons; off for people who ask for less motion */
+@media (prefers-reduced-motion: no-preference){
+  :is(.btn,.iconbtn,.fab,.keypad button,.sa){transition:scale .15s ease-out}
+  :is(.btn,.iconbtn,.fab,.keypad button,.sa):active:not([disabled]){scale:.96}
+}
 .btn svg{width:18px;height:18px;flex:none}
 .iconbtn{width:44px;height:44px;flex:none;border:1px solid var(--glass-edge);border-radius:22px;background:var(--glass);box-shadow:inset 0 1px 0 var(--glass-hi);color:var(--ink);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none}
-.iconbtn:hover{background:var(--pill-on)}
+@media (hover:hover){.iconbtn:hover{background:var(--pill-on)}}
 .iconbtn svg{width:20px;height:20px}
 .chipbar{display:flex;gap:8px;flex-wrap:wrap}
 
 .av{width:40px;height:40px;flex:none;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:15px;color:var(--ink);background:var(--t1);overflow:hidden;position:relative}
-.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit}
+:is(.av,.rthumb) img{outline:1px solid rgba(0,0,0,.1);outline-offset:-1px}
+:root[data-theme="dark"] :is(.av,.rthumb) img{outline-color:rgba(255,255,255,.1)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) :is(.av,.rthumb) img{outline-color:rgba(255,255,255,.1)}}
 .av.lg{width:52px;height:52px;font-size:21px}
 .av.sm{width:28px;height:28px;font-size:13px}
 .tile{width:50px;height:50px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:22px;color:var(--ink);background:var(--t1)}
@@ -138,7 +147,7 @@ main{max-width:640px;margin:0 auto;padding:12px 16px calc(var(--tabbar-h) + var(
 .rows > li + li{border-top:1px solid var(--line-soft)}
 .row{display:flex;align-items:center;gap:12px;width:100%;padding:12px 0;border:0;background:none;text-align:left;color:inherit;text-decoration:none;font:inherit}
 button.row,a.row{cursor:pointer}
-button.row:hover .r-title,a.row:hover .r-title{text-decoration:underline;text-underline-offset:3px}
+@media (hover:hover){button.row:hover .r-title,a.row:hover .r-title{text-decoration:underline;text-underline-offset:3px}}
 .r-main{flex:1 1 9rem;min-width:0;display:flex;flex-direction:column;gap:2px}
 .r-title .clip svg{width:14px;height:14px;vertical-align:-2px;margin-right:4px;color:var(--muted)}
 
@@ -176,7 +185,8 @@ li.swipe{position:relative;overflow:hidden}
 .comment .c-main{flex:1;min-width:0;background:var(--field);border:1px solid var(--line-soft);border-radius:14px;padding:8px 12px}
 .comment .c-who{font-size:12px;font-weight:600;color:var(--muted)}
 .comment .c-body{margin:2px 0 0;font-size:15px;line-height:1.4;white-space:pre-wrap;overflow-wrap:anywhere}
-.comment .c-del{border:0;background:none;color:var(--muted);font:inherit;font-size:12px;cursor:pointer;padding:6px 0 0;text-decoration:underline}
+.comment .c-del{display:inline-flex;align-items:center;min-height:32px;margin:0 0 -6px -8px;padding:0 8px;border:0;border-radius:16px;background:none;color:var(--neg);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+@media (hover:hover){.comment .c-del:hover{background:var(--neg-soft)}}
 .composer{display:flex;gap:8px}
 .composer input{flex:1;min-width:0}
 .rows.history .row{align-items:flex-start}
@@ -187,7 +197,7 @@ li.swipe{position:relative;overflow:hidden}
 
 .cardlist{display:flex;flex-direction:column;gap:10px;list-style:none;margin:0;padding:0}
 .gcard{display:flex;align-items:center;gap:14px;width:100%;padding:14px;color:inherit;text-decoration:none}
-.gcard:hover{background:var(--pill-on)}
+@media (hover:hover){.gcard:hover{background:var(--pill-on)}}
 
 .none{margin:0;padding:18px 16px;color:var(--muted);text-align:center}
 .none p{margin:0 0 12px}
@@ -225,7 +235,7 @@ li.swipe{position:relative;overflow:hidden}
 @media (max-width:559px){.ghead-add{flex:1 1 100%;margin-left:0}}
 .settle{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
 .settle li{display:flex;align-items:center;gap:12px;padding:10px 10px 10px 18px;border-radius:22px;background:var(--glass);border:1px solid var(--glass-edge);box-shadow:inset 0 1px 0 var(--glass-hi)}
-.settle li.owe{border-left:3px solid var(--neg)}
+.settle li.owe{background:var(--neg-soft);border-color:transparent}
 .settle p{margin:0;flex:1;font-size:15px}
 .search{width:100%;min-height:44px;border:1px solid var(--control-edge);border-radius:var(--r-field);background:var(--field);padding:0 14px;font-size:16px}
 
@@ -260,6 +270,7 @@ dialog::backdrop{background:var(--scrim)}
 dialog form{padding:10px 18px 20px;display:grid;gap:14px}
 dialog form::before{content:"";width:40px;height:4px;border-radius:2px;background:var(--line);justify-self:center}
 dialog h2{font-size:24px;line-height:1.15}
+dialog .card{border-radius:var(--r-field)}
 dialog h2:focus{outline:none}
 dialog.confirm form{gap:12px}
 @media (min-width:640px){dialog.confirm{width:min(400px,calc(100vw - 32px))}}
@@ -293,7 +304,7 @@ legend{font-size:13px;font-weight:500;color:var(--muted);margin-bottom:6px;paddi
 @media (max-width:374px){.topbar-invite{width:44px;min-height:44px;padding:0;justify-content:center;border-color:var(--line)}.topbar-invite .lbl{display:none}}
 .grp-exit{display:flex;flex-wrap:wrap;gap:4px;margin:-4px 0 -6px -8px}
 .grp-exit .btn:not(.danger){border-color:transparent;padding:0 8px}
-.grp-exit .btn:not(.danger):hover{background:var(--line-soft)}
+@media (hover:hover){.grp-exit .btn:not(.danger):hover{background:var(--line-soft)}}
 /* Archived groups */
 .archived-note{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r-card);background:var(--glass);border:1px solid var(--glass-edge);box-shadow:inset 0 1px 0 var(--glass-hi);color:var(--ink)}
 .archived-note > svg{width:22px;height:22px;flex:none;color:var(--muted)}
@@ -315,7 +326,7 @@ details.archived .count{font-size:12px;font-weight:700;background:var(--line-sof
 .err:empty,.hint:empty{display:none}
 .field-err{font-size:14px;font-weight:600;margin-top:-6px}
 /* The sheet's buttons stay in view at its foot however long the form gets */
-.dlg-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;position:sticky;bottom:0;z-index:2;margin:0 -18px -20px;padding:10px 18px 18px;background:var(--sheet);border-top:1px solid var(--line-soft)}
+.dlg-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;position:sticky;bottom:0;z-index:2;margin:0 -18px -20px;padding:10px 18px 18px;background:var(--sheet);border-top:1px solid var(--line-soft);-webkit-backdrop-filter:blur(24px) saturate(1.6);backdrop-filter:blur(24px) saturate(1.6)}
 @media (min-width:640px){.dlg-actions{margin:0 -24px -22px;padding:12px 24px 22px}}
 dialog .err{scroll-margin-bottom:96px}
 .dlg-actions .sp{flex:1}
