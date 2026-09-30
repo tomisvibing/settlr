@@ -52,6 +52,7 @@ export function openExpense(eid, prefill){
       ${e ? '' : `<button type="button" class="iconbtn" data-action="voice-expense" aria-label="Add by voice" title="Add by voice">${icon.mic}</button>`}
       <button type="button" class="iconbtn" data-action="close" aria-label="Close">${icon.close}</button>
     </div>
+    ${prefill?.heard ? `<p class="heard">Heard: “${esc(prefill.heard)}”. Check the details below.</p>` : ''}
     <label class="amount"><span class="sr">Amount in ${g.currency}</span><span class="cur" aria-hidden="true">${esc(currencySymbol(g.currency))}</span><input name="amount" inputmode="${touch() ? 'none' : whole ? 'numeric' : 'decimal'}" autocomplete="off" value="${amountVal}" placeholder="0"></label>
     <label>What for?<input name="desc" maxlength="80" value="${esc(descVal)}" placeholder="Dinner, taxi, tickets…"></label>
     <fieldset class="field"><legend class="flabel">Paid by</legend>

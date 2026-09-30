@@ -13,7 +13,7 @@ import { shareInvite, exportGroupCsv, exportAll } from './share.js';
 import { filterActivity } from './views/group.js';
 import { dlg, closeDialog, fail, describeError } from './dialogs/dialog.js';
 import { openExpense, openAddExpense } from './dialogs/expense.js';
-import { openVoiceExpense, abortVoice } from './dialogs/voice.js';
+import { openVoiceExpense, abortVoice, finishVoice } from './dialogs/voice.js';
 import { openPayment } from './dialogs/payment.js';
 import { openSettlement } from './dialogs/settlement.js';
 import { openPerson } from './dialogs/person.js';
@@ -39,6 +39,7 @@ export function initEvents(){
     else if(a==='quick-add') openAddExpense();
     else if(a==='pick-group'){ state.activeGroupId = b.dataset.id; openExpense(); }
     else if(a==='voice-expense') openVoiceExpense();
+    else if(a==='voice-done') finishVoice();
     else if(a==='edit-expense') openExpense(b.dataset.id);
     else if(a==='add-payment') openPayment();
     else if(a==='edit-payment') openPayment({id:b.dataset.id});

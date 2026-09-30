@@ -30,19 +30,14 @@ Everything later builds on these.
 - [x] **UI polish**: in-app confirm sheets instead of the browser's pop-ups, loading placeholders, smooth page transitions
 - [x] **Swipe** a row left for Edit and Delete (touch screens; on desktop, click a row to edit)
 - [ ] **More polish**: a custom date picker (the phone's own is fine for now)
-- [ ] **Sign in without Google**:
-  - [x] email with a 6-digit code (needs the dashboard steps in the README before it works for everyone)
-  - [ ] Sign in with Apple (needs an Apple Developer account, $99 a year)
+- [x] **Sign in without Google**:
+  - [x] email with a 6-digit code (needs the email sender set up in Supabase, see the README, before codes reach everyone)
   - [x] account linking: Supabase links sign-ins that share a verified email automatically
 
 ## Phase 2: Smart capture
 
 - [x] **Receipts**: take a photo or upload an image or PDF, shrunk on the phone before upload, stored in Supabase Storage and visible only to the group, shown on the expense
-- [ ] **Receipt reading**: Claude reads the photo and fills in merchant, total, date and line items
-- [ ] **Split by item**: tap who had what from the scanned line items
-- [ ] **AI voice parsing**: send the transcript and the group's member names to Claude and get back clean fields (description, amount, payer, split, date) to confirm in the form. Today's parser just keeps whatever words are left over, so the descriptions come out garbled.
-
-Both AI features share one Supabase Edge Function, so the Claude API key never reaches the browser. The default model is Claude Opus 5 (reads images, returns structured output), at roughly 1–2p per receipt and under 1p per voice entry. Claude Haiku 4.5 costs about a fifth as much if cost matters more than accuracy.
+- [x] **Better voice entry, no AI**: the voice screen asks for *what, how much, who paid, who for* with an example using the group's own names; it keeps listening through pauses (with a Done button); the description is just the first phrase, so "Yesterday we went for dinner at Nando's and it cost me £37" becomes *Dinner at Nando's*; it understands "I paid", "cost me" and "split with Sam"; and the form shows what it heard
 
 ## Phase 3: Using it together
 
@@ -64,10 +59,16 @@ Both AI features share one Supabase Edge Function, so the Claude API key never r
 ## Phase 5: Reach
 
 - [ ] Offline support: open the app and queue entries without signal
-- [ ] Import from Splitwise: upload the CSV Splitwise exports for each group, match its people to settlr's, and bring in every expense and payment
-- [ ] App Store and Play Store versions from the same code (Capacitor)
-- [ ] Custom domain
 
-## Suggested order
+## Parked: needs something from outside the code
 
-Phase 0 (migrations, then the Vite split), then the design mock-ups, then receipts and AI voice together since they share a server function.
+Not planned for now. Each one needs an account, a key, a file or a purchase before it can be built.
+
+- **Receipt reading**: Claude reads the photo and fills in merchant, total, date and line items. *Needs an Anthropic API key.*
+- **Split by item**: tap who had what from the scanned line items. *Needs receipt reading.*
+- **AI voice parsing**: Claude turns the transcript into clean fields. *Needs an Anthropic API key.* The no-AI voice improvements above may be enough.
+  - Both AI features would share one Supabase Edge Function so the key never reaches the browser, at roughly 1–2p per receipt and under 1p per voice entry.
+- **Import from Splitwise**: upload the CSV Splitwise exports for each group, match its people to settlr's, and bring in every expense and payment (or connect to Splitwise's API for all groups at once). *Needs a real Splitwise export to build against, or a Splitwise developer app.*
+- **Sign in with Apple**. *Needs an Apple Developer account, $99 a year.*
+- **App Store and Play Store versions** from the same code (Capacitor). *Needs Apple and Google developer accounts.*
+- **Custom domain**, which would also let sign-in emails come from settlr's own address. *Needs a domain, about £10 a year.*
