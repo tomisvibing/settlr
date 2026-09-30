@@ -2,10 +2,10 @@
 import { sb } from './supabase.js';
 import { state, session, myPersonId } from './store.js';
 import { setTheme } from './theme.js';
-import { toast } from './ui.js';
+import { toast, forgetTrigger } from './ui.js';
 import { group, personLocked, meIn, isAdmin, canAdmin } from './selectors.js';
 import { balances } from './lib/ledger.js';
-import { money } from './lib/format.js';
+import { $, money } from './lib/format.js';
 import { refresh, lastLoadedAt } from './data.js';
 import { render, navigate } from './router.js';
 import { rememberPendingJoin } from './auth.js';
@@ -25,7 +25,7 @@ import { openHistory, restoreEntry } from './dialogs/history.js';
 import { removeReceipts, groupReceiptPaths } from './receipts.js';
 
 /* A failed delete shows in the sheet it came from, or as a toast when it came from a swiped row */
-const oops = err => { if(dlg.open) fail(describeError(err)); else toast(describeError(err)); };
+const oops = err => { if(dlg.open) fail(describeError(err)); else toast(describeError(err), { error: true }); };
 
 export function initEvents(){
   document.addEventListener('click', async ev => {
@@ -66,6 +66,7 @@ export function initEvents(){
       }
     }
     else if(a==='close') closeDialog();
+    else if(a==='skip') $('#app').focus();
     else if(a==='add-member') await addPendingMember();
     else if(a==='invite'){ if(g) await shareInvite(g); }
     else if(a==='export-group'){ if(g) exportGroupCsv(g); }
@@ -148,7 +149,7 @@ export function initEvents(){
   window.addEventListener('hashchange', () => {
     if(!session){ rememberPendingJoin(); return; }
     if(!myPersonId) return;
-    closeDialog();
+    closeDialog(); forgetTrigger();
     /* A short cross-fade between screens where the browser supports it; instant otherwise */
     const swap = () => { render(); window.scrollTo(0, 0); };
     if(document.startViewTransition && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) document.startViewTransition(swap);

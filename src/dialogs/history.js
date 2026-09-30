@@ -41,7 +41,7 @@ export async function openHistory(){
 /* Bring a deleted entry back (from the Undo toast or the History sheet) */
 export async function restoreEntry(eid){
   const { error } = await sb.rpc('restore_deleted_expense', { eid });
-  if(error){ toast(describeError(error)); return; }
+  if(error){ toast(describeError(error), { error: true }); return; }
   await refresh();
   toast('Brought it back.');
   if(dlg.open && $('#histList')) openHistory();

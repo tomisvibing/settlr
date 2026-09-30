@@ -17,7 +17,7 @@ export function openJoinGroup(prefill){
       <button type="submit" class="btn primary">Continue</button>
     </div>`, async () => {
       const code = form.code.value.trim().toLowerCase();
-      if(!code) return fail('Enter the invite code.');
+      if(!code) return fail('Enter the invite code.', form.code);
       const existing = state.groups.find(x => x.inviteCode === code);
       if(existing){ toast(`You're already in ${existing.name}.`); return '#/g/' + encodeURIComponent(existing.id); }
       const { data, error } = await sb.rpc('preview_group_by_code', { code });

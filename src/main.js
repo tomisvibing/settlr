@@ -9,6 +9,7 @@ import { initSwipe } from './swipe.js';
 import { initLive } from './live.js';
 import { initAuth } from './auth.js';
 import { initPhotoFallback } from './photo.js';
+import { initToast } from './ui.js';
 
 initMonitoring();
 applyTheme();
@@ -18,5 +19,6 @@ initGroupDialog();
 initEvents();
 initSwipe();
 initPhotoFallback();
+initToast();
 initLive();
 initAuth();

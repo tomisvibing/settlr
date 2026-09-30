@@ -20,7 +20,7 @@ export function openProfile({ welcome = false } = {}){
       <button type="submit" class="btn primary">Save</button>
     </div>`, async () => {
       const name = form.name.value.trim();
-      if(!name) return fail('Enter your name.');
+      if(!name) return fail('Enter your name.', form.name);
       const { error } = await sb.from('people').update({ name }).eq('id', myPersonId);
       if(error) return fail(describeError(error));
       toast('Name updated.');
@@ -44,7 +44,7 @@ export function openDeleteAccount(){
       <button type="button" class="btn" data-action="close">Cancel</button>
       <button type="submit" class="btn destroy">Delete account</button>
     </div>`, async () => {
-      if(form.confirm.value.trim().toUpperCase() !== 'DELETE') return fail('Type DELETE to confirm.');
+      if(form.confirm.value.trim().toUpperCase() !== 'DELETE') return fail('Type DELETE to confirm.', form.confirm);
       const { error } = await sb.rpc('delete_my_account');
       if(error){
         /* PGRST202: the RPC doesn't exist yet — supabase/delete_my_account.sql hasn't been run */

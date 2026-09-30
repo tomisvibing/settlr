@@ -81,6 +81,6 @@ export async function refreshQuietly(){
 }
 export async function refresh(){
   try{ await loadAllData(); }
-  catch(err){ reportError(err, 'refresh'); toast(`Couldn't refresh: ${err.message || 'check your connection'}`); }
+  catch(err){ reportError(err, 'refresh'); toast(`Couldn't refresh: ${err.message || 'check your connection'}`, { error: true }); }
   render();
 }
