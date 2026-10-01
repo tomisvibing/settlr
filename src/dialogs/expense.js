@@ -14,6 +14,7 @@ import { openComposer } from './compose.js';
 import { askConfirm } from './confirm.js';
 import { prepareReceipt, uploadReceipt, removeReceipts, receiptUrl } from '../receipts.js';
 import { isPdf, pathIsPdf, sizeLabel } from '../lib/receipt.js';
+import { FREQUENCIES, firstRepeat, frequencyLabel } from '../lib/recurring.js';
 
 const touch = () => window.matchMedia?.('(pointer: coarse)').matches;
 /* Names for the keypad keys a screen reader would otherwise read as punctuation or nothing */
@@ -91,6 +92,8 @@ export function openExpense(eid, prefill){
       <div id="splitRows"></div>
     </fieldset>
     <label class="daterow">Date<input type="date" name="date" value="${dateVal}"></label>
+    ${e ? '' : `<label class="daterow">Repeats<select name="repeat"><option value="">Doesn’t repeat</option>${FREQUENCIES.map(([v, l]) => `<option value="${v}">${l[0].toUpperCase() + l.slice(1)}</option>`).join('')}</select></label>
+    <p class="hint" id="repeatHint" hidden></p>`}
     <div class="receipt" id="receiptBox"></div>
     ${keypad(cur)}
     ${e ? '<section class="comments" id="commentsBox" aria-label="Comments"></section>' : ''}
@@ -105,6 +108,13 @@ export function openExpense(eid, prefill){
   renderReceipt();
   renderComments();
   if(cur !== g.currency && !draft.rate) loadRate();
+}
+
+/* Under Repeats: when the next one will be added */
+function showRepeat(){
+  const hint = $('#repeatHint'), f = form.repeat?.value; if(!hint) return;
+  hint.hidden = !f;
+  if(f) hint.textContent = `Next one is added on ${new Date(firstRepeat(form.date.value || today(), f) + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}, ${frequencyLabel(f)}.`;
 }
 
 /* ---- Comments (on saved expenses) ---- */
@@ -316,6 +326,7 @@ export function initExpenseDialog(){
       rememberCur(group(), t.value);
       renderFx(); renderSplitRows(); loadRate(); return;
     }
+    if(t.name === 'repeat' || t.name === 'date') showRepeat();
     if(t.name === 'date'){ if(foreign() && !draft.rateManual) loadRate(); return; }
     if(t.name === 'mode'){ draft.mode = t.value; renderSplitRows(); return; }
     if(t.dataset.sid && t.type === 'checkbox'){ draft.equal[t.dataset.sid] = t.checked ? 1 : 0; updateHint(); }
@@ -367,12 +378,25 @@ async function saveExpense(){
     catch(err){ return fail(receiptError(err)); }
     row.receipt_path = added;
   } else if(d.receiptRemoved) row.receipt_path = null;
+  const repeat = d.id ? '' : form.repeat?.value;
+  if(repeat && isForeign){ if(added) removeReceipts([added]); return fail(`Repeating expenses are in ${g.currency}. Switch the currency back, or choose Doesn’t repeat.`, form.repeat); }
   const result = await saveExpenseRow(d.id, row, splits);
   if(result === false){ if(added) removeReceipts([added]); return false; }
+  if(repeat) await scheduleRepeat(g, row, input, splits, repeat);
   if(old && (added || d.receiptRemoved)) removeReceipts([old]);
   if(d.receiptPreview) URL.revokeObjectURL(d.receiptPreview);
-  if(!d.id) toast(`Added “${desc}” to ${g.name}.`);
+  if(!d.id && !repeat) toast(`Added “${desc}” to ${g.name}.`);
   return result;
+}
+/* The expense is already saved, so a failure here is a message, not a reason to keep the sheet open */
+async function scheduleRepeat(g, row, input, splits, frequency){
+  const { error } = await sb.from('recurring_expenses').insert({
+    group_id: g.id, description: row.description, amount_cents: row.amount_cents, paid_by: row.paid_by, split_mode: row.split_mode,
+    split_input: input, splits, frequency, start_date: firstRepeat(row.expense_date, frequency) });
+  if(error) return toast('Added the expense, but couldn’t make it repeat. ' + describeError(error), { error: true });
+  /* A first repeat that's already due (an old date) is added now */
+  await sb.rpc('run_recurring_expenses');
+  toast(`Added “${row.description}”. It repeats ${frequencyLabel(frequency)}.`);
 }
 export async function saveExpenseRow(expenseId, row, splits){
   try{

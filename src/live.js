@@ -5,7 +5,7 @@ import { sb } from './supabase.js';
 import { reportError } from './monitoring.js';
 import { dlg } from './dialogs/dialog.js';
 
-const TABLES = ['groups', 'group_members', 'people', 'expenses', 'expense_splits', 'payments'];
+const TABLES = ['groups', 'group_members', 'people', 'expenses', 'expense_splits', 'payments', 'recurring_expenses'];
 /* One save touches several rows (an expense and its splits); wait for the burst to finish */
 const SETTLE_MS = 400;
 

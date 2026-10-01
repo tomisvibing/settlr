@@ -49,7 +49,7 @@ Everything later builds on these.
 
 - [x] Live updates: see new expenses the moment someone adds them (Supabase Realtime)
 - [x] Change history ("Bob edited *Dinner*: £40 → £45") in each group's History sheet, with Undo after a delete and Restore for any deleted entry
-- [x] Nudges: a Nudge beside each payment owed to you opens your phone's share sheet with a friendly message and the group's link, and once a week the overview lists who still owes you in groups that have gone quiet (switch off on You)
+- [x] Nudges: a Nudge beside each payment owed to you opens your phone's share sheet with a friendly message and the group's link, and, if you turn it on in You (never, by default; weekly, fortnightly or monthly), the overview lists who still owes you in groups that have gone quiet. Nothing is sent until you've read the message and said yes
 - [x] Push notifications (switch on under You): a Sunday-evening summary of who owes what, and a notification when someone nudges you. Nudging someone with notifications on reaches them directly; anyone else gets the share-sheet message. On an iPhone they need settlr added to the Home Screen
 - [x] Leave a group (once settled up); admin role so only admins can delete a group or remove someone with an account
 - [x] Comments on expenses
@@ -60,7 +60,7 @@ Everything later builds on these.
 - [x] 50 currencies to pick from, with names, and whole-number amounts for currencies without pence (yen, won, forint…)
 - [x] Multiple currencies in one group: each expense or payment in any currency, converted into the group's at the European Central Bank rate for its date (or your own), keeping both amounts
 - [ ] One overall total on Home in your own currency, across groups in different currencies
-- [ ] Recurring expenses (rent, bills)
+- [x] Recurring expenses (rent, bills): choose Repeats when adding an expense (weekly, fortnightly, monthly or yearly); a daily job adds each one when it falls due, and the group page lists them with a Stop
 - [ ] Categories and insights: spending by group and month, trip totals, who paid most
 - [x] Archive finished groups: frozen and read-only for everyone, kept under Archived on Home, and restorable by any member
 - [ ] "Simplify debts" as a setting

@@ -7,6 +7,7 @@ import { avatar, icon } from './shared.js';
 import { standings } from './standings.js';
 import { nudgedAt } from '../nudge.js';
 import { receipt } from './receipt.js';
+import { nextDate, frequencyLabel } from '../lib/recurring.js';
 
 const nameOf = pid => isMe(pid) ? 'You' : shortName(pid);
 
@@ -39,6 +40,21 @@ function move(g, p, frozen, paid = false){
     <span class="m-amt">${money(p.amount, g.currency)}</span>
     ${acts}
   </li>`;
+}
+
+/* The schedules that add an expense by themselves, each with a Stop */
+function repeating(g, frozen){
+  if(!g.recurring.length) return '';
+  const when = d => new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  return `<section class="section" aria-labelledby="repeatHead">
+    <div class="section-head"><h2 id="repeatHead">Repeating</h2></div>
+    <ul class="moves">${g.recurring.map(r => { const next = nextDate(r); return `<li class="move">
+      <span class="m-who"><b>${esc(r.desc)}</b></span>
+      <span class="m-amt">${money(r.amount, g.currency)}</span>
+      <span class="m-acts"><span class="m-note">${esc(frequencyLabel(r.frequency))}${next ? ` · next ${when(next)}` : ' · finished'}</span>
+        ${frozen ? '' : `<button class="btn small" data-action="stop-recurring" data-group="${g.id}" data-id="${r.id}" data-desc="${esc(r.desc)}">Stop</button>`}</span>
+    </li>`; }).join('')}</ul>
+  </section>`;
 }
 
 export function renderGroupView(id){
@@ -89,6 +105,8 @@ export function renderGroupView(id){
       ${plan.length || justPaid ? `<ul class="moves">${justPaid ? move(g, justPaid, frozen, true) : ''}${plan.map(p => move(g, p, frozen)).join('')}</ul>` : ''}
       ${!plan.length ? `<p class="square-line">${g.expenses.length ? 'Square. Nobody owes anybody.' : 'Nothing to settle yet. Add the first expense with the + button.'}</p>` : ''}
     </section>
+
+    ${repeating(g, frozen)}
 
     <section class="section" aria-labelledby="receiptHead">
       <div class="section-head"><h2 id="receiptHead">The receipt so far</h2></div>

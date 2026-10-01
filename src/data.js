@@ -21,10 +21,11 @@ export async function loadAllData(){
     sb.from('expense_splits').select('*'),
     sb.from('payments').select('*').order('payment_date', { ascending:false }),
     sb.from('expense_comments').select('*').order('created_at'),
+    sb.from('recurring_expenses').select('*').order('created_at'),
   ]);
   const failed = results.find(r => r.error);
   if(failed) throw failed.error;
-  const [groups, people, members, expenses, splits, payments, comments] = results.map(r => r.data || []);
+  const [groups, people, members, expenses, splits, payments, comments, recurring] = results.map(r => r.data || []);
   const commentsByExpense = {};
   comments.forEach(c => { (commentsByExpense[c.expense_id] ||= []).push({ id: c.id, body: c.body, authorUser: c.author_user, authorPerson: c.author_person, createdAt: new Date(c.created_at).getTime() }); });
 
@@ -48,6 +49,14 @@ export async function loadAllData(){
     });
   });
 
+  const recurringByGroup = {};
+  recurring.forEach(r => {
+    (recurringByGroup[r.group_id] ||= []).push({
+      id: r.id, desc: r.description, amount: Number(r.amount_cents), paidBy: r.paid_by, frequency: r.frequency,
+      startDate: r.start_date, runs: r.runs, endsOn: r.ends_on || null,
+    });
+  });
+
   /* members: who's in the group now; left: who left (their names stay on its history); admins: who runs it */
   const membersByGroup = {}, leftByGroup = {}, adminsByGroup = {};
   members.forEach(m => {
@@ -63,7 +72,7 @@ export async function loadAllData(){
     id: g.id, name: g.name, currency: g.currency, inviteCode: g.invite_code, createdAt: new Date(g.created_at).getTime(),
     archivedAt: g.archived_at ? new Date(g.archived_at).getTime() : null,
     members: membersByGroup[g.id] || [], left: leftByGroup[g.id] || [], admins: adminsByGroup[g.id] || [],
-    expenses: expensesByGroup[g.id] || []
+    expenses: expensesByGroup[g.id] || [], recurring: recurringByGroup[g.id] || []
   }));
 
   state.payments = payments.map(p => ({
