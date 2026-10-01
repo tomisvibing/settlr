@@ -31,22 +31,23 @@ function drawReel(drum, pos, speed){
   /* A little blur while it's really moving */
   drum.style.filter = speed > .4 ? `blur(${Math.min(2.5, (speed - .4) * 1.2).toFixed(2)}px)` : '';
 }
+/* The reel starts hidden and fades in already spinning, so the phrase it starts from is never seen
+   standing still */
 function spin(drum){
   cancelAnimationFrame(frame);
-  const from = landed;
+  const reel = drum.parentElement, from = landed;
   let next = Math.floor(Math.random() * (PHRASES.length - 1)); if(next >= from) next++;
   landed = next;
   const n = PHRASES.length, to = from + LAPS * n + ((next - from + n) % n);
-  if(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){ drawReel(drum, next, 0); return; }
+  if(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){ drawReel(drum, next, 0); reel.classList.add('shown'); return; }
   let t0 = null, last = from;
   const step = now => {
     if(!drum.isConnected) return;
-    t0 ??= now + 250;
-    const t = Math.max(0, Math.min(1, (now - t0) / SPIN_MS)), pos = from + (to - from) * (1 - Math.pow(1 - t, 4));
+    if(t0 === null){ t0 = now; reel.classList.add('spinning'); }
+    const t = Math.min(1, (now - t0) / SPIN_MS), pos = from + (to - from) * (1 - Math.pow(1 - t, 4));
     drawReel(drum, pos, Math.abs(pos - last)); last = pos;
     if(t < 1) frame = requestAnimationFrame(step);
   };
-  drawReel(drum, from, 0);
   frame = requestAnimationFrame(step);
 }
 
@@ -74,5 +75,7 @@ export function renderStart({ loading = false, entering = false } = {}){
   </section>`;
   syncThemeToggle();
   const drum = $('.start .drum');
-  if(doSpin) spin(drum); else drawReel(drum, landed, 0);
+  /* While the first load runs the reel stays hidden; it spins in once everything's ready */
+  if(doSpin) spin(drum);
+  else { drawReel(drum, landed, 0); if(!loading) drum.parentElement.classList.add('shown'); }
 }
