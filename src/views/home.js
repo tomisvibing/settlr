@@ -5,7 +5,7 @@ import { storyParts } from '../lib/story.js';
 import { personName, shortName, meIn, lastActivity, isArchived, canAdmin, isMe } from '../selectors.js';
 import { groupHref } from '../router.js';
 import { avatar, icon, swipeButtons } from './shared.js';
-import { weeklyNudges } from '../nudge.js';
+import { dueNow } from '../nudge.js';
 
 /* Whether the Archived list is open, kept across re-renders (live updates redraw the page) */
 let archivedOpen = false;
@@ -59,17 +59,17 @@ function story(){
   return `<p class="story">${html}</p>`;
 }
 
-/* Once a week (unless switched off on You), the people who still owe you in groups that have gone
+/* As often as you chose on You (never, unless you switch it on), the people who still owe you in groups that have gone
    quiet, each with a Nudge */
 function nudges(){
-  const due = weeklyNudges(); if(!due.length) return '';
+  const due = dueNow(); if(!due.length) return '';
   return `<section class="nudges" aria-labelledby="nudgeHead">
-    <h2 id="nudgeHead">It’s been a week. Want to nudge anyone?</h2>
+    <h2 id="nudgeHead">Some groups have gone quiet. Want to nudge anyone?</h2>
     <ul>${due.slice(0, 4).map(({ g, pid, amount }) => `<li>
       ${avatar(pid, 'sm')}<span class="n-text"><b>${esc(shortName(pid))}</b> owes you ${money(amount, g.currency)}<span class="n-sub">${esc(g.name)} · quiet since ${ago(lastActivity(g))}</span></span>
       <button class="btn small" data-action="nudge" data-group="${g.id}" data-id="${pid}" data-amount="${amount}">Nudge</button>
     </li>`).join('')}</ul>
-    <button type="button" class="n-later" data-action="dismiss-nudges">Not this week</button>
+    <button type="button" class="n-later" data-action="dismiss-nudges">Not now</button>
   </section>`;
 }
 

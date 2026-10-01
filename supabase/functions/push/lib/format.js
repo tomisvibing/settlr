@@ -11,6 +11,17 @@ export const CURRENCIES = [
   'AUD','CNY','HKD','IDR','INR','JPY','KRW','LKR','MYR','NZD','PHP','SGD','THB','TWD','VND',
   'AED','EGP','ILS','JOD','KES','MAD','NGN','QAR','SAR','TZS','ZAR',
 ];
+/* A currency for where someone is, from their browser's language ("en-GB" → GBP): the euro for the
+   countries that use it, else a short table of the rest, else GBP */
+const EURO = 'AT BE CY DE EE ES FI FR GR HR IE IT LT LU LV MT NL PT SI SK'.split(' ');
+const REGION_CUR = { GB:'GBP', US:'USD', CA:'CAD', AU:'AUD', NZ:'NZD', CH:'CHF', SE:'SEK', NO:'NOK', DK:'DKK', PL:'PLN', CZ:'CZK', HU:'HUF', RO:'RON', BG:'BGN', IS:'ISK',
+  TR:'TRY', UA:'UAH', MX:'MXN', BR:'BRL', AR:'ARS', CL:'CLP', CO:'COP', PE:'PEN', UY:'UYU', JP:'JPY', KR:'KRW', CN:'CNY', HK:'HKD', TW:'TWD', IN:'INR', ID:'IDR', MY:'MYR',
+  PH:'PHP', SG:'SGD', TH:'THB', VN:'VND', LK:'LKR', AE:'AED', SA:'SAR', QA:'QAR', IL:'ILS', JO:'JOD', EG:'EGP', MA:'MAD', NG:'NGN', KE:'KES', TZ:'TZS', ZA:'ZAR', RS:'RSD' };
+export function guessCurrency(lang){
+  const region = String(lang || '').split(/[-_]/).find((x, i) => i > 0 && /^[A-Za-z]{2}$/.test(x))?.toUpperCase();
+  if(EURO.includes(region)) return 'EUR';
+  return REGION_CUR[region] || 'GBP';
+}
 const names = (() => { try{ return new Intl.DisplayNames(['en-GB'], { type:'currency' }); }catch(e){ return null; } })();
 export const currencyName = cur => names?.of(cur) || cur;
 /* <option>s for a currency picker: "GBP · British Pound", plus the current value if it's not in the list */

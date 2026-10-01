@@ -27,6 +27,7 @@ import { removeReceipts, groupReceiptPaths } from './receipts.js';
 import { nudge, dismissNudges, setNudgePref } from './nudge.js';
 import { openPayLinks } from './dialogs/paylinks.js';
 import { enablePush, disablePush } from './push.js';
+import { setHomeCurrency } from './prefs.js';
 
 /* A failed delete shows in the sheet it came from, or as a toast when it came from a swiped row */
 const oops = (err, action = 'delete') => { if(dlg.open) fail(describeError(err, action)); else toast(describeError(err, action), { error: true }); };
@@ -151,6 +152,7 @@ export function initEvents(){
   document.addEventListener('change', async ev => {
     if(ev.target.name === 'theme' && !ev.target.closest('dialog')) setTheme(ev.target.value);
     if(ev.target.name === 'nudges' && !ev.target.closest('dialog')) setNudgePref(ev.target.value);
+    if(ev.target.name === 'homeCurrency' && !ev.target.closest('dialog')) setHomeCurrency(ev.target.value);
     if(ev.target.name === 'push' && !ev.target.closest('dialog')){
       if(ev.target.value === 'on'){ const why = await enablePush(); if(why) toast(why, { error: true }); else toast('Notifications are on.'); }
       else await disablePush();
