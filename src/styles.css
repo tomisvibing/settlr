@@ -81,6 +81,10 @@ main:focus{outline:none}
 .shell{min-height:100dvh}
 main{max-width:640px;margin:0 auto;padding:12px 16px calc(var(--tabbar-h) + var(--safe-b) + 56px)}
 .wrap{max-width:640px;margin:0 auto;padding:0 20px}
+/* Phones: the wordmark at the top of each tab goes back to the landing page (the sidebar has its own) */
+.topbrand{display:block;width:fit-content;margin:0 max(20px,calc(50% - 300px));padding:12px 0 0;font-family:var(--serif);font-weight:500;font-size:26px;line-height:1.2;letter-spacing:-.02em;color:var(--ink);text-decoration:none}
+:is([data-route="start"],[data-route="group"]) .topbrand{display:none}
+@media (min-width:900px){.topbrand{display:none}}
 
 .tabbar{position:fixed;left:16px;right:84px;bottom:calc(14px + var(--safe-b));z-index:15;height:56px;padding:0 5px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:center;border-radius:999px;background:var(--bar);border:1px solid var(--line);box-shadow:var(--float)}
 .tabbar .brand{display:none}
@@ -211,14 +215,19 @@ li.swipe{position:relative;overflow:hidden}
 [data-route="start"] :is(.tabbar,.skip-link){display:none}
 [data-route="start"] main{max-width:none;padding:0}
 @media (min-width:900px){[data-route="start"] .shell{padding-left:0}}
-.start{position:relative;min-height:100dvh;display:grid;place-items:center;padding:24px 20px calc(96px + var(--safe-b))}
-.start-brand{position:absolute;top:calc(18px + env(safe-area-inset-top,0px));inset-inline-start:22px;font-family:var(--serif);font-weight:500;font-size:28px;letter-spacing:-.02em;color:var(--ink);text-decoration:none}
+.start{position:relative;min-height:calc(100dvh - env(safe-area-inset-top,0px));display:grid;place-items:center;padding:24px 20px calc(96px + var(--safe-b))}
+.start-brand{position:absolute;top:14px;inset-inline-start:22px;font-family:var(--serif);font-weight:500;font-size:28px;letter-spacing:-.02em;color:var(--ink);text-decoration:none}
 .start-stack{display:flex;flex-direction:column;align-items:center;text-align:center;width:min(100%,640px);--reel:clamp(34px,10vw,80px)}
 .start-head{font-size:clamp(52px,15vw,104px)}
 /* The reel: phrases round a drum, only the one facing you stays once it lands */
 .reel{position:relative;width:100%;height:calc(var(--reel) * 1.9);margin:-.06em 0 30px;perspective:900px;font-family:var(--serif);font-style:italic;font-size:var(--reel);line-height:1.1;letter-spacing:-.02em;color:var(--ink);
   -webkit-mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent);mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent)}
 .drum{position:absolute;inset:0;transform-style:preserve-3d}
+/* Hidden until it spins in (views/start.js), or shown at once when it isn't spinning */
+.reel{opacity:0}
+.reel.shown{opacity:1}
+.reel.spinning{animation:reel-in .45s ease-out both}
+@keyframes reel-in{from{opacity:0}to{opacity:1}}
 .drum span{position:absolute;left:0;right:0;top:50%;margin-top:-.55em;white-space:nowrap;backface-visibility:hidden}
 .start-add{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-width:min(100%,280px);min-height:68px;padding:0 36px;border:0;border-radius:999px;background:var(--pill);color:var(--pill-ink);font:inherit;font-size:19px;font-weight:700;letter-spacing:-.015em;cursor:pointer}
 .start-add svg{width:22px;height:22px;flex:none}
@@ -273,7 +282,6 @@ li.swipe{position:relative;overflow:hidden}
 .page-head h1{font-size:clamp(40px,12vw,60px);overflow-wrap:anywhere}
 .page-head .sub{margin:8px 0 0;font-size:15px;color:var(--muted)}
 .page-head .sub.serif{font-size:21px;line-height:1.3}
-.caption{margin:2px 4px 0;font-size:13px;color:var(--muted)}
 
 /* ---------- Overview: the situation in a sentence, groups as tickets ---------- */
 .hello-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 4px 0}
@@ -308,27 +316,31 @@ li.swipe{position:relative;overflow:hidden}
 .ticket:focus-visible .t-main,.ticket:focus-visible .t-stub{background:var(--pill)}
 .ticket:focus-visible :is(.t-kind,.t-meta,.t-lbl,.t-amt){color:var(--pill-ink)}
 
-/* ---------- Who's up, who's down (views/beam.js) ---------- */
-.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:0 4px;font-size:13px;color:var(--muted)}
-.legend span{display:inline-flex;align-items:center;gap:6px}
-.legend i{width:12px;height:12px;border-radius:3px;background:var(--mark-up)}
-.legend i.down{background:var(--mark-down)}
-/* Name 96px, track, value 88px: the square line sits in the middle of the track */
-.beam{position:relative;list-style:none;margin:0;padding:6px 0;border-block:1px solid var(--line)}
-.beam::before{content:"";position:absolute;top:0;bottom:0;left:calc(50% + 4px);width:1px;background:var(--line-strong)}
-.bar-row{display:grid;grid-template-columns:96px minmax(0,1fr) 88px;align-items:center;width:100%;padding:8px 0;border:0;background:none;color:inherit;font:inherit;text-align:left}
-button.bar-row{cursor:pointer}
-.bar-row:focus-visible{outline-offset:-2px;border-radius:8px}
-.b-who{display:flex;align-items:center;gap:8px;min-width:0;font-weight:600;font-size:14px}
-.b-who > span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.b-track{position:relative;height:28px}
-.b-bar{position:absolute;top:6px;height:16px}
-.b-bar.up{left:50%;background:var(--mark-up);border-radius:0 4px 4px 0}
-.b-bar.down{right:50%;background:var(--mark-down);border-radius:4px 0 0 4px}
-.b-val{text-align:right;font-size:13px;font-weight:700;white-space:nowrap}
-@media (hover:hover){.bar-row:hover .b-who > span:last-child{text-decoration:underline}}
-.b-tip{position:fixed;z-index:30;pointer-events:none;padding:8px 10px;border-radius:10px;background:var(--ink);color:var(--bg);font-size:13px;line-height:1.35;box-shadow:var(--float)}
-.beam-cur{margin:8px 4px 0;font-size:13px;font-weight:700;color:var(--muted)}
+/* ---------- Who's up, who's down, in words (views/standings.js) ---------- */
+.standings{list-style:none;margin:0;padding:0;border-block:1px solid var(--line)}
+.standings > li + li{border-top:1px solid var(--line-soft)}
+.st-row{display:flex;align-items:center;gap:14px;width:100%;padding:12px 4px;border:0;background:none;color:inherit;font:inherit;text-align:left}
+button.st-row{cursor:pointer}
+.st-text{display:flex;flex-direction:column;gap:2px;min-width:0}
+.st-line{font-family:var(--serif);font-size:22px;line-height:1.2;letter-spacing:-.01em;overflow-wrap:anywhere}
+.st-line em{font-style:italic}
+.st-line em.down{color:var(--owe)}
+.st-sub{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+@media (hover:hover){button.st-row:hover .st-line{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.15em}}
+
+/* ---------- Nudges: on the overview once a week, and beside Mark paid ---------- */
+.nudges{display:grid;gap:10px;padding:16px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--surface)}
+.nudges h2{font-family:var(--serif);font-size:22px;font-weight:400;line-height:1.2;letter-spacing:-.01em}
+.nudges ul{list-style:none;margin:0;padding:0;display:grid}
+.nudges li{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line-soft)}
+.n-text{flex:1;min-width:0;font-size:15px}
+.n-text b{font-weight:700}
+.n-sub{display:block;font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.n-later{justify-self:start;min-height:36px;padding:0 4px;border:0;background:none;color:var(--muted);font:inherit;font-size:14px;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.m-acts{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.m-note{font-size:13px;color:var(--muted)}
+.keep{white-space:nowrap}
+.pref-note{display:block;margin-top:4px;font-family:var(--font);font-size:13px;line-height:1.45;color:var(--muted)}
 
 /* ---------- A group: the fewest payments, stamped Paid when marked ---------- */
 .moves{list-style:none;margin:0;padding:0;display:grid;gap:10px}
@@ -358,13 +370,16 @@ button.bar-row{cursor:pointer}
 .r-head .serif{font-size:30px;line-height:1}
 .r-head span:last-child{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);overflow-wrap:anywhere}
 .r-lines{list-style:none;margin:0;padding:0}
-.day{margin:16px 0 2px;font-family:var(--serif);font-size:19px;font-style:italic;font-weight:400;letter-spacing:0;color:var(--muted)}
-.r-lines > :first-child .day{margin-top:10px}
-.line{display:grid;grid-template-columns:minmax(0,max-content) minmax(12px,1fr) auto;align-items:baseline;column-gap:6px;width:100%;padding:6px 0;border:0;background:none;color:inherit;font:inherit;text-align:left}
+.r-lines{display:grid;gap:4px}
+/* Each day starts a section: the day in italics, a dashed rule running off to the right */
+.day{display:flex;align-items:center;gap:12px;margin:22px 0 4px;font-family:var(--serif);font-size:20px;font-style:italic;font-weight:400;letter-spacing:0;color:var(--ink)}
+.day::after{content:"";flex:1;border-top:1px dashed var(--line-strong)}
+.r-lines > :first-child .day{margin-top:12px}
+.line{display:grid;grid-template-columns:minmax(0,max-content) minmax(16px,1fr) auto;align-items:baseline;column-gap:8px;row-gap:2px;width:100%;padding:8px 0;border:0;background:none;color:inherit;font:inherit;text-align:left}
 button.line{cursor:pointer}
 .l-what{font-weight:600;font-size:15px;overflow-wrap:anywhere}
 .line.payment .l-what{font-style:italic;font-weight:500}
-.l-dots{border-bottom:2px dotted var(--line-strong);translate:0 -4px}
+.l-dots{height:2px;background:radial-gradient(circle,var(--line-strong) .8px,transparent 1.1px) 0 0/5px 2px repeat-x}
 .l-amt{font-weight:700;font-size:15px;white-space:nowrap}
 .l-sub{grid-column:1 / -1;display:flex;flex-wrap:wrap;justify-content:space-between;gap:0 10px;font-size:13px;color:var(--muted)}
 .l-sub .r-mine{font-size:13px}
@@ -427,7 +442,14 @@ dialog.confirm form{gap:12px}
   dialog form{padding:22px 24px 22px}
   dialog form::before{display:none}
 }
-@media (prefers-reduced-motion: reduce){dialog[open]{animation:none}}
+/* Phones: a sheet that grows as you use it hangs from the top instead (dialogs/dialog.js) */
+@media (max-width:639px){
+  dialog.top{margin:calc(8px + env(safe-area-inset-top,0px)) auto auto;border-radius:22px;max-height:calc(100dvh - 16px - env(safe-area-inset-top,0px) - var(--safe-b))}
+  dialog.top form::before{display:none}
+  dialog.top[open]{animation:sheet-down .22s cubic-bezier(.2,.8,.2,1)}
+}
+@keyframes sheet-down{from{transform:translateY(-24px);opacity:.4}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion: reduce){dialog[open],dialog.top[open]{animation:none}}
 
 label{display:grid;gap:6px;font-size:13px;font-weight:500;color:var(--muted)}
 select,input,textarea{color:var(--ink);background:var(--field);border:1px solid var(--control-edge);border-radius:var(--r-field);padding:0 14px;min-height:48px;width:100%;font-size:16px;font-weight:400}

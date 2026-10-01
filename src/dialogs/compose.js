@@ -43,7 +43,7 @@ export function openComposer(start = {}){
     <p class="each" id="each" aria-live="polite"></p>
     <div class="tray" id="tray"></div>
     <p class="err" role="alert"></p>
-    <div class="dlg-actions"><button type="button" class="btn" data-compose="more">More details</button><span class="sp"></span><button type="submit" class="btn primary" id="composeGo">Add it</button></div>`, save);
+    <div class="dlg-actions"><button type="button" class="btn" data-compose="more">More details</button><span class="sp"></span><button type="submit" class="btn primary" id="composeGo">Add it</button></div>`, save, { top: true });
   render();
   /* Opening on the amount: on a phone the keypad is already up; with a keyboard, type straight away */
   if(draft.open === 'amount' && !touch()) form.querySelector('#cAmount')?.focus();

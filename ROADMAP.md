@@ -29,6 +29,12 @@ Everything later builds on these.
   - every dialog a bottom sheet on phones and a centred panel on desktop
 - [x] **UI polish**: in-app confirm sheets instead of the browser's pop-ups, loading placeholders, smooth page transitions
 - [x] **Swipe** left for actions everywhere on touch screens: expenses and payments (Edit, Delete), group cards on Home (Edit, Archive, Delete for admins; Restore on archived ones), people who aren't in anything yet, and settlements
+- [x] **Redesign** ([prototype](https://claude.ai/artifact/PwjSpyktQ4dnJz4szVqYxE)): espresso on cream with EB Garamond and a lavender pill:
+  - a landing page that says *Split* over a spinning reel, with one Add an expense button
+  - adding an expense as one editable sentence
+  - the overview as a paragraph, with groups as tear-off tickets
+  - who's up and who's down in words, the fewest payments with a Paid stamp, and spending printed as a till receipt
+  - a membership card on You, with settings as sentences
 - [ ] **More polish**: a custom date picker (the phone's own is fine for now)
 - [x] **Sign in without Google**:
   - [x] email with a 6-digit code (needs the email sender set up in Supabase, see the README, before codes reach everyone)
@@ -43,7 +49,8 @@ Everything later builds on these.
 
 - [x] Live updates: see new expenses the moment someone adds them (Supabase Realtime)
 - [x] Change history ("Bob edited *Dinner*: £40 → £45") in each group's History sheet, with Undo after a delete and Restore for any deleted entry
-- [ ] Push notifications: "You owe Sam £20" reminders and a weekly summary
+- [x] Nudges: a Nudge beside each payment owed to you opens your phone's share sheet with a friendly message and the group's link, and once a week the overview lists who still owes you in groups that have gone quiet (switch off on You)
+- [ ] Push notifications: "You owe Sam £20" reminders and a weekly summary, sent by settlr itself
 - [x] Leave a group (once settled up); admin role so only admins can delete a group or remove someone with an account
 - [x] Comments on expenses
 

@@ -12,8 +12,12 @@ let onSubmit = null;
 export let draft = null;
 export const setDraft = d => { draft = d; };
 
-export function openDialog(html, submit){
+/* top: the sheet hangs from the top of a phone screen instead of sitting on the bottom, so a
+   sheet whose height changes as you use it (the sentence composer) grows downwards and its top
+   stays put */
+export function openDialog(html, submit, { top = false } = {}){
   if(!dlg.open) rememberTrigger();
+  dlg.classList.toggle('top', top);
   form.innerHTML = html; onSubmit = submit;
   /* The sheet is named by its heading */
   const title = form.querySelector('h2'); if(title) title.id = 'dlgTitle';

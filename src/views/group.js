@@ -3,13 +3,13 @@ import { $, esc, money, byNewest, ago } from '../lib/format.js';
 import { balances, settlements } from '../lib/ledger.js';
 import { group, shortName, isMe, spentIn, isArchived } from '../selectors.js';
 import { avatar, icon } from './shared.js';
-import { beam } from './beam.js';
+import { standings } from './standings.js';
+import { nudgedAt } from '../nudge.js';
 import { receipt } from './receipt.js';
 
 const nameOf = pid => isMe(pid) ? 'You' : shortName(pid);
-const words = n => ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six'][n] || String(n);
 
-/* Where each member's balance comes from, for the line's tooltip */
+/* Where each member's balance comes from, under their line */
 function breakdown(g, pid){
   let paid = 0, share = 0, sent = 0, got = 0;
   for(const e of g.expenses){
@@ -20,13 +20,20 @@ function breakdown(g, pid){
   return [`Paid ${m(paid)}, share ${m(share)}`, sent && `paid back ${m(sent)}`, got && `received ${m(got)}`].filter(Boolean).join(' · ');
 }
 
-/* One payment that settles part of the group: from → to, how much, and Mark paid */
-function move(p, cur, frozen, paid = false){
+/* One payment that settles part of the group: from → to, how much, and Mark paid. When it's
+   owed to you, there's a Nudge too */
+function move(g, p, frozen, paid = false){
   const side = pid => `${avatar(pid, 'sm')}<b>${isMe(pid) ? (p.from === pid ? 'You' : 'you') : esc(shortName(pid))}</b>`;
+  const toMe = isMe(p.to) && !isMe(p.from), when = toMe ? nudgedAt(g.id, p.from) : 0;
+  const acts = paid ? '<span class="stamp" role="status">Paid</span>' : frozen ? '' : `<span class="m-acts">
+      ${toMe ? `<button class="btn small" data-action="nudge" data-group="${g.id}" data-id="${p.from}" data-amount="${p.amount}">Nudge</button>` : ''}
+      <button class="btn small" data-action="settle" data-from="${p.from}" data-to="${p.to}" data-amount="${p.amount}">Mark paid</button>
+      ${when ? `<span class="m-note">Nudged ${ago(when)}</span>` : ''}
+    </span>`;
   return `<li class="move${isMe(p.from) ? ' mine' : ''}${paid ? ' paid' : ''}">
     <span class="m-who">${side(p.from)}<svg class="m-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="pays"><path d="M5 12h14M13 6l6 6-6 6"/></svg>${side(p.to)}</span>
-    <span class="m-amt">${money(p.amount, cur)}</span>
-    ${paid ? '<span class="stamp" role="status">Paid</span>' : frozen ? '' : `<button class="btn small" data-action="settle" data-from="${p.from}" data-to="${p.to}" data-amount="${p.amount}">Mark paid</button>`}
+    <span class="m-amt">${money(p.amount, g.currency)}</span>
+    ${acts}
   </li>`;
 }
 
@@ -48,9 +55,7 @@ export function renderGroupView(id){
   const frozen = isArchived(g);
   const justPaid = takeJustPaid(g.id);
   const rows = g.members.slice().sort((a, c) => (b[c] || 0) - (b[a] || 0) || (isMe(c) - isMe(a))).map(pid => {
-    const v = b[pid] || 0, nm = nameOf(pid);
-    const say = v > 0 ? `${nm} ${isMe(pid) ? 'are' : 'is'} owed ${money(v, cur)}` : v < 0 ? `${nm} owe${isMe(pid) ? '' : 's'} ${money(-v, cur)}` : `${nm} ${isMe(pid) ? 'are' : 'is'} square`;
-    return { pid, name: nm, value: v, say, tip: breakdown(g, pid) };
+    return { pid, name: nameOf(pid), amounts: [[cur, b[pid] || 0]], sub: breakdown(g, pid) };
   });
 
   app.innerHTML = `<div class="stack">
@@ -72,13 +77,12 @@ export function renderGroupView(id){
 
     ${n > 1 && g.expenses.length ? `<section class="section" aria-labelledby="upDown">
       <div class="section-head"><h2 id="upDown">Who’s up, who’s down</h2></div>
-      ${beam(rows, cur, `Balances in ${g.name}`)}
-      <p class="caption">The line in the middle is square. Bars are to scale.</p>
+      ${standings(rows, `Balances in ${g.name}`)}
     </section>` : ''}
 
     <section class="section" aria-labelledby="settleHead">
-      <div class="section-head"><h2 id="settleHead">${plan.length ? `${words(plan.length)} payment${plan.length === 1 ? ' settles' : 's settle'} it` : 'Settle up'}</h2>${frozen ? '' : `<button class="btn small" data-action="add-payment" ${n > 1 ? '' : 'disabled'}>Record a payment</button>`}</div>
-      ${plan.length || justPaid ? `<ul class="moves">${justPaid ? move(justPaid, cur, frozen, true) : ''}${plan.map(p => move(p, cur, frozen)).join('')}</ul>` : ''}
+      <div class="section-head"><h2 id="settleHead">${plan.length ? 'Time to settle up' : 'Settle up'}</h2>${frozen ? '' : `<button class="btn small" data-action="add-payment" ${n > 1 ? '' : 'disabled'}>Record a payment</button>`}</div>
+      ${plan.length || justPaid ? `<ul class="moves">${justPaid ? move(g, justPaid, frozen, true) : ''}${plan.map(p => move(g, p, frozen)).join('')}</ul>` : ''}
       ${!plan.length ? `<p class="square-line">${g.expenses.length ? 'Square. Nobody owes anybody.' : 'Nothing to settle yet. Add the first expense with the + button.'}</p>` : ''}
     </section>
 

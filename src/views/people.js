@@ -2,31 +2,27 @@ import { state } from '../store.js';
 import { $, esc, money, byNewest, dayMonth } from '../lib/format.js';
 import { personName, shortName, groupsOf, personCurrencyTotals, isMe } from '../selectors.js';
 import { avatar, swipeActs } from './shared.js';
-import { beam } from './beam.js';
+import { standings } from './standings.js';
 import { plainReceipt, lineHTML } from './receipt.js';
 
 const nameOf = pid => isMe(pid) ? 'You' : shortName(pid);
 
-/* Everyone on one up-and-down line, one line per currency (bars only compare within a currency).
-   Tap a person to edit them; people with nothing owed either way sit underneath as "All square" */
+/* Everyone in words: who's up and who's down across all your groups, in each currency. Tap a person
+   to edit them; people with nothing owed either way sit underneath as "All square" */
 export function renderPeopleView(){
   const app = $('#app');
   const people = state.people.slice().sort((a, b) => a.name.localeCompare(b.name));
   const settlements = state.payments.slice().sort(byNewest);
-  const byCur = {}, square = [];
+  const rows = [], square = [];
   for(const p of people){
-    const totals = Object.entries(personCurrencyTotals(p.id)).filter(([, v]) => v !== 0);
-    if(!totals.length){ square.push(p); continue; }
-    const gnames = groupsOf(p.id).map(g => g.name).join(', ');
-    for(const [cur, v] of totals){
-      const nm = nameOf(p.id), you = isMe(p.id);
-      const say = v > 0 ? `${nm} ${you ? 'are' : 'is'} owed ${money(v, cur)}` : `${nm} owe${you ? '' : 's'} ${money(-v, cur)}`;
-      (byCur[cur] ||= []).push({ pid: p.id, name: nm, value: v, say, tip: gnames ? `In ${gnames}` : 'Settlements outside groups', action: 'edit-person' });
-    }
+    const amounts = Object.entries(personCurrencyTotals(p.id)).filter(([, v]) => v !== 0);
+    if(!amounts.length){ square.push(p); continue; }
+    const gnames = groupsOf(p.id).map(g => g.name);
+    rows.push({ pid: p.id, name: nameOf(p.id), amounts, sub: gnames.length ? `In ${gnames.join(', ')}` : 'Settlements outside groups', action: 'edit-person' });
   }
-  const curs = Object.keys(byCur).sort((a, c) => byCur[c].length - byCur[a].length);
-  const lines = curs.map((cur, i) => `${curs.length > 1 ? `<h3 class="beam-cur">In ${esc(cur)}</h3>` : ''}
-    ${beam(byCur[cur].sort((a, c) => c.value - a.value), cur, `Balances in ${cur}`, { legend: i === 0 })}`).join('');
+  /* Owed most first, then the biggest owing last */
+  const score = r => r.amounts.reduce((m, [, v]) => Math.abs(v) > Math.abs(m) ? v : m, 0);
+  rows.sort((a, c) => score(c) - score(a));
 
   app.innerHTML = `<div class="stack">
     <header class="page-head">
@@ -36,9 +32,9 @@ export function renderPeopleView(){
 
     <section class="section" aria-labelledby="everyoneHead">
       <div class="section-head"><h2 id="everyoneHead">Everyone</h2><button class="btn small" data-action="add-person">Add a person</button></div>
-      ${curs.length ? `${lines}<p class="caption">The line in the middle is square. Tap someone to see or change their details.</p>` : ''}
+      ${rows.length ? standings(rows, 'Balances with everyone') : ''}
       ${square.length ? `<div class="square-people">
-        <h3>${curs.length ? 'All square' : 'Everyone’s square'}</h3>
+        <h3>${rows.length ? 'All square' : 'Everyone’s square'}</h3>
         <ul class="opts">${square.map(p => `<li><button class="opt" data-action="edit-person" data-id="${p.id}">${avatar(p.id, 'sm')}${esc(isMe(p.id) ? 'You' : personName(p.id))}</button></li>`).join('')}</ul>
       </div>` : ''}
       ${!people.length ? `<p class="none">No one saved yet. Add a person to get started.</p>` : ''}

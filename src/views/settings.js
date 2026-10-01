@@ -2,6 +2,7 @@ import { state, session, myPersonId } from '../store.js';
 import { $, esc } from '../lib/format.js';
 import { personName } from '../selectors.js';
 import { getThemeOverride } from '../theme.js';
+import { nudgePref } from '../nudge.js';
 
 /* A member number that's yours and stays put: six digits from your account id */
 function memberNo(id){
@@ -39,6 +40,10 @@ export function renderSettings(){
         <span class="seg inline" role="radiogroup" aria-labelledby="themeLead">${[['light', 'day'], ['dark', 'night'], ['system', 'my phone’s']].map(([v, l]) =>
           `<label><input type="radio" name="theme" value="${v}" ${theme === v ? 'checked' : ''}><span>${l}</span></label>`).join('')}</span>
         mode.</li>
+      <li><span id="nudgeLead">Remind me to nudge people who owe me</span>
+        <span class="keep"><span class="seg inline" role="radiogroup" aria-labelledby="nudgeLead">${[['weekly', 'every week'], ['never', 'never']].map(([v, l]) =>
+          `<label><input type="radio" name="nudges" value="${v}" ${nudgePref() === v ? 'checked' : ''}><span>${l}</span></label>`).join('')}</span>.</span>
+        <span class="pref-note">Once a group’s been quiet for a week, the overview lists who still owes you, with a Nudge that opens your phone’s share sheet. Remembered on this device.</span></li>
     </ul>
 
     <div class="links">

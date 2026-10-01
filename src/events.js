@@ -24,6 +24,7 @@ import { openProfile, openDeleteAccount, signOut } from './dialogs/account.js';
 import { askConfirm } from './dialogs/confirm.js';
 import { openHistory, restoreEntry } from './dialogs/history.js';
 import { removeReceipts, groupReceiptPaths } from './receipts.js';
+import { nudge, dismissNudges, setNudgePref } from './nudge.js';
 
 /* A failed delete shows in the sheet it came from, or as a toast when it came from a swiped row */
 const oops = (err, action = 'delete') => { if(dlg.open) fail(describeError(err, action)); else toast(describeError(err, action), { error: true }); };
@@ -40,6 +41,8 @@ export function initEvents(){
     else if(a==='add-expense') openAddExpense();
     else if(a==='quick-add') openAddExpense();
     else if(a==='act-filter') setActivityGroup(b.dataset.id);
+    else if(a==='nudge'){ const ng = state.groups.find(x => x.id === b.dataset.group); if(ng && await nudge(ng, b.dataset.id, +b.dataset.amount)) render(); }
+    else if(a==='dismiss-nudges'){ dismissNudges(); render(); }
     else if(a==='voice-expense') openVoiceExpense();
     else if(a==='voice-done') finishVoice();
     else if(a==='voice-type'){ abortVoice(); openExpense(); }
@@ -144,6 +147,7 @@ export function initEvents(){
   });
   document.addEventListener('change', ev => {
     if(ev.target.name === 'theme' && !ev.target.closest('dialog')) setTheme(ev.target.value);
+    if(ev.target.name === 'nudges' && !ev.target.closest('dialog')) setNudgePref(ev.target.value);
   });
   document.addEventListener('input', ev => {
     if(ev.target.dataset.filter === 'activity') filterActivity(ev.target.value);
