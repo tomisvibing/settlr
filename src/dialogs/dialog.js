@@ -22,12 +22,24 @@ export function openDialog(html, submit, { top = false } = {}){
   /* The sheet is named by its heading */
   const title = form.querySelector('h2'); if(title) title.id = 'dlgTitle';
   if(!dlg.open) dlg.showModal();
+  fitToViewport();
   const first = form.querySelector('input:not([type=hidden]):not([type=radio]):not([type=checkbox]):not([type=date]),textarea');
   /* On touch screens, focusing a text field pops the keyboard over half the sheet: focus the heading
      instead, unless the field uses the on-screen keypad (inputmode="none") */
   const touch = window.matchMedia?.('(pointer: coarse)').matches;
   if(first && (!touch || first.inputMode === 'none')) first.focus();
   else { const h = form.querySelector('h2'); if(h){ h.tabIndex = -1; h.focus(); } }
+}
+/* On a phone the keyboard covers the bottom of the screen but the page doesn't shrink, so a sheet
+   pinned to the top or bottom can end up pushed off-screen. Follow the visible area instead: the
+   CSS reads these to size and place the sheet inside whatever the keyboard leaves */
+export function fitToViewport(){
+  const vv = window.visualViewport, root = document.documentElement.style;
+  if(!vv || !dlg.open){ root.removeProperty('--vv-h'); root.removeProperty('--vv-top'); root.removeProperty('--vv-bottom'); return; }
+  const bottom = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+  root.setProperty('--vv-h', vv.height + 'px');
+  root.setProperty('--vv-top', vv.offsetTop + 'px');
+  root.setProperty('--vv-bottom', bottom + 'px');
 }
 export function closeDialog(){ if(dlg.open) dlg.close(); onSubmit = null; draft = null; }
 /* Show why a save didn't happen. With a field, the message sits under that field, the field is
@@ -94,5 +106,9 @@ export function initDialog(){
   /* Fixing the field clears its error */
   form.addEventListener('input', ev => { if(ev.target.getAttribute?.('aria-invalid')) clearFieldError(); });
   form.addEventListener('change', ev => { if(ev.target.closest?.('fieldset')?.querySelector('[aria-invalid]')) clearFieldError(); });
-  dlg.addEventListener('close', () => { onSubmit = null; draft = null; sheetClosed(); });
+  dlg.addEventListener('close', () => { onSubmit = null; draft = null; sheetClosed(); fitToViewport(); });
+  window.visualViewport?.addEventListener('resize', fitToViewport);
+  window.visualViewport?.addEventListener('scroll', fitToViewport);
+  /* Focusing a field makes the browser scroll the page behind to reveal it; the sheet doesn't need that */
+  form.addEventListener('focusin', () => { if(window.scrollY) window.scrollTo(0, 0); });
 }
