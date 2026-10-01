@@ -37,4 +37,6 @@ The `push` Edge Function (`functions/push/`) sends web push notifications to the
 
 It reuses the app's `ledger.js`, `story.js` and `format.js` from copies in `functions/push/lib/`. After changing those files in `src/lib/`, run `npm run sync-functions` (a test fails until you do).
 
+This project doesn't give `service_role` table access by default, so `20261001072704_push_function_grants.sql` grants the function exactly what it reads and writes. A new table the function uses needs a grant there too.
+
 Deploy with `supabase functions deploy push` (the `verify_jwt = false` in `config.toml` matters: the app calls it with the publishable key, which isn't a JWT, and the function checks the signed-in user itself).
