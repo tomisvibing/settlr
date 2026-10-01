@@ -34,6 +34,7 @@ export function render(){
 }
 function renderRoute(r){
   /* The landing page has no navigation: just the button and the way to the overview */
+  const entering = document.body.dataset.route !== r.name;
   document.body.dataset.route = r.name;
   const tab = r.name === 'group' ? 'overview' : r.name;
   [['overview','#navHome'],['people','#navPeople'],['activity','#navActivity'],['settings','#navSettings']].forEach(([n,sel]) => {
@@ -44,6 +45,6 @@ function renderRoute(r){
   else if(r.name === 'settings') renderSettings();
   else if(r.name === 'activity') renderActivity();
   else if(r.name === 'overview') renderHome();
-  else renderStart();
+  else renderStart({ entering });
   restoreFocus();
 }

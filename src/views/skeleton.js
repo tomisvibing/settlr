@@ -2,14 +2,14 @@ import { $ } from '../lib/format.js';
 import { parseRoute } from '../router.js';
 import { renderStart } from './start.js';
 
-/* Shown while the first load runs: the shape of Home, softly pulsing */
+/* Shown while the first load runs: the shape of the overview, softly pulsing */
 export function renderSkeleton(){
   /* The landing page is already just a button: show it, waiting */
   if(parseRoute().name === 'start'){ document.body.dataset.route = 'start'; renderStart({ loading: true }); return; }
-  const row = `<li class="row"><span class="sk sk-av"></span><span class="r-main"><span class="sk sk-line" style="width:55%"></span><span class="sk sk-line sm" style="width:35%"></span></span><span class="sk sk-pill"></span></li>`;
+  const ticket = `<li class="sk sk-ticket"></li>`;
   $('#app').innerHTML = `<div class="stack" aria-busy="true" aria-label="Loading your groups">
-    <div class="greet"><span class="sk sk-av lg"></span><div class="who"><span class="sk sk-line sm" style="width:70px"></span><span class="sk sk-line" style="width:110px;margin-top:6px"></span></div></div>
-    <div class="sk sk-hero"></div>
-    <div class="card"><ul class="rows">${row}${row}${row}</ul></div>
+    <span class="sk sk-line" style="width:120px;height:18px;margin-top:12px"></span>
+    <div class="sk-story"><span class="sk sk-line"></span><span class="sk sk-line"></span><span class="sk sk-line" style="width:60%"></span></div>
+    <ul class="tickets">${ticket}${ticket}${ticket}</ul>
   </div>`;
 }

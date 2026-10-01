@@ -4,7 +4,7 @@ import { toast } from './ui.js';
 import { render } from './router.js';
 import { reportError } from './monitoring.js';
 import { friendlyError } from './lib/errors.js';
-import { filterActivity } from './views/group.js';
+import { filterActivity } from './views/receipt.js';
 import { safeAvatarUrl } from './lib/avatar.js';
 
 export let lastLoadedAt = 0;
