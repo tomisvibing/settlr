@@ -110,5 +110,10 @@ export function initDialog(){
   window.visualViewport?.addEventListener('resize', fitToViewport);
   window.visualViewport?.addEventListener('scroll', fitToViewport);
   /* Focusing a field makes the browser scroll the page behind to reveal it; the sheet doesn't need that */
-  form.addEventListener('focusin', () => { if(window.scrollY) window.scrollTo(0, 0); });
+  form.addEventListener('focusin', () => {
+    if(window.scrollY) window.scrollTo(0, 0);
+    /* iOS keeps scrolling while the keyboard slides up, and doesn't always say when it's done */
+    [100, 300, 600].forEach(ms => setTimeout(fitToViewport, ms));
+  });
+  form.addEventListener('focusout', () => setTimeout(fitToViewport, 100));
 }
