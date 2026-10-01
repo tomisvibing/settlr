@@ -340,6 +340,11 @@ button.st-row{cursor:pointer}
 .m-acts{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .m-note{font-size:13px;color:var(--muted)}
 .keep{white-space:nowrap}
+.pref-btn{margin-left:4px;vertical-align:middle;font-family:var(--font)}
+/* A field with its fixed start shown in front: "monzo.me/ username" */
+.prefixed{display:flex;align-items:center;min-height:48px;padding-left:14px;border:1px solid var(--control-edge);border-radius:var(--r-field);background:var(--field);color:var(--muted);font-size:16px}
+.prefixed:focus-within{outline:2px solid var(--focus);outline-offset:-1px}
+.prefixed input{flex:1;min-width:0;border:0;padding-left:1px;background:none;outline:none}
 .pref-note{display:block;margin-top:4px;font-family:var(--font);font-size:13px;line-height:1.45;color:var(--muted)}
 
 /* ---------- A group: the fewest payments, stamped Paid when marked ---------- */

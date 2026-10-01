@@ -13,5 +13,6 @@ export default [
       'no-empty': ['error', { allowEmptyCatch: true }],
     },
   },
-  { files: ['*.config.js'], languageOptions: { globals: { ...globals.node } } },
+  { files: ['*.config.js', 'scripts/**'], languageOptions: { globals: { ...globals.node } } },
+  { files: ['public/sw.js'], languageOptions: { globals: { ...globals.serviceworker } } },
 ];

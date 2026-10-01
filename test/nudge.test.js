@@ -24,7 +24,8 @@ describe('weekly nudges', () => {
     const owe = g('chalet', 8 * 864e5, [exp('a', 30000, { me: 10000, a: 10000, b: 10000 })]);
     expect(dueNudges([owe], isMe, { now, lastActivity })).toEqual([]);
   });
-  it('says it kindly', () => {
-    expect(nudgeText('Alex', '£100.00', 'Lisbon')).toMatch(/^Hi Alex! A friendly nudge from settlr: you owe me £100\.00 for Lisbon\./);
+  it('says it kindly, with your payment link when you have one', () => {
+    expect(nudgeText('Alex', '£100.00', 'Lisbon')).toMatch(/^Hi Alex! A friendly nudge from settlr: you owe me £100\.00 for Lisbon\. No rush/);
+    expect(nudgeText('Alex', '£100.00', 'Lisbon', { name: 'Monzo', url: 'https://monzo.me/t/100.00' })).toMatch(/You can pay me with Monzo here: https:\/\/monzo\.me\/t\/100\.00$/);
   });
 });

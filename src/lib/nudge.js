@@ -23,6 +23,8 @@ export function dueNudges(groups, isMe, { now = Date.now(), nudged = {}, lastAct
 
 export const nudgeKey = key;
 
-export function nudgeText(firstName, amount, groupName){
-  return `Hi ${firstName}! A friendly nudge from settlr: you owe me ${amount} for ${groupName}. No rush, but here’s the link when you’re ready.`;
+/* link: a payment link of yours ({ name, url }), so they can pay there and then */
+export function nudgeText(firstName, amount, groupName, link = null){
+  return `Hi ${firstName}! A friendly nudge from settlr: you owe me ${amount} for ${groupName}.`
+    + (link ? ` You can pay me with ${link.name} here: ${link.url}` : ' No rush, but here’s the group when you’re ready.');
 }

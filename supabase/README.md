@@ -22,3 +22,19 @@ An expense or payment in another currency keeps `orig_currency`, `orig_amount_ce
 The app's tables are in the `supabase_realtime` publication, so the app gets live updates. Realtime applies the same row-level security as a normal read.
 
 The membership helpers the security rules use (`is_member`, `my_group_ids`, `can_see_person`) live in a `private` schema. The REST API doesn't expose that schema, so the app can't call them directly.
+
+## Payment links
+
+`pay_handles` keeps each login's Monzo, PayPal and Revolut usernames (one row per `auth.users` id). Anyone who can see a person tied to that login can read them, and only the owner can change them. The app builds the links itself (`src/lib/paylinks.js`): Monzo with the amount in pounds, PayPal with the amount and currency, and Revolut without an amount, because its public links can't carry one.
+
+## Push notifications
+
+The `push` Edge Function (`functions/push/`) sends web push notifications to the devices in `push_subscriptions`:
+
+- `{ "type": "key" }` returns the public VAPID key a browser subscribes with. The key pair is made on first use and kept in `push_state`, which has no policies, so only the function's service role can read it. No secret needs setting by hand.
+- `{ "type": "nudge", "group_id", "person_id" }`, called by a signed-in member, tells someone who owes them in that group. It checks the caller is in the group and is owed by that person, allows one nudge per person per group every 12 hours (`push_nudges`), and does nothing for people without an account.
+- `{ "type": "weekly" }` sends everyone with notifications on the overview's sentence ("Alex owes you £20.00 for Lisbon. You owe Sam €30.00."), skipping anyone who's square. A `pg_cron` job calls it on Sundays at 17:00 UTC; the function sends at most once every six days, so an extra call does nothing.
+
+It reuses the app's `ledger.js`, `story.js` and `format.js` from copies in `functions/push/lib/`. After changing those files in `src/lib/`, run `npm run sync-functions` (a test fails until you do).
+
+Deploy with `supabase functions deploy push` (the `verify_jwt = false` in `config.toml` matters: the app calls it with the publishable key, which isn't a JWT, and the function checks the signed-in user itself).

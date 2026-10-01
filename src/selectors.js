@@ -32,6 +32,9 @@ export function canAdmin(g){
 }
 export const isAdmin = (g, pid) => g.admins.includes(pid);
 export const hasAccount = pid => !!person(pid).userId;
+/* Someone's Monzo, PayPal and Revolut usernames, if they've added them; and your own */
+export const handlesOf = pid => state.payHandles[person(pid).userId] || null;
+export const myHandles = () => state.payHandles[session?.user?.id] || null;
 /* Everyone an entry's editor should see: current members plus anyone who has since left but is on this entry */
 export function rosterFor(g, e){
   if(!e) return g.members;
