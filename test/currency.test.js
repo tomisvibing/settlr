@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { CURRENCIES, currencyOptions, currencyName, minorDigits, minorStep, plainAmount, money } from '../src/lib/format.js';
+import { CURRENCIES, currencyOptions, currencyName, guessCurrency, minorDigits, minorStep, plainAmount, money } from '../src/lib/format.js';
 import { distribute } from '../src/lib/ledger.js';
 
 describe('currencies', () => {
@@ -35,5 +35,18 @@ describe('currencies', () => {
     const big = 5_000_000_000; // 50,000,000 dong in hundredths
     const out = distribute(big, { a:1, b:2 }, 100);
     expect(out.a + out.b).toBe(big);
+  });
+});
+
+describe('home currency guess', () => {
+  it('follows the browser language’s country', () => {
+    expect(guessCurrency('en-GB')).toBe('GBP');
+    expect(guessCurrency('en-US')).toBe('USD');
+    expect(guessCurrency('fr-FR')).toBe('EUR');
+    expect(guessCurrency('de_CH')).toBe('CHF');
+  });
+  it('falls back to pounds', () => {
+    expect(guessCurrency('en')).toBe('GBP');
+    expect(guessCurrency(undefined)).toBe('GBP');
   });
 });

@@ -25,6 +25,7 @@ import { askConfirm } from './dialogs/confirm.js';
 import { openHistory, restoreEntry } from './dialogs/history.js';
 import { removeReceipts, groupReceiptPaths } from './receipts.js';
 import { nudge, dismissNudges, setNudgePref } from './nudge.js';
+import { setHomeCurrency } from './prefs.js';
 
 /* A failed delete shows in the sheet it came from, or as a toast when it came from a swiped row */
 const oops = (err, action = 'delete') => { if(dlg.open) fail(describeError(err, action)); else toast(describeError(err, action), { error: true }); };
@@ -148,6 +149,7 @@ export function initEvents(){
   document.addEventListener('change', ev => {
     if(ev.target.name === 'theme' && !ev.target.closest('dialog')) setTheme(ev.target.value);
     if(ev.target.name === 'nudges' && !ev.target.closest('dialog')) setNudgePref(ev.target.value);
+    if(ev.target.name === 'homeCurrency' && !ev.target.closest('dialog')) setHomeCurrency(ev.target.value);
   });
   document.addEventListener('input', ev => {
     if(ev.target.dataset.filter === 'activity') filterActivity(ev.target.value);

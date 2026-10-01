@@ -223,6 +223,9 @@ li.swipe{position:relative;overflow:hidden}
 .reel{position:relative;width:100%;height:calc(var(--reel) * 1.9);margin:-.06em 0 30px;perspective:900px;font-family:var(--serif);font-style:italic;font-size:var(--reel);line-height:1.1;letter-spacing:-.02em;color:var(--ink);
   -webkit-mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent);mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent)}
 .drum{position:absolute;inset:0;transform-style:preserve-3d}
+button.reel{display:block;padding:0;border:0;background:none;cursor:pointer;text-align:inherit;-webkit-user-select:none;user-select:none}
+button.reel:disabled{cursor:default}
+button.reel:focus-visible{outline:2px solid var(--focus);outline-offset:4px;border-radius:12px}
 /* Hidden until it spins in (views/start.js), or shown at once when it isn't spinning */
 .reel{opacity:0}
 .reel.shown{opacity:1}
@@ -426,7 +429,8 @@ button.line{cursor:pointer}
 .seg.small span{padding:5px 10px;font-size:13px}
 
 /* ---------- Sheets (all dialogs) ---------- */
-dialog{border:1px solid var(--line);padding:0;background:var(--sheet);color:var(--ink);width:calc(100% - 16px);max-width:calc(100% - 16px);max-height:calc(94dvh - var(--safe-b));margin:auto auto calc(8px + var(--safe-b));border-radius:22px;box-shadow:var(--float);overscroll-behavior:contain}
+/* --vv-*: the area the keyboard leaves visible (fitToViewport in dialogs/dialog.js); unset, the full screen */
+dialog{border:1px solid var(--line);padding:0;background:var(--sheet);color:var(--ink);width:calc(100% - 16px);max-width:calc(100% - 16px);max-height:calc(min(94dvh, var(--vv-h, 100dvh)) - var(--safe-b));margin:auto auto calc(8px + var(--safe-b) + var(--vv-bottom, 0px));border-radius:22px;box-shadow:var(--float);overscroll-behavior:contain}
 dialog[open]{animation:sheet-up .22s cubic-bezier(.2,.8,.2,1)}
 @keyframes sheet-up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
 dialog::backdrop{background:var(--scrim)}
@@ -444,7 +448,7 @@ dialog.confirm form{gap:12px}
 }
 /* Phones: a sheet that grows as you use it hangs from the top instead (dialogs/dialog.js) */
 @media (max-width:639px){
-  dialog.top{margin:calc(8px + env(safe-area-inset-top,0px)) auto auto;border-radius:22px;max-height:calc(100dvh - 16px - env(safe-area-inset-top,0px) - var(--safe-b))}
+  dialog.top{margin:calc(8px + env(safe-area-inset-top,0px) + var(--vv-top, 0px)) auto auto;border-radius:22px;max-height:calc(var(--vv-h, 100dvh) - 16px - env(safe-area-inset-top,0px) - var(--safe-b))}
   dialog.top form::before{display:none}
   dialog.top[open]{animation:sheet-down .22s cubic-bezier(.2,.8,.2,1)}
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { dueNudges, nudgeKey, nudgeText, WEEK } from '../src/lib/nudge.js';
+import { dueNudges, nudgeKey, nudgeText, nudgeMessage, frequencyMs, WEEK } from '../src/lib/nudge.js';
 
 const isMe = id => id === 'me';
 const now = Date.parse('2026-10-01T12:00:00Z');
@@ -26,5 +26,17 @@ describe('weekly nudges', () => {
   });
   it('says it kindly', () => {
     expect(nudgeText('Alex', '£100.00', 'Lisbon')).toMatch(/^Hi Alex! A friendly nudge from settlr: you owe me £100\.00 for Lisbon\./);
+  });
+});
+
+describe('nudge frequency and message', () => {
+  it('waits longer between reminders when set to fortnightly or monthly', () => {
+    const quiet = { ...lisbon, quiet: 10 * 864e5 };
+    expect(dueNudges([quiet], isMe, { now, lastActivity, every: frequencyMs('fortnightly') })).toEqual([]);
+    expect(dueNudges([quiet], isMe, { now, lastActivity, every: frequencyMs('weekly') })).toHaveLength(2);
+    expect(frequencyMs('monthly')).toBe(30 * 864e5);
+  });
+  it('puts the link inside the message so it survives sharing', () => {
+    expect(nudgeMessage('Hi Alex!', 'https://x.test/#/g/1')).toBe('Hi Alex! https://x.test/#/g/1');
   });
 });

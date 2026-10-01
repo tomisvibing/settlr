@@ -12,6 +12,7 @@ import { icon } from '../views/shared.js';
 import { form, draft, setDraft, openDialog, fail } from './dialog.js';
 import { openExpense, saveExpenseRow, keypad } from './expense.js';
 import { openGroup } from './group.js';
+import { homeCurrency } from '../prefs.js';
 
 const MODES = { equal: 'equally', shares: 'by shares', exact: 'by exact amounts' };
 const touch = () => window.matchMedia?.('(pointer: coarse)').matches;
@@ -25,10 +26,10 @@ function list(ids, g){
   return ns.length > 1 ? ns.slice(0, -1).join(', ') + ' and ' + ns.at(-1) : ns[0] || 'nobody';
 }
 
-/* Start a sentence: in this group if you're on its page, otherwise your most recent one */
+/* Start a sentence: in this group if you're on its page, otherwise "in a group" until you pick one */
 export function openComposer(start = {}){
   const r = parseRoute(), here = r.name === 'group' ? group() : null;
-  const gid = start.gid ?? (here && !here.archivedAt ? here.id : activeGroups().slice().sort(byRecent)[0]?.id ?? null);
+  const gid = start.gid ?? (here && !here.archivedAt ? here.id : null);
   const g = state.groups.find(x => x.id === gid);
   setDraft({
     compose: true, gid,
@@ -49,18 +50,20 @@ export function openComposer(start = {}){
   if(draft.open === 'amount' && !touch()) form.querySelector('#cAmount')?.focus();
 }
 
-const cur = () => state.groups.find(x => x.id === draft.gid)?.currency || 'GBP';
+/* A group's own currency once it's picked; until then, yours */
+const cur = () => state.groups.find(x => x.id === draft.gid)?.currency || homeCurrency();
 /* Each changeable part is a span acting as a button, so a long one wraps like the words around it */
 const tok = (key, text, label) => `<span class="tok" role="button" tabindex="0" data-tok="${key}" aria-expanded="${draft.open === key}" aria-controls="tray" aria-label="${esc(label)}: ${esc(text)}. Change">${esc(text)}</span>`;
 
 function render(){ renderSentence(); renderTray(); }
 function renderSentence(){
   const d = draft, g = state.groups.find(x => x.id === d.gid);
-  const payer = d.payer ? (isMe(d.payer) ? 'You' : shortName(d.payer)) : 'Someone';
-  $('#sentence').innerHTML = `${tok('payer', payer, 'Who paid')} paid ${tok('amount', currencySymbol(cur()) + (d.amount || '0'), 'How much')} for ${tok('what', d.what || 'something', 'What for')}, split ${tok('mode', MODES[d.mode], 'How it’s split')} between ${tok('who', list(d.who, g), 'Who it’s for')}, in ${tok('group', g ? g.name : 'a new group', 'Which group')}.`;
-  $('#composeGo').textContent = !g ? 'Start the group' : d.mode === 'equal' ? 'Add it' : 'Set the amounts';
+  const payer = !d.payer || isMe(d.payer) ? 'You' : shortName(d.payer);
+  $('#sentence').innerHTML = `${tok('payer', payer, 'Who paid')} paid ${tok('amount', currencySymbol(cur()) + (d.amount || '0'), 'How much')} for ${tok('what', d.what || 'something', 'What for')}, split ${tok('mode', MODES[d.mode], 'How it’s split')} between ${tok('who', g ? list(d.who, g) : 'everyone', 'Who it’s for')}, in ${tok('group', g ? g.name : 'a group', 'Which group')}.`;
+  $('#composeGo').textContent = d.mode === 'equal' ? 'Add it' : 'Set the amounts';
   const amount = toPence(d.amount), each = $('#each');
-  if(!g || !(amount > 0) || !d.who.length || d.mode !== 'equal'){ each.textContent = d.mode !== 'equal' && g ? 'You’ll set each person’s part next.' : ''; return; }
+  if(!g){ each.textContent = 'Pick the group to see who it’s split with.'; return; }
+  if( !(amount > 0) || !d.who.length || d.mode !== 'equal'){ each.textContent = d.mode !== 'equal' && g ? 'You’ll set each person’s part next.' : ''; return; }
   const split = distribute(amount, Object.fromEntries(d.who.map(id => [id, 1])), minorStep(cur()));
   const vals = Object.values(split), lo = Math.min(...vals), hi = Math.max(...vals);
   const me = meIn(g), mine = split[me] || 0;
@@ -104,11 +107,16 @@ function press(k){
 /* Hand over to the full sheet, filled in, for anything this sentence doesn't cover */
 function moreDetails(){
   const d = draft;
-  if(!d.gid) return startGroup();
+  if(!d.gid) return askGroup();
   state.activeGroupId = d.gid;
   openExpense(null, { desc: d.what, amount: toPence(d.amount) > 0 ? toPence(d.amount) : null, currency: cur(), paidBy: d.payer, subset: d.who, mode: d.mode });
 }
-/* No group yet (or "New group"): start one, then come back to this sentence in it */
+/* Nothing is saved until the person says which group: open that part of the sentence */
+function askGroup(){
+  draft.open = 'group'; render(); fail('Pick which group this is for.'); $('[data-tok="group"]')?.focus();
+  return false;
+}
+/* A brand-new group ("New group" in the tray): start one, then come back to this sentence in it */
 function startGroup(){
   const keep = { amount: draft.amount, what: draft.what, mode: draft.mode, open: null };
   const amount = toPence(keep.amount);
@@ -120,7 +128,7 @@ function startGroup(){
 
 async function save(){
   const d = draft, g = state.groups.find(x => x.id === d.gid);
-  if(!g){ startGroup(); return false; }
+  if(!g) return askGroup();
   if(d.mode !== 'equal'){ moreDetails(); return false; }
   const amount = toPence(d.amount), what = d.what.trim();
   const ask = (open, msg) => { d.open = open; render(); fail(msg); $(`[data-tok="${open}"]`)?.focus(); return false; };
