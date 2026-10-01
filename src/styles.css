@@ -223,6 +223,9 @@ li.swipe{position:relative;overflow:hidden}
 .reel{position:relative;width:100%;height:calc(var(--reel) * 1.9);margin:-.06em 0 30px;perspective:900px;font-family:var(--serif);font-style:italic;font-size:var(--reel);line-height:1.1;letter-spacing:-.02em;color:var(--ink);
   -webkit-mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent);mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent)}
 .drum{position:absolute;inset:0;transform-style:preserve-3d}
+button.reel{display:block;padding:0;border:0;background:none;cursor:pointer;text-align:inherit;-webkit-user-select:none;user-select:none}
+button.reel:disabled{cursor:default}
+button.reel:focus-visible{outline:2px solid var(--focus);outline-offset:4px;border-radius:12px}
 /* Hidden until it spins in (views/start.js), or shown at once when it isn't spinning */
 .reel{opacity:0}
 .reel.shown{opacity:1}

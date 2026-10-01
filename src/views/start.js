@@ -16,7 +16,7 @@ export function syncThemeToggle(){
 const PHRASES = ['dinner at Hawksmoor', 'the train to Paris', 'coffee for two', 'festival tickets', 'the Airbnb in Lisbon',
   'Friday’s big shop', 'a cab home', 'the electricity bill', 'pizza for six', 'birthday drinks', 'the ski chalet', 'brunch, again'];
 const SPIN_MS = 2200, LAPS = 2;
-let landed = Math.floor(Math.random() * PHRASES.length), frame = 0, wasLoading = false;
+let landed = Math.floor(Math.random() * PHRASES.length), frame = 0, wasLoading = false, spinning = false;
 
 function drawReel(drum, pos, speed){
   const items = drum.children, n = items.length;
@@ -36,17 +36,18 @@ function drawReel(drum, pos, speed){
 function spin(drum){
   cancelAnimationFrame(frame);
   const reel = drum.parentElement, from = landed;
+  spinning = true;
   let next = Math.floor(Math.random() * (PHRASES.length - 1)); if(next >= from) next++;
   landed = next;
   const n = PHRASES.length, to = from + LAPS * n + ((next - from + n) % n);
-  if(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){ drawReel(drum, next, 0); reel.classList.add('shown'); return; }
+  if(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){ drawReel(drum, next, 0); reel.classList.add('shown'); spinning = false; return; }
   let t0 = null, last = from;
   const step = now => {
-    if(!drum.isConnected) return;
+    if(!drum.isConnected){ spinning = false; return; }
     if(t0 === null){ t0 = now; reel.classList.add('spinning'); }
     const t = Math.min(1, (now - t0) / SPIN_MS), pos = from + (to - from) * (1 - Math.pow(1 - t, 4));
     drawReel(drum, pos, Math.abs(pos - last)); last = pos;
-    if(t < 1) frame = requestAnimationFrame(step);
+    if(t < 1) frame = requestAnimationFrame(step); else spinning = false;
   };
   frame = requestAnimationFrame(step);
 }
@@ -61,7 +62,7 @@ export function renderStart({ loading = false, entering = false } = {}){
     <a class="start-brand" href="#/overview">settlr</a>
     <div class="start-stack">
       <h1 class="start-head display" id="startTitle">Split<span class="sr"> the bill for anything you share</span></h1>
-      <div class="reel" aria-hidden="true"><div class="drum">${PHRASES.map(p => `<span>${p}</span>`).join('')}</div></div>
+      <button type="button" class="reel" aria-label="Spin for another idea"${loading ? ' disabled' : ''}><span class="drum" aria-hidden="true">${PHRASES.map(p => `<span>${p}</span>`).join('')}</span></button>
       <button type="button" class="start-add" data-action="quick-add"${loading ? ' disabled' : ''}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
         <span>Add an expense</span>
@@ -75,6 +76,8 @@ export function renderStart({ loading = false, entering = false } = {}){
   </section>`;
   syncThemeToggle();
   const drum = $('.start .drum');
+  /* Tap the words that landed to spin the reel again */
+  drum.parentElement.addEventListener('click', () => { if(!spinning && !drum.parentElement.disabled) spin(drum); });
   /* While the first load runs the reel stays hidden; it spins in once everything's ready */
   if(doSpin) spin(drum);
   else { drawReel(drum, landed, 0); if(!loading) drum.parentElement.classList.add('shown'); }
