@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "sync-functions": "node scripts/sync-function-libs.mjs"
   },
   "dependencies": {
     "@sentry/browser": "^11.0.0",

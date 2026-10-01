@@ -11,6 +11,7 @@ import { initLive } from './live.js';
 import { initAuth } from './auth.js';
 import { initPhotoFallback } from './photo.js';
 import { initToast } from './ui.js';
+import { initServiceWorker } from './push.js';
 
 initMonitoring();
 applyTheme();
@@ -22,5 +23,6 @@ initEvents();
 initSwipe();
 initPhotoFallback();
 initToast();
+initServiceWorker();
 initLive();
 initAuth();

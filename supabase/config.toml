@@ -1,0 +1,7 @@
+# Only what the Supabase CLI needs to deploy settlr's Edge Function the same way every time.
+project_id = "ctlldbpdtohalfcwkjwq"
+
+[functions.push]
+# The app calls it with the publishable key, which isn't a JWT; the function checks who's signed
+# in itself where that matters (see supabase/functions/push/index.ts)
+verify_jwt = false

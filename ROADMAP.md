@@ -50,13 +50,13 @@ Everything later builds on these.
 - [x] Live updates: see new expenses the moment someone adds them (Supabase Realtime)
 - [x] Change history ("Bob edited *Dinner*: £40 → £45") in each group's History sheet, with Undo after a delete and Restore for any deleted entry
 - [x] Nudges: a Nudge beside each payment owed to you opens your phone's share sheet with a friendly message and the group's link, and once a week the overview lists who still owes you in groups that have gone quiet (switch off on You)
-- [ ] Push notifications: "You owe Sam £20" reminders and a weekly summary, sent by settlr itself
+- [x] Push notifications (switch on under You): a Sunday-evening summary of who owes what, and a notification when someone nudges you. Nudging someone with notifications on reaches them directly; anyone else gets the share-sheet message. On an iPhone they need settlr added to the Home Screen
 - [x] Leave a group (once settled up); admin role so only admins can delete a group or remove someone with an account
 - [x] Comments on expenses
 
 ## Phase 4: Money features
 
-- [ ] Payment links: "Mark paid" opens Monzo.me, PayPal.me or Revolut with the amount filled in
+- [x] Payment links: add your Monzo, PayPal or Revolut username under You, and anyone who owes you gets "Pay with Monzo" beside the payment, with the amount filled in (Monzo for pounds; Revolut opens your page without an amount). Your link also goes in the nudges you send
 - [x] 50 currencies to pick from, with names, and whole-number amounts for currencies without pence (yen, won, forint…)
 - [x] Multiple currencies in one group: each expense or payment in any currency, converted into the group's at the European Central Bank rate for its date (or your own), keeping both amounts
 - [ ] One overall total on Home in your own currency, across groups in different currencies

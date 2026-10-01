@@ -1,7 +1,8 @@
 import { state, takeJustPaid } from '../store.js';
 import { $, esc, money, byNewest, ago } from '../lib/format.js';
 import { balances, settlements } from '../lib/ledger.js';
-import { group, shortName, isMe, spentIn, isArchived } from '../selectors.js';
+import { group, shortName, isMe, spentIn, isArchived, handlesOf } from '../selectors.js';
+import { payLinks } from '../lib/paylinks.js';
 import { avatar, icon } from './shared.js';
 import { standings } from './standings.js';
 import { nudgedAt } from '../nudge.js';
@@ -25,7 +26,10 @@ function breakdown(g, pid){
 function move(g, p, frozen, paid = false){
   const side = pid => `${avatar(pid, 'sm')}<b>${isMe(pid) ? (p.from === pid ? 'You' : 'you') : esc(shortName(pid))}</b>`;
   const toMe = isMe(p.to) && !isMe(p.from), when = toMe ? nudgedAt(g.id, p.from) : 0;
+  /* You owe: buttons that open their payment app with the amount filled in */
+  const pay = isMe(p.from) && !isMe(p.to) ? payLinks(handlesOf(p.to), p.amount, g.currency, g.name) : [];
   const acts = paid ? '<span class="stamp" role="status">Paid</span>' : frozen ? '' : `<span class="m-acts">
+      ${pay.map(l => `<a class="btn small primary" href="${l.url}" target="_blank" rel="noopener"${l.filled ? '' : ` title="Opens ${l.name}; type ${money(p.amount, g.currency)}"`}>Pay with ${l.name}</a>`).join('')}
       ${toMe ? `<button class="btn small" data-action="nudge" data-group="${g.id}" data-id="${p.from}" data-amount="${p.amount}">Nudge</button>` : ''}
       <button class="btn small" data-action="settle" data-from="${p.from}" data-to="${p.to}" data-amount="${p.amount}">Mark paid</button>
       ${when ? `<span class="m-note">Nudged ${ago(when)}</span>` : ''}
