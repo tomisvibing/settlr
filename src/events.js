@@ -11,8 +11,8 @@ import { refresh, lastLoadedAt } from './data.js';
 import { render, navigate } from './router.js';
 import { rememberPendingJoin } from './auth.js';
 import { shareInvite, exportGroupCsv, exportAll } from './share.js';
-import { filterActivity } from './views/group.js';
-import { dlg, draft, closeDialog, fail, describeError } from './dialogs/dialog.js';
+import { filterActivity, setActivityGroup } from './views/receipt.js';
+import { dlg, closeDialog, fail, describeError } from './dialogs/dialog.js';
 import { openExpense, openAddExpense } from './dialogs/expense.js';
 import { openVoiceExpense, abortVoice, finishVoice } from './dialogs/voice.js';
 import { openPayment } from './dialogs/payment.js';
@@ -37,11 +37,9 @@ export function initEvents(){
     if(a==='new-group') openGroup(true);
     else if(a==='edit-group') openGroup(false);
     else if(a==='join-group') openJoinGroup();
-    else if(a==='add-expense') openExpense();
+    else if(a==='add-expense') openAddExpense();
     else if(a==='quick-add') openAddExpense();
-    /* The expense typed on the way in travels to the group picked for it */
-    else if(a==='pick-group'){ const carry = draft?.pick; state.activeGroupId = b.dataset.id; openExpense(null, carry); }
-    else if(a==='pick-new-group') openGroup(true, { carry: draft?.pick });
+    else if(a==='act-filter') setActivityGroup(b.dataset.id);
     else if(a==='voice-expense') openVoiceExpense();
     else if(a==='voice-done') finishVoice();
     else if(a==='voice-type'){ abortVoice(); openExpense(); }
@@ -50,7 +48,7 @@ export function initEvents(){
     else if(a==='edit-expense') openExpense(b.dataset.id);
     else if(a==='add-payment') openPayment();
     else if(a==='edit-payment') openPayment({id:b.dataset.id});
-    else if(a==='settle') openPayment({from:b.dataset.from, to:b.dataset.to, amount:+b.dataset.amount});
+    else if(a==='settle') openPayment({from:b.dataset.from, to:b.dataset.to, amount:+b.dataset.amount, settle:true});
     else if(a==='add-person') openPerson();
     else if(a==='edit-person') openPerson(b.dataset.id);
     else if(a==='del-person'){

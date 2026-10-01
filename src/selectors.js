@@ -10,6 +10,11 @@ export const activeGroups = () => state.groups.filter(g => !g.archivedAt);
 export function group(){ return state.groups.find(x => x.id === state.activeGroupId) || null; }
 export function person(id){ return state.people.find(p => p.id === id) || { id, name:'Someone' }; }
 export const personName = id => person(id).name;
+/* First name where that's enough to tell people apart, the full name where it isn't */
+export function shortName(id){
+  const full = personName(id), first = full.split(' ')[0];
+  return state.people.some(p => p.id !== id && p.name.split(' ')[0] === first) ? full : first;
+}
 /* "Me" can be several people rows: my own contact plus any placeholder I claimed when joining a group */
 export const isMe = pid => state.myIds.has(pid);
 export function meIn(g){ return g.members.find(isMe) || null; }

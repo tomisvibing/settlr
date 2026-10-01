@@ -1,4 +1,4 @@
-import { esc, money, dayMonth, initial } from '../lib/format.js';
+import { esc, money, initial } from '../lib/format.js';
 import { meIn, personName, personPhoto, isMe } from '../selectors.js';
 
 /* A stable tint per person or group, so the same face always has the same colour */
@@ -14,13 +14,6 @@ export function avatar(pid, size = ''){
 }
 export const groupTile = (g, size = '') =>
   `<span class="tile ${size} ${tintOf(g.id)}" aria-hidden="true">${esc(initial(g.name))}</span>`;
-
-/* +€45.00 / −£20.00 / Settled */
-export function balancePill(v, cur, zero = 'Settled'){
-  if(v > 0) return `<span class="pill pos">+${money(v, cur)}</span>`;
-  if(v < 0) return `<span class="pill neg">−${money(-v, cur)}</span>`;
-  return `<span class="pill">${zero}</span>`;
-}
 
 const svg = (d, w = 1.8) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
 export const icon = {
@@ -66,11 +59,4 @@ export function entryMeta(e){
   const n = Object.keys(e.splits).length;
   if(e.type === 'payment') return `${who(e.paidBy)} paid ${isMe(Object.keys(e.splits)[0]) ? 'you' : esc(personName(Object.keys(e.splits)[0]))}`;
   return `${who(e.paidBy)} paid · ${e.splitMode==='exact'?'split by amount':e.splitMode==='shares'?'split by shares':`split ${n} ${n===1?'way':'ways'}`}`;
-}
-/* One activity row's contents; groupName adds the group in front of the meta line */
-export function entryInner(e, g, groupName){
-  const { day, mon } = dayMonth(e), isPay = e.type === 'payment';
-  return `${avatar(e.paidBy)}
-    <span class="r-main"><span class="r-title">${e.receipt ? `<span class="clip" title="Has a receipt"><span class="sr">Has a receipt: </span>${icon.clip}</span>` : ''}${esc(isPay ? 'Payment' : e.desc)}${e.comments?.length ? `<span class="ccount" title="${e.comments.length} comment${e.comments.length === 1 ? '' : 's'}"><span class="sr">, ${e.comments.length} comments</span>${icon.comment}${e.comments.length}</span>` : ''}</span><span class="r-meta">${groupName ? esc(g.name) + ' · ' : ''}${entryMeta(e)} · ${day} ${mon}</span></span>
-    <span class="r-end"><span class="r-amt">${money(e.origCurrency ? e.origAmount : e.amount, e.origCurrency || g.currency)}</span>${e.origCurrency ? `<span class="r-conv">${money(e.amount, g.currency)}</span>` : ''}${myLine(e, g)}</span>`;
 }

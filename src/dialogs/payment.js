@@ -2,6 +2,7 @@ import { $, esc, toPence, today, plainAmount, currencyOptions, money } from '../
 import { convert, parseRate, formatRate, canFetch } from '../lib/fx.js';
 import { fetchRate } from '../rates.js';
 import { group, personName, defaultPayer, rosterFor } from '../selectors.js';
+import { setJustPaid } from '../store.js';
 import { form, draft, setDraft, openDialog, fail } from './dialog.js';
 import { saveExpenseRow } from './expense.js';
 
@@ -40,7 +41,10 @@ export function openPayment(opts = {}){
       const a = isForeign ? convert(typed, draft.rate, g.currency) : typed;
       const row = { group_id: g.id, type:'payment', description:'Payment', amount_cents:a, paid_by:f, split_mode:'payment', expense_date: form.date.value || today(), split_input: {},
         orig_currency: isForeign ? draft.cur : null, orig_amount_cents: isForeign ? typed : null, fx_rate: isForeign ? draft.rate : null };
-      return saveExpenseRow(draft.id, row, { [t]: a });
+      const result = await saveExpenseRow(draft.id, row, { [t]: a });
+      /* From "Mark paid": the group page stamps this payment Paid when it redraws */
+      if(result !== false && opts.settle) setJustPaid({ gid: g.id, from: f, to: t, amount: a });
+      return result;
     });
   const d = draft;
   const showFx = note => {

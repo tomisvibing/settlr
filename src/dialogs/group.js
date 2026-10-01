@@ -4,7 +4,6 @@ import { $, esc, money, currencyOptions } from '../lib/format.js';
 import { group, personName, involved, isMe, meIn, canAdmin, isAdmin, hasAccount, isArchived } from '../selectors.js';
 import { form, draft, setDraft, openDialog, fail, describeError } from './dialog.js';
 import { refresh } from '../data.js';
-import { openExpense } from './expense.js';
 
 /* carry: an expense typed before it had a group (see openAddExpense). Once the group exists, that
    expense's sheet opens in it, filled in, instead of the group's page */
@@ -48,7 +47,8 @@ export function openGroup(isNew, { carry = null, note = '' } = {}){
         } else {
           const { data: gid, error } = await sb.rpc('create_group', { name, currency: form.currency.value, member_person_ids: draft.members });
           if(error) throw error;
-          if(carry){ await refresh(); state.activeGroupId = gid; openExpense(null, carry); return false; }
+          /* Started from a new expense: go back to it, now in this group */
+          if(carry?.resume){ await refresh(); state.activeGroupId = gid; carry.resume(gid); return false; }
           return '#/g/' + encodeURIComponent(gid);
         }
       }catch(err){ return fail(describeError(err)); }

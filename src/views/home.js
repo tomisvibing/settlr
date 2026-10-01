@@ -1,79 +1,70 @@
 import { state, myPersonId } from '../store.js';
-import { $, esc, money, ago, byNewest } from '../lib/format.js';
+import { $, esc, money, ago } from '../lib/format.js';
 import { balances } from '../lib/ledger.js';
-import { personName, meIn, lastActivity, myTotals, isArchived, canAdmin } from '../selectors.js';
+import { storyParts } from '../lib/story.js';
+import { personName, shortName, meIn, lastActivity, isArchived, canAdmin, isMe } from '../selectors.js';
 import { groupHref } from '../router.js';
-import { avatar, groupTile, balancePill, icon, swipeButtons } from './shared.js';
-import { activityList } from './group.js';
+import { icon, swipeButtons } from './shared.js';
 
 /* Whether the Archived list is open, kept across re-renders (live updates redraw the page) */
 let archivedOpen = false;
 
-/* One group card; swipe it left for Edit, Archive and Delete (or Restore when archived) */
-function groupCard(g){
+const firstName = pid => (personName(pid) || '').split(' ')[0];
+
+/* Members as a short list: "You, Alex, Priya" or "You, Alex and 4 more" */
+function memberLine(g){
+  const names = g.members.slice().sort((a, c) => isMe(c) - isMe(a)).map(pid => isMe(pid) ? 'You' : firstName(pid));
+  return names.length > 3 ? `${names.slice(0, 2).join(', ')} and ${names.length - 2} more` : names.join(', ');
+}
+
+/* One group as a ticket: the name on the main part, your balance on the stub. Swipe it left for
+   Edit, Archive and Delete (or Restore when archived) */
+function ticket(g){
   const me = meIn(g), v = me ? (balances(g)[me] || 0) : 0, n = g.members.length;
   const del = canAdmin(g) ? [['del-group', 'Delete', icon.trash, 'del']] : [];
   const acts = isArchived(g)
     ? [['restore-group', 'Restore', icon.restore], ...del]
     : [['edit-group', 'Edit', icon.edit], ['archive-group', 'Archive', icon.archive], ...del];
   const when = isArchived(g) ? `archived ${ago(g.archivedAt)}` : ago(lastActivity(g));
-  return `<li class="swipe"><a class="card gcard" href="${groupHref(g)}">
-    ${groupTile(g)}
-    <span class="r-main"><span class="r-title lead">${esc(g.name)}</span><span class="r-meta">${n} ${n === 1 ? 'person' : 'people'} · ${when}</span></span>
-    ${me ? balancePill(v, g.currency) : '<span class="pill">Not in it</span>'}
+  const [amt, lbl] = !me ? ['—', 'you’re not in it']
+    : v > 0 ? [`+${money(v, g.currency)}`, 'owed to you']
+    : v < 0 ? [`−${money(-v, g.currency)}`, 'you owe']
+    : ['Square', g.expenses.length ? 'nobody owes' : 'nothing yet'];
+  return `<li class="swipe"><a class="ticket" href="${groupHref(g)}">
+    <span class="t-main">
+      <span class="t-kind">${n} ${n === 1 ? 'person' : 'people'} · ${esc(g.currency)}</span>
+      <span class="t-name">${esc(g.name)}</span>
+      <span class="t-meta">${esc(memberLine(g))} · ${when}</span>
+    </span>
+    <span class="t-stub"><span class="t-amt${v < 0 ? ' down' : ''}">${amt}</span><span class="t-lbl">${lbl}</span></span>
   </a>${swipeButtons(acts, g.id, g.id)}</li>`;
 }
 
-const greeting = (h = new Date().getHours()) => h < 5 ? 'Evening,' : h < 12 ? 'Morning,' : h < 18 ? 'Afternoon,' : 'Evening,';
-const joinMoney = list => list.map(([c, v]) => money(Math.abs(v), c)).join(' · ');
-/* One amount per line: a tile is too narrow for "JP¥2,400 · €329.00 · US$90.00" */
-const stackMoney = list => list.map(([c, v]) => `<span>${money(Math.abs(v), c)}</span>`).join('');
-
-function greetRow(){
-  const name = personName(myPersonId) || '';
-  return `<div class="greet">
-    ${avatar(myPersonId, 'lg')}
-    <div class="who"><small>${greeting()}</small><b>${esc(name.split(' ')[0] || 'there')}</b></div>
+const greeting = (h = new Date().getHours()) => h < 5 ? 'Evening' : h < 12 ? 'Morning' : h < 18 ? 'Afternoon' : 'Evening';
+function hello(){
+  const name = firstName(myPersonId);
+  return `<div class="hello-row">
+    <p class="hello">${greeting()}${name ? `, ${esc(name)}` : ''}.</p>
     <a class="iconbtn" href="#/settings" aria-label="Your account and settings">${icon.cog}</a>
   </div>`;
 }
 
-/* The dark "where you stand" card: the biggest amount owed to you (or that you owe) up top */
-function heroCard(){
-  const totals = myTotals().sort((a, c) => Math.abs(c[1]) - Math.abs(a[1]));
-  const owed = totals.filter(([, v]) => v > 0), owe = totals.filter(([, v]) => v < 0);
-  const mine = state.groups.map(g => ({ g, me: meIn(g) })).filter(x => x.me);
-  const bal = mine.map(({ g, me }) => balances(g)[me] || 0);
-  const owedIn = bal.filter(v => v > 0).length, oweIn = bal.filter(v => v < 0).length, settled = bal.filter(v => v === 0).length;
-  const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
-  let big, sub;
-  if(owed.length){
-    big = `<div class="hero-big pos">+${money(owed[0][1], owed[0][0])}</div>${owed.length > 1 ? `<div class="hero-extra">+${joinMoney(owed.slice(1))}</div>` : ''}`;
-    sub = owedIn ? `you’re owed in ${plural(owedIn, 'group')}` : 'you’re owed';
-  } else if(owe.length){
-    big = `<div class="hero-big neg">−${money(-owe[0][1], owe[0][0])}</div>`;
-    sub = oweIn ? `you owe in ${plural(oweIn, 'group')}` : 'you owe';
-  } else {
-    big = `<div class="hero-big">All square</div>`;
-    sub = 'nobody owes anybody';
-  }
-  const tile1 = owed.length
-    ? `<div class="hero-tile"><span>You owe</span><b class="${owe.length ? 'neg' : ''}">${owe.length ? stackMoney(owe) : 'Nothing'}</b></div>`
-    : `<div class="hero-tile"><span>You’re owed</span><b>Nothing</b></div>`;
-  return `<section class="hero-card" aria-labelledby="standTitle">
-    <h1 class="eyebrow" id="standTitle">Where you stand</h1>
-    <div>${big}<div class="hero-sub">${sub}</div></div>
-    <div class="hero-tiles">${tile1}<div class="hero-tile"><span>Settled</span><b>${plural(settled, 'group')}</b></div></div>
-  </section>`;
+/* Where you stand, in one paragraph: people link to People, what you owe is red */
+function story(){
+  const parts = storyParts(state.groups, isMe, shortName, money);
+  const html = parts.map(p => typeof p === 'string' ? esc(p)
+    : p.person ? `<a href="#/people">${esc(p.name)}</a>`
+    : `<em class="${p.tone}">${p.amount}</em>`).join('');
+  return `<p class="story">${html}</p>`;
 }
 
 export function renderHome(){
   const app = $('#app');
   if(!state.groups.length){
     app.innerHTML = `<div class="stack">
-      ${greetRow()}
-      <section class="card empty" style="min-height:0;padding:36px 20px">
-        <h1>Start a group to split your first bill.</h1>
+      ${hello()}
+      <section class="empty">
+        <h1 class="display">Start a group to split your first bill.</h1>
         <button class="btn primary" data-action="new-group">Start a group</button>
         <button class="btn" data-action="join-group">Join with an invite code</button>
       </section>
@@ -83,27 +74,22 @@ export function renderHome(){
   const byRecent = (a, c) => lastActivity(c) - lastActivity(a);
   const groups = state.groups.filter(g => !isArchived(g)).sort(byRecent);
   const archived = state.groups.filter(isArchived).sort((a, c) => c.archivedAt - a.archivedAt);
-  const recent = state.groups.flatMap(g => g.expenses.map(e => ({ e, g }))).sort((x, y) => byNewest(x.e, y.e)).slice(0, 5);
   app.innerHTML = `<div class="stack">
-    ${greetRow()}
-    ${heroCard()}
+    ${hello()}
+    <h1 class="sr">Overview</h1>
+    ${story()}
 
-    <section class="section">
+    <section class="section" aria-labelledby="groupsHead">
       <div class="section-head">
-        <h2>Your groups</h2>
+        <h2 id="groupsHead">Your groups</h2>
         <div class="chipbar"><button class="btn small" data-action="join-group">Join</button><button class="btn small" data-action="new-group">New group</button></div>
       </div>
-      ${groups.length ? `<ul class="cardlist">${groups.map(groupCard).join('')}</ul>`
-        : `<div class="card"><p class="none">No active groups. Start one, or restore one from Archived below.</p></div>`}
+      ${groups.length ? `<ul class="tickets">${groups.map(ticket).join('')}</ul>`
+        : `<p class="none">No active groups. Start one, or restore one from Archived below.</p>`}
       ${archived.length ? `<details class="archived" ${archivedOpen ? 'open' : ''}>
         <summary>${icon.archive}Archived <span class="count">${archived.length}</span></summary>
-        <ul class="cardlist">${archived.map(groupCard).join('')}</ul>
+        <ul class="tickets">${archived.map(ticket).join('')}</ul>
       </details>` : ''}
-    </section>
-
-    <section class="section">
-      <div class="section-head"><h2>Lately</h2>${recent.length ? '<a class="btn small" href="#/activity">See all</a>' : ''}</div>
-      <div class="card">${recent.length ? activityList(recent, null, true) : `<div class="none"><p>No expenses yet. Everything you and your groups add shows up here.</p><button class="btn small" data-action="quick-add">Add expense</button></div>`}</div>
     </section>
   </div>`;
   app.querySelector('details.archived')?.addEventListener('toggle', ev => { archivedOpen = ev.target.open; });

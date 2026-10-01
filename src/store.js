@@ -12,3 +12,8 @@ export const setSession = s => { session = s; };
 export const setMyPersonId = id => { myPersonId = id; };
 
 export const PENDING_JOIN_KEY = 'settlr:pendingJoin';
+
+/* A payment just recorded from a group's "Mark paid": the group page stamps it once, then forgets it */
+let justPaid = null;
+export const setJustPaid = p => { justPaid = p; };
+export const takeJustPaid = gid => { const p = justPaid?.gid === gid ? justPaid : null; justPaid = null; return p; };
