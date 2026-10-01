@@ -1,7 +1,8 @@
 /* Turns activity_log rows into sentences for a group's History sheet (tested in test/history.test.js).
    ctx: { name(personId), money(hundredths), isMe(userId), exists(entryId) } */
 
-const who = (ev, ctx) => ctx.isMe(ev.actor_user) ? 'You' : (ev.actor_name || 'Someone');
+/* No actor: the daily job that adds repeating expenses */
+const who = (ev, ctx) => ctx.isMe(ev.actor_user) ? 'You' : ev.actor_user ? (ev.actor_name || 'Someone') : ev.actor_name || 'settlr';
 const title = s => s?.description || 'an entry';
 
 /* How a stored entry reads: "Fondue · CHF 45.00" or "Payment: Bob → Alice · €15.00" */

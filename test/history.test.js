@@ -16,6 +16,9 @@ group('history sentences', () => {
     expect(describe(ev('added', { after: entry() }), ctx).text).toBe('Bob added “Dinner” · EUR 40.00');
     expect(describe(ev('added', { after: entry() }, { actor_user: 'u-me' }), ctx).text).toBe('You added “Dinner” · EUR 40.00');
   });
+  it('credits settlr for repeating expenses, which have no signed-in actor', () => {
+    expect(describe(ev('added', { after: entry() }, { actor_user: null, actor_name: null }), ctx).text).toBe('settlr added “Dinner” · EUR 40.00');
+  });
   it('spells out edits', () => {
     const t = describe(ev('edited', { before: entry(), after: entry({ amount_cents: 4500, description: 'Dinner at Taberna', paid_by: 'pB' }) }), ctx).text;
     expect(t).toBe('Bob edited “Dinner”: renamed it “Dinner at Taberna”, EUR 40.00 → EUR 45.00, paid by Bob');

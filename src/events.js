@@ -45,6 +45,12 @@ export function initEvents(){
     else if(a==='quick-add') openAddExpense();
     else if(a==='act-filter') setActivityGroup(b.dataset.id);
     else if(a==='nudge'){ const ng = state.groups.find(x => x.id === b.dataset.group); if(ng && await nudge(ng, b.dataset.id, +b.dataset.amount)) render(); }
+    else if(a==='stop-recurring'){
+      if(await askConfirm({ title: `Stop repeating “${b.dataset.desc}”?`, body: 'Expenses it already added stay. Nothing new is added.', confirmLabel: 'Stop repeating' })){
+        const { error } = await sb.from('recurring_expenses').delete().eq('id', b.dataset.id);
+        if(error) oops(error, 'stop it'); else { toast('Stopped.'); await refresh(); }
+      }
+    }
     else if(a==='dismiss-nudges'){ dismissNudges(); render(); }
     else if(a==='pay-links') openPayLinks();
     else if(a==='voice-expense') openVoiceExpense();
