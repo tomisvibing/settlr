@@ -25,7 +25,7 @@ The membership helpers the security rules use (`is_member`, `my_group_ids`, `can
 
 ## Recurring expenses
 
-`recurring_expenses` holds schedules (rent, bills). Each stores the finished split, so every occurrence is identical, and occurrence n falls on `start_date` plus n periods (a monthly bill from the 31st lands on the 28th in February, then the 31st again). `run_recurring_expenses()` adds whatever has fallen due, catching up on missed days and skipping archived groups until they're restored. A pg_cron job runs it daily at 00:05 UTC (the migration schedules it when the extension is available; otherwise enable pg_cron and schedule it by hand), and the app calls it once after creating a schedule, when it covers only the caller's groups. The entries it adds have no signed-in actor, so History shows them as added by settlr.
+`recurring_expenses` holds schedules (rent, bills). Each stores the finished split, so every occurrence is identical, and occurrence n falls on `start_date` plus n periods (a monthly bill from the 31st lands on the 28th in February, then the 31st again). `run_recurring_expenses()` adds whatever has fallen due, catching up on missed days and skipping archived groups until they're restored. A pg_cron job runs it daily at 00:05 UTC (the migration schedules it when the extension is available; otherwise enable pg_cron and schedule it by hand), and the app calls it once after creating a schedule, when it covers only the caller's groups. The entries it adds have no signed-in actor, so History shows them as added by settlr. Each schedule runs on its own, so a broken one is skipped with a warning in the logs instead of stopping the rest, and no schedule adds more than 100 entries a day.
 
 ## Payment links
 
@@ -37,7 +37,7 @@ The `push` Edge Function (`functions/push/`) sends web push notifications to the
 
 - `{ "type": "key" }` returns the public VAPID key a browser subscribes with. The key pair is made on first use and kept in `push_state`, which has no policies, so only the function's service role can read it. No secret needs setting by hand.
 - `{ "type": "nudge", "group_id", "person_id" }`, called by a signed-in member, tells someone who owes them in that group. It checks the caller is in the group and is owed by that person, allows one nudge per person per group every 12 hours (`push_nudges`), and does nothing for people without an account.
-- `{ "type": "weekly" }` sends everyone with notifications on the overview's sentence ("Alex owes you £20.00 for Lisbon. You owe Sam €30.00."), skipping anyone who's square. A `pg_cron` job calls it on Sundays at 17:00 UTC; the function sends at most once every six days, so an extra call does nothing.
+- `{ "type": "weekly" }` sends everyone with notifications on the overview's sentence ("Alex owes you £20.00 for Lisbon. You owe Sam €30.00."), skipping anyone who's square. A `pg_cron` job calls it on Sundays at 17:00 UTC, sending a secret the migration keeps in `push_state` (`x-cron-secret`); calls without it are refused. The function sends at most once every six days, so an extra call does nothing. It only sends to the push services' own addresses (Google, Mozilla, Apple, Microsoft).
 
 It reuses the app's `ledger.js`, `story.js` and `format.js` from copies in `functions/push/lib/`. After changing those files in `src/lib/`, run `npm run sync-functions` (a test fails until you do).
 

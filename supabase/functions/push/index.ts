@@ -3,7 +3,8 @@
 //   { type: 'key' }                               the public VAPID key a browser subscribes with
 //   { type: 'nudge', group_id, person_id }        from the app, signed in: tell someone who owes
 //                                                 you in a group that you've nudged them
-//   { type: 'weekly' }                            from the Sunday cron job: everyone with
+//   { type: 'weekly' }                            from the Sunday cron job (needs its secret in the
+//                                                 x-cron-secret header): everyone with
 //                                                 notifications on gets the overview's sentence
 //
 // Deployed with verify_jwt off (see supabase/config.toml): the publishable key isn't a JWT, so
@@ -39,12 +40,24 @@ async function vapid(): Promise<Keys> {
   return keys;
 }
 
+// Browsers only hand out endpoints at their push service's own address. Anyone signed in can save a
+// row in push_subscriptions, so send only to those hosts: anything else would make this function
+// POST to an address of the row-writer's choosing.
+const PUSH_HOSTS = ['fcm.googleapis.com', 'android.googleapis.com', 'push.services.mozilla.com', 'push.apple.com', 'notify.windows.com'];
+function pushEndpointOk(endpoint: string) {
+  try {
+    const u = new URL(endpoint);
+    return u.protocol === 'https:' && !u.port && PUSH_HOSTS.some(h => u.hostname === h || u.hostname.endsWith('.' + h));
+  } catch { return false; }
+}
+
 // Every subscription a login has; ones the push service says are gone get deleted
 async function send(userId: string, payload: { title: string; body: string; url?: string; tag?: string }) {
   await vapid();
   const { data: subs } = await sb.from('push_subscriptions').select('*').eq('user_id', userId);
   let sent = 0;
   for (const s of subs || []) {
+    if (!pushEndpointOk(s.endpoint)) { await sb.from('push_subscriptions').delete().eq('id', s.id); continue; }
     try {
       await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(payload), { TTL: 60 * 60 * 24 });
       sent++;
@@ -124,7 +137,12 @@ async function nudge(req: Request, groupId: string, personId: string) {
   return reply({ sent, reason: sent ? undefined : 'no-subscription' });
 }
 
-async function weekly() {
+// The Sunday job proves who it is with a secret the migration keeps in push_state. Without it anyone
+// could call this early and use up the week's send.
+async function weekly(req: Request) {
+  const { data: cron } = await sb.from('push_state').select('value').eq('key', 'cron').maybeSingle();
+  const secret = (cron?.value as { secret?: string } | undefined)?.secret;
+  if (!secret || req.headers.get('x-cron-secret') !== secret) return reply({ error: 'Not allowed.' }, 403);
   const { data: last } = await sb.from('push_state').select('value').eq('key', 'weekly').maybeSingle();
   if (last && Date.now() - Date.parse((last.value as { at: string }).at) < 6 * 864e5) return reply({ skipped: 'already sent this week' });
   await sb.from('push_state').upsert({ key: 'weekly', value: { at: new Date().toISOString() }, updated_at: new Date().toISOString() });
@@ -152,7 +170,7 @@ Deno.serve(async req => {
     const body = await req.json().catch(() => ({}));
     if (body.type === 'key') return reply({ publicKey: (await vapid()).publicKey });
     if (body.type === 'nudge') return await nudge(req, body.group_id, body.person_id);
-    if (body.type === 'weekly') return await weekly();
+    if (body.type === 'weekly') return await weekly(req);
     return reply({ error: 'Unknown type' }, 400);
   } catch (err) {
     console.error(err);
