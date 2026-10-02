@@ -67,7 +67,7 @@ Everything later builds on these.
 
 ## Phase 5: Reach
 
-- [ ] Offline support: open the app and queue entries without signal
+- [ ] Offline support: open the app and queue entries without signal (design proposal in `docs/offline-design.md`, not built)
 
 ## Parked: needs something from outside the code
 
