@@ -2,7 +2,10 @@ import { state, myPersonId } from '../store.js';
 import { $, esc, money, ago } from '../lib/format.js';
 import { balances } from '../lib/ledger.js';
 import { storyParts } from '../lib/story.js';
-import { personName, shortName, meIn, lastActivity, isArchived, canAdmin, isMe } from '../selectors.js';
+import { personName, shortName, meIn, lastActivity, isArchived, canAdmin, isMe, myTotals } from '../selectors.js';
+import { overallTotal } from '../lib/fx.js';
+import { fetchRate } from '../rates.js';
+import { homeCurrency } from '../prefs.js';
 import { groupHref } from '../router.js';
 import { avatar, icon, swipeButtons } from './shared.js';
 import { dueNow } from '../nudge.js';
@@ -59,6 +62,24 @@ function story(){
   return `<p class="story">${html}</p>`;
 }
 
+/* One figure in your home currency when your balances are spread over several (the story above
+   keeps them apart). Drawn empty, then filled once the latest rates arrive; skipped if the page has
+   been redrawn since */
+function overallLine(){
+  return myTotals().length > 1 ? '<p class="overall" id="overall" hidden></p>' : '';
+}
+async function fillOverall(){
+  const el = document.getElementById('overall'); if(!el) return;
+  const totals = myTotals(), home = homeCurrency(), rates = {};
+  await Promise.all(totals.filter(([c]) => c !== home).map(async ([c]) => { rates[c] = (await fetchRate(c, home))?.rate; }));
+  if(!el.isConnected) return;
+  const { amount, missing } = overallTotal(totals, rates, home);
+  const word = amount > 0 ? 'owed to you' : amount < 0 ? 'you owe' : 'square';
+  el.innerHTML = `Overall, about <em class="${amount < 0 ? 'down' : ''}">${money(Math.abs(amount), home)}</em> ${word}`
+    + (missing.length ? `, not counting ${esc(missing.join(', '))}` : '') + '.';
+  el.hidden = false;
+}
+
 /* As often as you chose on You (never, unless you switch it on), the people who still owe you in groups that have gone
    quiet, each with a Nudge */
 function nudges(){
@@ -93,6 +114,7 @@ export function renderHome(){
     ${hello()}
     <h1 class="sr">Overview</h1>
     ${story()}
+    ${overallLine()}
     ${nudges()}
 
     <section class="section" aria-labelledby="groupsHead">
@@ -108,5 +130,6 @@ export function renderHome(){
       </details>` : ''}
     </section>
   </div>`;
+  fillOverall();
   app.querySelector('details.archived')?.addEventListener('toggle', ev => { archivedOpen = ev.target.open; });
 }

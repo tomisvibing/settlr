@@ -24,3 +24,17 @@ export function parseRate(v){
 
 /* A rate for display and editing: enough significant figures to be exact, no trailing noise */
 export const formatRate = rate => Number(rate.toPrecision(6)).toString();
+
+/* Your balances in several currencies as one amount in `home`. `totals` is [[currency, hundredths]],
+   `rates` maps a currency to what one unit buys of `home` (missing or null when unknown). Currencies
+   with no rate are left out and listed in `missing`, so the caller can say the total is partial. */
+export function overallTotal(totals, rates, home){
+  let amount = 0; const missing = [];
+  for(const [cur, v] of totals){
+    if(cur === home){ amount += v; continue; }
+    const rate = rates[cur];
+    if(!(rate > 0)){ missing.push(cur); continue; }
+    amount += Math.sign(v) * convert(Math.abs(v), rate, home);
+  }
+  return { amount, missing };
+}
