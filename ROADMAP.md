@@ -61,7 +61,7 @@ Everything later builds on these.
 - [x] Multiple currencies in one group: each expense or payment in any currency, converted into the group's at the European Central Bank rate for its date (or your own), keeping both amounts
 - [ ] One overall total on Home in your own currency, across groups in different currencies
 - [x] Recurring expenses (rent, bills): choose Repeats when adding an expense (weekly, fortnightly, monthly or yearly); a daily job adds each one when it falls due, and the group page lists them with a Stop
-- [ ] Categories and insights: spending by group and month, trip totals, who paid most
+- [x] Categories and insights: pick a category on an expense; each group page has Insights (by category, by month, who paid most, trip total). Across groups is left out, since groups can be in different currencies
 - [x] Archive finished groups: frozen and read-only for everyone, kept under Archived on Home, and restorable by any member
 - [ ] "Simplify debts" as a setting
 

@@ -1,6 +1,7 @@
 import { session, state, myPersonId } from './store.js';
 import { byNewest, today, slug } from './lib/format.js';
 import { csvCell } from './lib/csv.js';
+import { categoryLabel } from './lib/categories.js';
 import { personName } from './selectors.js';
 import { inviteLink } from './router.js';
 import { toast, download } from './ui.js';
@@ -16,9 +17,9 @@ export async function shareInvite(g){
 }
 export function exportGroupCsv(g){
   const everyone = [...g.members, ...g.left];
-  const rows = [['Date','Description','Type','Amount','Currency','Spent','Spent in','Rate','Paid by', ...everyone.map(personName)]];
+  const rows = [['Date','Description','Category','Type','Amount','Currency','Spent','Spent in','Rate','Paid by', ...everyone.map(personName)]];
   [...g.expenses].sort((a,c) => byNewest(c,a)).forEach(e => rows.push([
-    e.date || '', e.type === 'payment' ? 'Payment' : e.desc, e.type === 'payment' ? 'Payment' : 'Expense',
+    e.date || '', e.type === 'payment' ? 'Payment' : e.desc, e.type === 'payment' ? '' : categoryLabel(e.category), e.type === 'payment' ? 'Payment' : 'Expense',
     (e.amount/100).toFixed(2), g.currency,
     e.origCurrency ? (e.origAmount/100).toFixed(2) : '', e.origCurrency || '', e.origCurrency ? String(e.fxRate) : '',
     personName(e.paidBy),
@@ -35,7 +36,7 @@ export function exportAll(){
       name: g.name, currency: g.currency, inviteCode: g.inviteCode, members: g.members.map(personName),
       entries: [...g.expenses].sort(byNewest).map(e => ({
         date: e.date, type: e.type, description: e.type === 'payment' ? 'Payment' : e.desc, amount: cents(e.amount),
-        paidBy: personName(e.paidBy), splitMode: e.splitMode,
+        paidBy: personName(e.paidBy), splitMode: e.splitMode, category: e.category || null,
         splits: Object.fromEntries(Object.entries(e.splits).map(([id,v]) => [personName(id), cents(v)]))
       }))
     })),

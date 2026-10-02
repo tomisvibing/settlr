@@ -23,6 +23,8 @@ The app's tables are in the `supabase_realtime` publication, so the app gets liv
 
 The membership helpers the security rules use (`is_member`, `my_group_ids`, `can_see_person`) live in a `private` schema. The REST API doesn't expose that schema, so the app can't call them directly.
 
+Expenses have an optional `category` (one of the keys in `src/lib/categories.js`, enforced by a check constraint). It isn't part of the history summary, so changing only a category isn't logged as an edit, and entries added by recurring schedules are uncategorised.
+
 ## Recurring expenses
 
 `recurring_expenses` holds schedules (rent, bills). Each stores the finished split, so every occurrence is identical, and occurrence n falls on `start_date` plus n periods (a monthly bill from the 31st lands on the 28th in February, then the 31st again). `run_recurring_expenses()` adds whatever has fallen due, catching up on missed days and skipping archived groups until they're restored. A pg_cron job runs it daily at 00:05 UTC (the migration schedules it when the extension is available; otherwise enable pg_cron and schedule it by hand), and the app calls it once after creating a schedule, when it covers only the caller's groups. The entries it adds have no signed-in actor, so History shows them as added by settlr.

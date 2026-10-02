@@ -43,7 +43,7 @@ export async function loadAllData(){
     (expensesByGroup[e.group_id] ||= []).push({
       id: e.id, type: e.type, desc: e.description, amount: e.amount_cents,
       paidBy: e.paid_by, splits: splitsByExpense[e.id] || {}, splitMode: e.split_mode,
-      splitInput: e.split_input || {}, date: e.expense_date, receipt: e.receipt_path || null,
+      splitInput: e.split_input || {}, date: e.expense_date, receipt: e.receipt_path || null, category: e.category || null,
       comments: commentsByExpense[e.id] || [],
       origCurrency: e.orig_currency || null, origAmount: e.orig_amount_cents ?? null, fxRate: e.fx_rate != null ? Number(e.fx_rate) : null, createdAt: new Date(e.created_at).getTime()
     });

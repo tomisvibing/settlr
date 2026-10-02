@@ -7,6 +7,7 @@ import { avatar, icon } from './shared.js';
 import { standings } from './standings.js';
 import { nudgedAt } from '../nudge.js';
 import { receipt } from './receipt.js';
+import { insights, watchInsights } from './insights.js';
 import { nextDate, frequencyLabel } from '../lib/recurring.js';
 
 const nameOf = pid => isMe(pid) ? 'You' : shortName(pid);
@@ -108,10 +109,13 @@ export function renderGroupView(id){
 
     ${repeating(g, frozen)}
 
+    ${insights(g)}
+
     <section class="section" aria-labelledby="receiptHead">
       <div class="section-head"><h2 id="receiptHead">The receipt so far</h2></div>
       ${sorted.length > 6 ? `<input class="search" type="search" data-filter="activity" placeholder="Search this group" aria-label="Search this group" autocomplete="off">` : ''}
       ${sorted.length ? receipt(sorted.map(e => ({ e, g })), { title: g.name, foot: 'Keep the receipts. We did.' }) : `<p class="none">No expenses yet.</p>`}
     </section>
   </div>`;
+  watchInsights(app);
 }

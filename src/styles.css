@@ -619,3 +619,19 @@ input.code{font-size:24px;letter-spacing:.3em;text-align:center;font-variant-num
 @media (min-width:900px){#toast{bottom:24px;margin-left:116px}}
 [data-route="start"] #toast{bottom:calc(88px + var(--safe-b));margin-left:0}
 @media (prefers-reduced-motion: reduce){#toast{transition:none}}
+
+/* Insights on a group's page */
+.insights summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px}
+.insights summary::-webkit-details-marker{display:none}
+.insights summary h2{margin:0}
+.insights summary::after{content:'+';margin-left:auto;font-size:20px;color:var(--muted)}
+.insights[open] summary::after{content:'\2212'}
+.ins-total{margin:10px 0 4px;color:var(--muted);font-size:14px}
+.ins-block{margin-top:14px}
+.ins-block h3{margin:0 0 6px;font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.02em}
+.ins-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.ins-list li{display:grid;grid-template-columns:minmax(0,9.5em) minmax(0,1fr) 5.5em;align-items:center;gap:10px;font-size:15px}
+.ins-name{display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ins-bar{display:block;height:8px;border-radius:4px;background:var(--line-soft)}
+.ins-bar i{display:block;height:100%;border-radius:4px;background:var(--pill-hover)}
+.ins-amt{font-variant-numeric:tabular-nums;text-align:right}
