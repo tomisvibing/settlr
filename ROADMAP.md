@@ -63,7 +63,7 @@ Everything later builds on these.
 - [x] Recurring expenses (rent, bills): choose Repeats when adding an expense (weekly, fortnightly, monthly or yearly); a daily job adds each one when it falls due, and the group page lists them with a Stop
 - [ ] Categories and insights: spending by group and month, trip totals, who paid most
 - [x] Archive finished groups: frozen and read-only for everyone, kept under Archived on Home, and restorable by any member
-- [ ] "Simplify debts" as a setting
+- [x] "Simplify debts" as a setting (You → Settle up with: the fewest payments, or who paid whom; changes the list on each group page, on this device)
 
 ## Phase 5: Reach
 

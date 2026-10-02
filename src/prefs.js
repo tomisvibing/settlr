@@ -10,3 +10,8 @@ export const setHomeCurrency = v => {
   if(!CURRENCIES.includes(v)) return;
   try{ localStorage.setItem(HOME, v); }catch(e){ /* private mode: just not remembered */ }
 };
+
+/* Settle-up as the fewest payments (the default), or as who owes whom. Only changes the list on a group's page */
+const SIMPLIFY = 'settlr.simplifyDebts';
+export const simplifyDebts = () => { try{ return localStorage.getItem(SIMPLIFY) !== 'off'; }catch(e){ return true; } };
+export const setSimplifyDebts = on => { try{ localStorage.setItem(SIMPLIFY, on ? 'on' : 'off'); }catch(e){ /* private mode: just not remembered */ } };

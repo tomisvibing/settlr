@@ -26,6 +26,31 @@ export function balances(g){
   });
   return b;
 }
+/* Who owes whom as it happened, with simplifying turned off: each expense makes its split members owe
+   the payer, and each pair is netted against itself (so A owing B £10 and B owing A £4 is A owing B £6).
+   Same shape as settlements(), and everyone ends up square just the same. Only current members count,
+   as in balances() */
+export function pairwiseDebts(g){
+  const members = new Set(g.members), net = new Map();
+  g.expenses.forEach(e => {
+    if(!members.has(e.paidBy)) return;
+    for(const [id, v] of Object.entries(e.splits)){
+      if(id === e.paidBy || !members.has(id)) continue;
+      const [a, b, sign] = id < e.paidBy ? [id, e.paidBy, 1] : [e.paidBy, id, -1];
+      net.set(`${a}|${b}`, (net.get(`${a}|${b}`) || 0) + sign * v);
+    }
+  });
+  const out = [];
+  for(const [k, v] of net){
+    const [a, b] = k.split('|');
+    if(v > 0) out.push({ from: a, to: b, amount: v });
+    else if(v < 0) out.push({ from: b, to: a, amount: -v });
+  }
+  return out.sort((x, y) => y.amount - x.amount);
+}
+/* The settle-up list: the fewest payments (the default), or who owes whom */
+export const settlePlan = (g, simplify = true) => simplify ? settlements(balances(g)) : pairwiseDebts(g);
+
 /* Fewest-transfers settle-up: greedy match largest debtor to largest creditor */
 export function settlements(b){
   const cr = [], db = [];

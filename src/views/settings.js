@@ -4,7 +4,7 @@ import { personName, myHandles } from '../selectors.js';
 import { PAY_APPS } from '../lib/paylinks.js';
 import { getThemeOverride } from '../theme.js';
 import { nudgePref } from '../nudge.js';
-import { homeCurrency } from '../prefs.js';
+import { homeCurrency, simplifyDebts } from '../prefs.js';
 import { pushKnown, checkPush, pushSupport } from '../push.js';
 
 /* A member number that's yours and stays put: six digits from your account id */
@@ -66,6 +66,10 @@ export function renderSettings(){
       <li><label for="homeCur">My home currency is</label>
         <span class="keep"><select id="homeCur" name="homeCurrency">${currencyOptions(homeCurrency())}</select>.</span>
         <span class="pref-note">New expenses and groups start in this. Each group keeps its own currency, and any expense can still be in another.</span></li>
+      <li><span id="simplifyLead">Settle up with</span>
+        <span class="keep"><span class="seg inline" role="radiogroup" aria-labelledby="simplifyLead">${[['on', 'the fewest payments'], ['off', 'who paid whom']].map(([v, l]) =>
+          `<label><input type="radio" name="simplify" value="${v}" ${(simplifyDebts() ? 'on' : 'off') === v ? 'checked' : ''}><span>${l}</span></label>`).join('')}</span>.</span>
+        <span class="pref-note">“Who paid whom” keeps each debt between the two people it came from, netted pair by pair, so it can mean more payments. It changes the list on each group’s page; balances are the same either way. Remembered on this device.</span></li>
       ${pushPref()}
       <li><span id="nudgeLead">Remind me to nudge people who owe me</span>
         <span class="keep"><span class="seg inline" role="radiogroup" aria-labelledby="nudgeLead">${[['never', 'never'], ['weekly', 'weekly'], ['fortnightly', 'fortnightly'], ['monthly', 'monthly']].map(([v, l]) =>
