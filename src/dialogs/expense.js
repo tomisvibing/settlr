@@ -1,4 +1,3 @@
-import { CATEGORIES } from '../lib/categories.js';
 import { sb } from '../supabase.js';
 import { session } from '../store.js';
 import { $, esc, ago, money, toPence, today, currencySymbol, currencyOptions, plainAmount, minorDigits, minorStep } from '../lib/format.js';
@@ -16,6 +15,7 @@ import { askConfirm } from './confirm.js';
 import { prepareReceipt, uploadReceipt, removeReceipts, receiptUrl } from '../receipts.js';
 import { isPdf, pathIsPdf, sizeLabel } from '../lib/receipt.js';
 import { FREQUENCIES, firstRepeat, frequencyLabel } from '../lib/recurring.js';
+import { CATEGORIES } from '../lib/categories.js';
 
 const touch = () => window.matchMedia?.('(pointer: coarse)').matches;
 /* Names for the keypad keys a screen reader would otherwise read as punctuation or nothing */
