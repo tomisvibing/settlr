@@ -1,4 +1,5 @@
 /* Page-wide event delegation: every button carries a data-action */
+import { initDatePicker } from './dialogs/datepicker.js';
 import { sb } from './supabase.js';
 import { state, session, myPersonId } from './store.js';
 import { setTheme, isNight } from './theme.js';
@@ -27,7 +28,6 @@ import { removeReceipts, groupReceiptPaths } from './receipts.js';
 import { nudge, dismissNudges, setNudgePref } from './nudge.js';
 import { openPayLinks } from './dialogs/paylinks.js';
 import { enablePush, disablePush } from './push.js';
-import { initDatePicker } from './dialogs/datepicker.js';
 import { setHomeCurrency } from './prefs.js';
 
 /* A failed delete shows in the sheet it came from, or as a toast when it came from a swiped row */
