@@ -1,6 +1,6 @@
 # Database
 
-settlr runs on Supabase (project `ctlldbpdtohalfcwkjwq`, eu-west-1).
+settlr runs on Supabase.
 
 `migrations/` holds the database schema: tables, row-level security policies and the RPCs the app calls.
 
