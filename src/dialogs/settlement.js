@@ -1,3 +1,4 @@
+import { dateField } from './datepicker.js';
 import { sb } from '../supabase.js';
 import { state, myPersonId } from '../store.js';
 import { esc, toPence, today, currencyOptions, plainAmount } from '../lib/format.js';
@@ -18,7 +19,7 @@ export function openSettlement(opts = {}){
       <label>Currency<select name="currency">${currencyOptions(e?.currency || 'GBP')}</select></label>
     </div>
     <div class="two">
-      <label>Date<input type="date" name="date" value="${e?.date||today()}"></label>
+      <div class="datewrap"><span class="flabel">Date</span>${dateField('date', e?.date||today())}</div>
       <label>Note (optional)<input name="note" maxlength="60" value="${esc(e?.note||'')}" placeholder="What was this for?"></label>
     </div>
     <p class="err" role="alert"></p>

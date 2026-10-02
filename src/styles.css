@@ -466,7 +466,23 @@ input[type=checkbox],input[type=radio]{min-height:0;width:auto}
 textarea{padding:10px 14px}
 ::placeholder{color:var(--faint);opacity:1}
 select{padding-right:8px}
-input[type=date]{padding:0 10px}
+/* The date field: a button that opens settlr's own calendar under it */
+.datefield{position:relative;min-width:0;flex:1}
+.datewrap{display:grid;gap:6px;align-content:start}
+.datebtn{width:100%;min-height:48px;padding:0 14px;text-align:left;font:inherit;font-size:16px;color:var(--ink);background:var(--field);border:1px solid var(--control-edge);border-radius:var(--r-field);cursor:pointer}
+.cal{position:absolute;z-index:5;top:calc(100% + 6px);left:0;width:min(320px,calc(100vw - 48px));padding:12px;background:var(--surface,var(--field));color:var(--ink);border:1px solid var(--line-strong);border-radius:var(--r-field);box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.cal[hidden]{display:none}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cal-title{font-weight:600;font-size:15px}
+.cal-nav{min-width:44px;min-height:44px;border:0;background:none;color:var(--ink);font-size:22px;border-radius:50%;cursor:pointer}
+.cal-row{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-dow{padding:4px 0;text-align:center;font-size:12px;color:var(--muted)}
+.cal-day{min-height:42px;border:0;border-radius:50%;background:none;color:var(--ink);font:inherit;font-size:15px;cursor:pointer}
+.cal-day.out{color:var(--faint)}
+.cal-day.now{box-shadow:inset 0 0 0 1px var(--line-strong)}
+.cal-day[aria-selected=true]{background:var(--accent);color:var(--accent-ink)}
+@media (hover:hover){.cal-day:hover:not([aria-selected=true]),.cal-nav:hover{background:var(--pill-on)}}
+.cal-quick{display:flex;gap:8px;margin-top:8px}
 fieldset{border:0;padding:0;margin:0;min-width:0}
 legend{font-size:13px;font-weight:500;color:var(--muted);margin-bottom:6px;padding:0}
 .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}

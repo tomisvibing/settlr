@@ -27,12 +27,14 @@ import { removeReceipts, groupReceiptPaths } from './receipts.js';
 import { nudge, dismissNudges, setNudgePref } from './nudge.js';
 import { openPayLinks } from './dialogs/paylinks.js';
 import { enablePush, disablePush } from './push.js';
+import { initDatePicker } from './dialogs/datepicker.js';
 import { setHomeCurrency } from './prefs.js';
 
 /* A failed delete shows in the sheet it came from, or as a toast when it came from a swiped row */
 const oops = (err, action = 'delete') => { if(dlg.open) fail(describeError(err, action)); else toast(describeError(err, action), { error: true }); };
 
 export function initEvents(){
+  initDatePicker();
   document.addEventListener('click', async ev => {
     const b = ev.target.closest('[data-action]'); if(!b || b.disabled) return;
     /* Rows in the Activity tab belong to different groups */

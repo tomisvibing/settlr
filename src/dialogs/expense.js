@@ -1,3 +1,4 @@
+import { dateField } from './datepicker.js';
 import { sb } from '../supabase.js';
 import { session } from '../store.js';
 import { $, esc, ago, money, toPence, today, currencySymbol, currencyOptions, plainAmount, minorDigits, minorStep } from '../lib/format.js';
@@ -91,7 +92,7 @@ export function openExpense(eid, prefill){
       <div class="seg small">${modes.map(([v,l]) => `<label><input type="radio" name="mode" value="${v}" ${draft.mode===v?'checked':''}><span>${l}</span></label>`).join('')}</div>
       <div id="splitRows"></div>
     </fieldset>
-    <label class="daterow">Date<input type="date" name="date" value="${dateVal}"></label>
+    <div class="daterow"><span>Date</span>${dateField('date', dateVal)}</div>
     ${e ? '' : `<label class="daterow">Repeats<select name="repeat"><option value="">Doesn’t repeat</option>${FREQUENCIES.map(([v, l]) => `<option value="${v}">${l[0].toUpperCase() + l.slice(1)}</option>`).join('')}</select></label>
     <p class="hint" id="repeatHint" hidden></p>`}
     <div class="receipt" id="receiptBox"></div>

@@ -35,7 +35,7 @@ Everything later builds on these.
   - the overview as a paragraph, with groups as tear-off tickets
   - who's up and who's down in words, the fewest payments with a Paid stamp, and spending printed as a till receipt
   - a membership card on You, with settings as sentences
-- [ ] **More polish**: a custom date picker (the phone's own is fine for now)
+- [x] **More polish**: a custom date picker (a calendar of its own on expenses, payments and settlements)
 - [x] **Sign in without Google**:
   - [x] email with a 6-digit code (needs the email sender set up in Supabase, see the README, before codes reach everyone)
   - [x] account linking: Supabase links sign-ins that share a verified email automatically

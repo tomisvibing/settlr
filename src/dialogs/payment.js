@@ -1,3 +1,4 @@
+import { dateField } from './datepicker.js';
 import { $, esc, toPence, today, plainAmount, currencyOptions, money } from '../lib/format.js';
 import { convert, parseRate, formatRate, canFetch } from '../lib/fx.js';
 import { fetchRate } from '../rates.js';
@@ -21,7 +22,7 @@ export function openPayment(opts = {}){
     <div class="two"><label>From${sel('from',from)}</label><label>To${sel('to',to)}</label></div>
     <div class="two">
       <label>Amount<span class="amtcur"><input name="amount" inputmode="decimal" autocomplete="off" value="${amt ? plainAmount(amt, cur) : ''}" placeholder="0.00"><select name="pcur" aria-label="Currency">${currencyOptions(cur)}</select></span></label>
-      <label>Date<input type="date" name="date" value="${e?.date||today()}"></label>
+      <div class="datewrap"><span class="flabel">Date</span>${dateField('date', e?.date||today())}</div>
     </div>
     <div class="fxrow" id="payFx" hidden>
       <label>1 <span data-fx="from"></span> =<input name="rate" inputmode="decimal" autocomplete="off" aria-label="Exchange rate"></label><span>${esc(g.currency)}</span>
