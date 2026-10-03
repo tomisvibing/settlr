@@ -44,3 +44,8 @@ It reuses the app's `ledger.js`, `story.js` and `format.js` from copies in `func
 This project doesn't give `service_role` table access by default, so `20261001072704_push_function_grants.sql` grants the function exactly what it reads and writes. A new table the function uses needs a grant there too.
 
 Deploy with `supabase functions deploy push` (the `verify_jwt = false` in `config.toml` matters: the app calls it with the publishable key, which isn't a JWT, and the function checks the signed-in user itself).
+
+## Keeping the project awake
+
+Supabase's free plan pauses a project after a week with no activity. `public.heartbeat()` (it only returns the time, and touches no table) is called through the API by `.github/workflows/keepalive.yml` every Monday and Thursday, so the project always has recent activity. The `pg_cron` jobs run inside the database and may not count as activity, so the ping goes through the public API instead. If a run goes red, the project may already be paused: restore it from the Supabase dashboard. GitHub switches scheduled workflows off after 60 days with no commits to the repository, so re-enable it from the Actions tab if the repo has been quiet that long.
+
