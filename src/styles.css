@@ -401,7 +401,7 @@ button.st-row{cursor:pointer}
 .till::after{content:"";position:absolute;left:0;right:0;bottom:-10px;height:10px;background:conic-gradient(from 135deg at 50% 0,var(--surface) 90deg,transparent 0) 0 0/16px 10px repeat-x}
 .r-head{display:flex;flex-direction:column;align-items:center;gap:6px;padding-bottom:14px;margin-bottom:4px;border-bottom:1px dashed var(--line-strong);text-align:center}
 .r-head .serif{font-size:30px;line-height:1}
-.r-head span:last-child{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);overflow-wrap:anywhere}
+.r-head .r-sub{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);overflow-wrap:anywhere}
 .r-lines{list-style:none;margin:0;padding:0}
 .r-lines{display:grid;gap:4px}
 /* Each day starts a section: the day in italics, a dashed rule running off to the right */

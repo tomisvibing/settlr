@@ -18,7 +18,7 @@ export function renderActivity(){
       ${withSpend.map(g => `<button type="button" data-action="act-filter" data-id="${g.id}" aria-pressed="${only === g.id}">${esc(g.name)}</button>`).join('')}
     </div>` : ''}
     ${entries.length > 6 ? `<input class="search" type="search" data-filter="activity" placeholder="Search by what, who or group" aria-label="Search activity" autocomplete="off">` : ''}
-    ${entries.length ? receipt(entries, { title: 'Everything', withGroup: true, foot: 'Thank you for splitting.' })
+    ${entries.length ? receipt(entries, { withGroup: true, foot: 'Thank you for splitting.' })
       : `<div class="none"><p>No expenses yet. Everything you and your groups add shows up here.</p><button class="btn small" data-action="quick-add">Add an expense</button></div>`}
   </div>`;
   /* A group filter picked earlier still applies after a live update redraws the page */
