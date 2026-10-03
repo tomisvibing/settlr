@@ -46,7 +46,6 @@ function hello(){
   const name = firstName(myPersonId);
   return `<div class="hello-row">
     <p class="hello">${greeting()}${name ? `, ${esc(name)}` : ''}.</p>
-    <a class="iconbtn" href="#/settings" aria-label="Your account and settings">${icon.cog}</a>
   </div>`;
 }
 
