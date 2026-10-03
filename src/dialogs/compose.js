@@ -14,6 +14,7 @@ import { openExpense, saveExpenseRow, keypad } from './expense.js';
 import { sb } from '../supabase.js';
 import { openGroup } from './group.js';
 import { homeCurrency } from '../prefs.js';
+import { missingPart, goLabel } from '../lib/compose.js';
 
 const MODES = { equal: 'equally', shares: 'by shares', exact: 'by exact amounts' };
 const touch = () => window.matchMedia?.('(pointer: coarse)').matches;
@@ -46,7 +47,7 @@ export function openComposer(start = {}){
     <p class="each" id="each" aria-live="polite"></p>
     <div class="tray" id="tray"></div>
     <p class="err" role="alert"></p>
-    <div class="dlg-actions"><button type="button" class="btn" data-compose="more">More details</button><span class="sp"></span><button type="submit" class="btn primary" id="composeGo">Add it</button></div>`, save, { top: true });
+    <div class="dlg-actions"><button type="button" class="btn" data-compose="more">More details</button><span class="sp"></span><button type="submit" class="btn primary" id="composeGo"><span class="go-text">Add it</span></button></div>`, save, { top: true });
   render();
   /* Opening on the amount: on a phone the keypad is already up; with a keyboard, type straight away */
   if(draft.open === 'amount' && !touch()) form.querySelector('#cAmount')?.focus();
@@ -62,7 +63,9 @@ function renderSentence(){
   const d = draft, g = state.groups.find(x => x.id === d.gid);
   const payer = !d.payer || isMe(d.payer) ? 'You' : shortName(d.payer);
   $('#sentence').innerHTML = `${tok('payer', payer, 'Who paid')} paid ${tok('amount', currencySymbol(cur()) + (d.amount || '0'), 'How much')} for ${tok('what', d.what || 'something', 'What for')}, split ${tok('mode', MODES[d.mode], 'How it’s split')} between ${tok('who', g ? list(d.who, g) : 'everyone', 'Who it’s for')}, in ${tok('group', g ? g.name : d.later ? 'no group yet' : 'a group', 'Which group')}.`;
-  $('#composeGo').textContent = !g && d.later ? 'Save for later' : d.mode === 'equal' ? 'Add it' : 'Set the amounts';
+  const pence = toPence(d.amount);
+  $('#composeGo .go-text').textContent = goLabel({ missing: missingPart({ hasGroup: !!g, later: d.later, pence, what: d.what, whoCount: d.who.length }),
+    mode: d.mode, hasGroup: !!g, amountText: money(pence > 0 ? pence : 0, cur()), groupName: g?.name });
   const amount = toPence(d.amount), each = $('#each');
   if(!g){ each.textContent = d.later ? 'It waits under “To sort” on your overview until you pick a group.' : 'Pick the group to see who it’s split with.'; return; }
   if( !(amount > 0) || !d.who.length || d.mode !== 'equal'){ each.textContent = d.mode !== 'equal' && g ? 'You’ll set each person’s part next.' : ''; return; }
@@ -115,7 +118,7 @@ function moreDetails(){
 }
 /* Nothing is saved until the person says which group: open that part of the sentence */
 function askGroup(){
-  draft.open = 'group'; render(); fail('Pick which group this is for.'); $('[data-tok="group"]')?.focus();
+  draft.open = 'group'; render(); fail(''); $('[data-tok="group"]')?.focus();
   return false;
 }
 /* A brand-new group ("New group" in the tray): start one, then come back to this sentence in it */
@@ -133,11 +136,12 @@ async function save(){
   if(!g && !d.later) return askGroup();
   if(g && d.mode !== 'equal'){ moreDetails(); return false; }
   const amount = toPence(d.amount), what = d.what.trim();
-  const ask = (open, msg) => { d.open = open; render(); fail(msg); $(`[data-tok="${open}"]`)?.focus(); return false; };
-  if(!(amount > 0)) return ask('amount', 'Enter an amount above zero.');
-  if(!what) return ask('what', 'Add a short description, like “Dinner”.');
+  /* The button already said what's next, so no error: just open that part */
+  const ask = open => { d.open = open; render(); fail(''); $(`[data-tok="${open}"]`)?.focus(); return false; };
+  if(!(amount > 0)) return ask('amount');
+  if(!what) return ask('what');
   if(!g) return saveForLater(what, amount);
-  if(!d.who.length) return ask('who', 'Pick at least one person to split with.');
+  if(!d.who.length) return ask('who');
   const weights = Object.fromEntries(d.who.map(id => [id, 1]));
   const splits = distribute(amount, weights, minorStep(g.currency));
   const row = { group_id: g.id, type: 'expense', description: what, amount_cents: amount, paid_by: d.payer, split_mode: 'equal', expense_date: today(), split_input: weights,

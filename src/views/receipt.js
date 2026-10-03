@@ -30,11 +30,13 @@ const totalsHTML = sums => {
   const parts = Object.entries(sums).filter(([, v]) => v);
   return parts.length ? parts.map(([c, v]) => money(v, c)).join(' · ') : money(0, Object.keys(sums)[0] || 'GBP');
 };
+/* The receipt's masthead: the wordmark and, if it has one, what the receipt is for */
+const rHead = title => `<header class="r-head"><span class="serif">settlr</span>${title ? `<span class="r-sub">${esc(title)}</span>` : ''}</header>`;
 export function receipt(entries, { title, withGroup = false, foot = '', id = 'activityList' } = {}){
   const sums = {};
   entries.forEach(({ e, g }) => { if(e.type !== 'payment') sums[g.currency] = (sums[g.currency] || 0) + e.amount; });
   return `<div class="till">
-    <header class="r-head"><span class="serif">settlr</span><span>${esc(title)}</span></header>
+    ${rHead(title)}
     <ol class="r-lines" id="${id}">${byDay(entries, dateOf).map(d => `<li class="day-head"><h3 class="day">${d.label}</h3></li>${d.items.map(({ e, g }) => entryLine(e, g, withGroup)).join('')}`).join('')}</ol>
     <p class="none" id="noMatches" hidden>Nothing matches that search.</p>
     <div class="r-total"><span>Total spent</span><span class="l-dots" aria-hidden="true"></span><span id="receiptTotal">${totalsHTML(sums)}</span></div>
@@ -45,7 +47,7 @@ export function receipt(entries, { title, withGroup = false, foot = '', id = 'ac
 /* A receipt of plain lines (the People page's settlements), with the same look */
 export function plainReceipt(title, lines, foot = ''){
   return `<div class="till">
-    <header class="r-head"><span class="serif">settlr</span><span>${esc(title)}</span></header>
+    ${rHead(title)}
     <ol class="r-lines">${lines.join('')}</ol>
     ${foot ? `<p class="thanks">${esc(foot)}</p>` : ''}
   </div>`;

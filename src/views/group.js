@@ -89,7 +89,6 @@ export function renderGroupView(id){
     </div>
 
     <header class="page-head">
-      <p class="kicker">${n} ${n === 1 ? 'person' : 'people'} · ${esc(cur)}${frozen ? ' · Archived' : ''}</p>
       <h1 class="display">${esc(g.name)}</h1>
       <p class="sub">${money(spentIn(g), cur)} spent${g.expenses.length ? ` · last added ${ago(sorted[0].createdAt)}` : ''}</p>
       ${frozen ? '' : `<button class="btn primary add-here" data-action="add-expense">${icon.plus}Add an expense</button>`}
