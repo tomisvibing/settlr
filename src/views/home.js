@@ -59,7 +59,7 @@ function story(){
   return `<p class="story">${html}</p>`;
 }
 
-/* As often as you chose on You (never, unless you switch it on), the people who still owe you in groups that have gone
+/* As often as you chose in Settings (never, unless you switch it on), the people who still owe you in groups that have gone
    quiet, each with a Nudge */
 function nudges(){
   const due = dueNow(); if(!due.length) return '';
@@ -72,6 +72,26 @@ function nudges(){
     <button type="button" class="n-later" data-action="dismiss-nudges">Not now</button>
   </section>`;
 }
+
+/* Your groups as tickets, then the archived ones folded away. Used on the overview and on Groups */
+export function groupList(){
+  const byRecent = (a, c) => lastActivity(c) - lastActivity(a);
+  const groups = state.groups.filter(g => !isArchived(g)).sort(byRecent);
+  const archived = state.groups.filter(isArchived).sort((a, c) => c.archivedAt - a.archivedAt);
+  return `<section class="section" aria-labelledby="groupsHead">
+      <div class="section-head">
+        <h2 id="groupsHead">Your groups</h2>
+        <div class="chipbar"><button class="btn small" data-action="join-group">Join</button><button class="btn small" data-action="new-group">New group</button></div>
+      </div>
+      ${groups.length ? `<ul class="tickets">${groups.map(ticket).join('')}</ul>`
+        : `<p class="none">No active groups. Start one, or restore one from Archived below.</p>`}
+      ${archived.length ? `<details class="archived" ${archivedOpen ? 'open' : ''}>
+        <summary>${icon.archive}Archived <span class="count">${archived.length}</span></summary>
+        <ul class="tickets">${archived.map(ticket).join('')}</ul>
+      </details>` : ''}
+    </section>`;
+}
+export const bindArchived = root => root.querySelector('details.archived')?.addEventListener('toggle', ev => { archivedOpen = ev.target.open; });
 
 export function renderHome(){
   const app = $('#app');
@@ -86,27 +106,13 @@ export function renderHome(){
     </div>`;
     return;
   }
-  const byRecent = (a, c) => lastActivity(c) - lastActivity(a);
-  const groups = state.groups.filter(g => !isArchived(g)).sort(byRecent);
-  const archived = state.groups.filter(isArchived).sort((a, c) => c.archivedAt - a.archivedAt);
   app.innerHTML = `<div class="stack">
     ${hello()}
     <h1 class="sr">Overview</h1>
     ${story()}
     ${nudges()}
 
-    <section class="section" aria-labelledby="groupsHead">
-      <div class="section-head">
-        <h2 id="groupsHead">Your groups</h2>
-        <div class="chipbar"><button class="btn small" data-action="join-group">Join</button><button class="btn small" data-action="new-group">New group</button></div>
-      </div>
-      ${groups.length ? `<ul class="tickets">${groups.map(ticket).join('')}</ul>`
-        : `<p class="none">No active groups. Start one, or restore one from Archived below.</p>`}
-      ${archived.length ? `<details class="archived" ${archivedOpen ? 'open' : ''}>
-        <summary>${icon.archive}Archived <span class="count">${archived.length}</span></summary>
-        <ul class="tickets">${archived.map(ticket).join('')}</ul>
-      </details>` : ''}
-    </section>
+    ${groupList()}
   </div>`;
-  app.querySelector('details.archived')?.addEventListener('toggle', ev => { archivedOpen = ev.target.open; });
+  bindArchived(app);
 }

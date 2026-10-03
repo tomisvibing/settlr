@@ -36,7 +36,8 @@ export function openComposer(start = {}){
     payer: start.payer && g?.members.includes(start.payer) ? start.payer : (g ? (meIn(g) || g.members[0]) : null),
     amount: start.amount ?? '', what: start.what ?? '', mode: start.mode ?? 'equal',
     who: g ? (start.who?.filter(id => g.members.includes(id)).length ? start.who.filter(id => g.members.includes(id)) : g.members.slice()) : [],
-    open: start.open ?? (start.amount ? null : 'amount'),
+    /* Every expense is shared with someone, so with no group yet that's the first question */
+    open: start.open ?? (!g ? 'group' : start.amount ? null : 'amount'),
   });
   openDialog(`
     <div class="sheet-head"><h2 class="sheet-title">New expense</h2><button type="button" class="iconbtn" data-action="close" aria-label="Close">${icon.close}</button></div>
@@ -82,7 +83,7 @@ function renderTray(){
   if(k === 'mode') tray.innerHTML = `<p class="tray-label" id="trayLabel">How’s it split?</p><div class="opts" role="group" aria-labelledby="trayLabel">${Object.entries(MODES).map(([v, l]) => text(v, l[0].toUpperCase() + l.slice(1), d.mode === v)).join('')}</div>`;
   if(k === 'group'){
     const open = activeGroups().slice().sort(byRecent);
-    tray.innerHTML = `<p class="tray-label" id="trayLabel">Which group?</p><div class="opts" role="group" aria-labelledby="trayLabel">${open.map(x => text(x.id, x.name, d.gid === x.id)).join('')}<button type="button" class="opt text" data-v="new">${icon.plus}New group</button></div>`;
+    tray.innerHTML = `<p class="tray-label" id="trayLabel">For which group?</p><div class="opts" role="group" aria-labelledby="trayLabel">${open.map(x => text(x.id, x.name, d.gid === x.id)).join('')}<button type="button" class="opt text" data-v="new">${icon.plus}New group</button></div>`;
   }
   if(k === 'what') tray.innerHTML = `<label class="tray-label" for="cWhat">What was it for?</label><input id="cWhat" maxlength="80" value="${esc(d.what)}" placeholder="Dinner, taxi, tickets…" autocomplete="off" enterkeyhint="done">`;
   if(k === 'amount') tray.innerHTML = `<label class="tray-label" for="cAmount">How much? <span class="hint">in ${esc(cur())}</span></label>
@@ -150,7 +151,9 @@ export function initComposer(){
     if(!on()) return;
     const t = ev.target.closest('[data-tok]');
     if(t){
-      draft.open = draft.open === t.dataset.tok ? null : t.dataset.tok;
+      /* Who paid, who it's for and how it's split all depend on the group, so ask for that first */
+      const want = !draft.gid && t.dataset.tok !== 'amount' && t.dataset.tok !== 'what' ? 'group' : t.dataset.tok;
+      draft.open = draft.open === want ? null : want;
       render(); fail('');
       $(`[data-tok="${t.dataset.tok}"]`)?.focus();
       if(draft.open === 'what') $('#cWhat')?.focus();
@@ -167,12 +170,15 @@ export function initComposer(){
     if(k === 'mode') draft.mode = v;
     if(k === 'group'){
       if(v === 'new') return startGroup();
-      const g = state.groups.find(x => x.id === v);
+      const g = state.groups.find(x => x.id === v), first = !draft.gid;
       draft.gid = v; draft.who = g.members.slice();
       if(!g.members.includes(draft.payer)) draft.payer = meIn(g) || g.members[0];
+      /* The group was the first question; the amount is the next */
+      if(first && !draft.amount) draft.open = 'amount';
     }
     render(); fail('');
     $(`#tray [data-v="${CSS.escape(v)}"]`)?.focus();
+    if(draft.open === 'amount' && !touch()) $('#cAmount')?.focus();
   });
   form.addEventListener('input', ev => {
     if(!on()) return;

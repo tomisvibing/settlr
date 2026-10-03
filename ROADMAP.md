@@ -34,7 +34,7 @@ Everything later builds on these.
   - adding an expense as one editable sentence
   - the overview as a paragraph, with groups as tear-off tickets
   - who's up and who's down in words, the fewest payments with a Paid stamp, and spending printed as a till receipt
-  - a membership card on You, with settings as sentences
+  - a membership card on Settings, with settings as sentences
 - [ ] **More polish**: a custom date picker (the phone's own is fine for now)
 - [x] **Sign in without Google**:
   - [x] email with a 6-digit code (needs the email sender set up in Supabase, see the README, before codes reach everyone)
@@ -50,13 +50,13 @@ Everything later builds on these.
 - [x] Live updates: see new expenses the moment someone adds them (Supabase Realtime)
 - [x] Change history ("Bob edited *Dinner*: £40 → £45") in each group's History sheet, with Undo after a delete and Restore for any deleted entry
 - [x] Nudges: a Nudge beside each payment owed to you opens your phone's share sheet with a friendly message and the group's link, and, if you turn it on in You (never, by default; weekly, fortnightly or monthly), the overview lists who still owes you in groups that have gone quiet. Nothing is sent until you've read the message and said yes
-- [x] Push notifications (switch on under You): a Sunday-evening summary of who owes what, and a notification when someone nudges you. Nudging someone with notifications on reaches them directly; anyone else gets the share-sheet message. On an iPhone they need settlr added to the Home Screen
+- [x] Push notifications (switch on under Settings): a Sunday-evening summary of who owes what, and a notification when someone nudges you. Nudging someone with notifications on reaches them directly; anyone else gets the share-sheet message. On an iPhone they need settlr added to the Home Screen
 - [x] Leave a group (once settled up); admin role so only admins can delete a group or remove someone with an account
 - [x] Comments on expenses
 
 ## Phase 4: Money features
 
-- [x] Payment links: add your Monzo, PayPal or Revolut username under You, and anyone who owes you gets "Pay with Monzo" beside the payment, with the amount filled in (Monzo for pounds; Revolut opens your page without an amount). Your link also goes in the nudges you send
+- [x] Payment links: add your Monzo, PayPal or Revolut username under Settings, and anyone who owes you gets "Pay with Monzo" beside the payment, with the amount filled in (Monzo for pounds; Revolut opens your page without an amount). Your link also goes in the nudges you send
 - [x] 50 currencies to pick from, with names, and whole-number amounts for currencies without pence (yen, won, forint…)
 - [x] Multiple currencies in one group: each expense or payment in any currency, converted into the group's at the European Central Bank rate for its date (or your own), keeping both amounts
 - [ ] One overall total on Home in your own currency, across groups in different currencies
