@@ -18,10 +18,10 @@ function memberLine(g){
   return names.length > 3 ? `${names.slice(0, 2).join(', ')} and ${names.length - 2} more` : names.join(', ');
 }
 
-/* One group as a ticket: the name on the main part, your balance on the stub. Swipe it left for
+/* One group as a ticket: its name large at the top left, your balance on the stub. Swipe it left for
    Edit, Archive and Delete (or Restore when archived) */
 function ticket(g){
-  const me = meIn(g), v = me ? (balances(g)[me] || 0) : 0, n = g.members.length;
+  const me = meIn(g), v = me ? (balances(g)[me] || 0) : 0;
   const del = canAdmin(g) ? [['del-group', 'Delete', icon.trash, 'del']] : [];
   const acts = isArchived(g)
     ? [['restore-group', 'Restore', icon.restore], ...del]
@@ -33,7 +33,6 @@ function ticket(g){
     : ['Square', g.expenses.length ? 'nobody owes' : 'nothing yet'];
   return `<li class="swipe"><a class="ticket" href="${groupHref(g)}">
     <span class="t-main">
-      <span class="t-kind">${n} ${n === 1 ? 'person' : 'people'} · ${esc(g.currency)}</span>
       <span class="t-name">${esc(g.name)}</span>
       <span class="t-meta">${esc(memberLine(g))} · ${when}</span>
     </span>

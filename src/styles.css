@@ -334,8 +334,7 @@ button.reel:focus-visible{outline:2px solid var(--focus);outline-offset:4px;bord
 .t-stub{display:flex;flex-direction:column;justify-content:center;align-items:flex-end;text-align:right;border-radius:0 var(--r-card) var(--r-card) 0;border-left:2px dashed var(--line-strong);
   -webkit-mask:radial-gradient(circle 9px at 0 0,transparent 98%,#000) top/100% 51% no-repeat,radial-gradient(circle 9px at 0 100%,transparent 98%,#000) bottom/100% 51% no-repeat;
   mask:radial-gradient(circle 9px at 0 0,transparent 98%,#000) top/100% 51% no-repeat,radial-gradient(circle 9px at 0 100%,transparent 98%,#000) bottom/100% 51% no-repeat}
-.t-kind{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
-.t-name{margin:2px 0 6px;font-family:var(--serif);font-size:24px;line-height:1.1;letter-spacing:-.01em;overflow-wrap:anywhere}
+.t-name{margin:0 0 8px;font-family:var(--serif);font-size:30px;line-height:1.05;letter-spacing:-.015em;overflow-wrap:anywhere}
 .t-meta{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
 .t-amt{font-family:var(--serif);font-size:22px;line-height:1.05;letter-spacing:-.01em;white-space:nowrap}
 .t-amt.down{color:var(--owe)}
@@ -343,7 +342,7 @@ button.reel:focus-visible{outline:2px solid var(--focus);outline-offset:4px;bord
 @media (hover:hover){.ticket:hover .t-name{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.15em}}
 .ticket:focus-visible{outline:none}
 .ticket:focus-visible .t-main,.ticket:focus-visible .t-stub{background:var(--pill)}
-.ticket:focus-visible :is(.t-kind,.t-meta,.t-lbl,.t-amt){color:var(--pill-ink)}
+.ticket:focus-visible :is(.t-meta,.t-lbl,.t-amt){color:var(--pill-ink)}
 
 /* ---------- Who's up, who's down, in words (views/standings.js) ---------- */
 .standings{list-style:none;margin:0;padding:0;border-block:1px solid var(--line)}
@@ -649,3 +648,8 @@ input.code{font-size:24px;letter-spacing:.3em;text-align:center;font-variant-num
 
 .add-here{margin-top:14px}
 .add-here svg{width:18px;height:18px}
+
+/* The new-expense button's words can be long ("Add £42.50 to Lisbon weekend"): they shorten, the button doesn't wrap */
+#composeGo{min-width:0;flex:0 1 auto}
+.go-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dlg-actions:has(#composeGo){flex-wrap:nowrap}
