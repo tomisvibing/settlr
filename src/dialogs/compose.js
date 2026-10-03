@@ -14,7 +14,7 @@ import { openExpense, saveExpenseRow, keypad } from './expense.js';
 import { sb } from '../supabase.js';
 import { openGroup } from './group.js';
 import { homeCurrency } from '../prefs.js';
-import { missingPart, goLabel } from '../lib/compose.js';
+import { missingParts, nextTarget, goLabel, isIdle } from '../lib/compose.js';
 
 const MODES = { equal: 'equally', shares: 'by shares', exact: 'by exact amounts' };
 const touch = () => window.matchMedia?.('(pointer: coarse)').matches;
@@ -63,9 +63,10 @@ function renderSentence(){
   const d = draft, g = state.groups.find(x => x.id === d.gid);
   const payer = !d.payer || isMe(d.payer) ? 'You' : shortName(d.payer);
   $('#sentence').innerHTML = `${tok('payer', payer, 'Who paid')} paid ${tok('amount', currencySymbol(cur()) + (d.amount || '0'), 'How much')} for ${tok('what', d.what || 'something', 'What for')}, split ${tok('mode', MODES[d.mode], 'How it’s split')} between ${tok('who', g ? list(d.who, g) : 'everyone', 'Who it’s for')}, in ${tok('group', g ? g.name : d.later ? 'no group yet' : 'a group', 'Which group')}.`;
-  const pence = toPence(d.amount);
-  $('#composeGo .go-text').textContent = goLabel({ missing: missingPart({ hasGroup: !!g, later: d.later, pence, what: d.what, whoCount: d.who.length }),
-    mode: d.mode, hasGroup: !!g, amountText: money(pence > 0 ? pence : 0, cur()), groupName: g?.name });
+  const pence = toPence(d.amount), st = { missing: missingParts({ hasGroup: !!g, later: d.later, pence, what: d.what, whoCount: d.who.length }), open: d.open, mode: d.mode, hasGroup: !!g };
+  $('#composeGo .go-text').textContent = goLabel({ ...st, amountText: money(pence > 0 ? pence : 0, cur()), groupName: g?.name });
+  const idle = isIdle(st), go = $('#composeGo');
+  go.classList.toggle('idle', idle); go.setAttribute('aria-disabled', String(idle));
   const amount = toPence(d.amount), each = $('#each');
   if(!g){ each.textContent = d.later ? 'It waits under “To sort” on your overview until you pick a group.' : 'Pick the group to see who it’s split with.'; return; }
   if( !(amount > 0) || !d.who.length || d.mode !== 'equal'){ each.textContent = d.mode !== 'equal' && g ? 'You’ll set each person’s part next.' : ''; return; }
@@ -133,15 +134,13 @@ function startGroup(){
 
 async function save(){
   const d = draft, g = state.groups.find(x => x.id === d.gid);
-  if(!g && !d.later) return askGroup();
   if(g && d.mode !== 'equal'){ moreDetails(); return false; }
   const amount = toPence(d.amount), what = d.what.trim();
-  /* The button already said what's next, so no error: just open that part */
-  const ask = open => { d.open = open; render(); fail(''); $(`[data-tok="${open}"]`)?.focus(); return false; };
-  if(!(amount > 0)) return ask('amount');
-  if(!what) return ask('what');
+  /* Open a part of the sentence: the button already said which, so no error, just move there */
+  const go = open => { d.open = open; render(); fail(''); $(`[data-tok="${open}"]`)?.focus(); if(open === 'amount' && !touch()) $('#cAmount')?.focus(); if(open === 'what') $('#cWhat')?.focus(); return false; };
+  const missing = missingParts({ hasGroup: !!g, later: d.later, pence: amount, what, whoCount: d.who.length });
+  if(missing.length) return go(nextTarget(missing, d.open) ?? d.open);
   if(!g) return saveForLater(what, amount);
-  if(!d.who.length) return ask('who');
   const weights = Object.fromEntries(d.who.map(id => [id, 1]));
   const splits = distribute(amount, weights, minorStep(g.currency));
   const row = { group_id: g.id, type: 'expense', description: what, amount_cents: amount, paid_by: d.payer, split_mode: 'equal', expense_date: today(), split_input: weights,
