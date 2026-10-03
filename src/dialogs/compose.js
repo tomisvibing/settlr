@@ -9,8 +9,9 @@ import { group, personName, shortName, isMe, meIn, lastActivity, activeGroups } 
 import { parseRoute } from '../router.js';
 import { toast } from '../ui.js';
 import { icon } from '../views/shared.js';
-import { form, draft, setDraft, openDialog, fail } from './dialog.js';
+import { form, draft, setDraft, openDialog, fail, describeError } from './dialog.js';
 import { openExpense, saveExpenseRow, keypad } from './expense.js';
+import { sb } from '../supabase.js';
 import { openGroup } from './group.js';
 import { homeCurrency } from '../prefs.js';
 
@@ -32,7 +33,7 @@ export function openComposer(start = {}){
   const gid = start.gid ?? (here && !here.archivedAt ? here.id : null);
   const g = state.groups.find(x => x.id === gid);
   setDraft({
-    compose: true, gid,
+    compose: true, gid, later: false, draftId: start.draftId ?? null,
     payer: start.payer && g?.members.includes(start.payer) ? start.payer : (g ? (meIn(g) || g.members[0]) : null),
     amount: start.amount ?? '', what: start.what ?? '', mode: start.mode ?? 'equal',
     who: g ? (start.who?.filter(id => g.members.includes(id)).length ? start.who.filter(id => g.members.includes(id)) : g.members.slice()) : [],
@@ -60,10 +61,10 @@ function render(){ renderSentence(); renderTray(); }
 function renderSentence(){
   const d = draft, g = state.groups.find(x => x.id === d.gid);
   const payer = !d.payer || isMe(d.payer) ? 'You' : shortName(d.payer);
-  $('#sentence').innerHTML = `${tok('payer', payer, 'Who paid')} paid ${tok('amount', currencySymbol(cur()) + (d.amount || '0'), 'How much')} for ${tok('what', d.what || 'something', 'What for')}, split ${tok('mode', MODES[d.mode], 'How it’s split')} between ${tok('who', g ? list(d.who, g) : 'everyone', 'Who it’s for')}, in ${tok('group', g ? g.name : 'a group', 'Which group')}.`;
-  $('#composeGo').textContent = d.mode === 'equal' ? 'Add it' : 'Set the amounts';
+  $('#sentence').innerHTML = `${tok('payer', payer, 'Who paid')} paid ${tok('amount', currencySymbol(cur()) + (d.amount || '0'), 'How much')} for ${tok('what', d.what || 'something', 'What for')}, split ${tok('mode', MODES[d.mode], 'How it’s split')} between ${tok('who', g ? list(d.who, g) : 'everyone', 'Who it’s for')}, in ${tok('group', g ? g.name : d.later ? 'no group yet' : 'a group', 'Which group')}.`;
+  $('#composeGo').textContent = !g && d.later ? 'Save for later' : d.mode === 'equal' ? 'Add it' : 'Set the amounts';
   const amount = toPence(d.amount), each = $('#each');
-  if(!g){ each.textContent = 'Pick the group to see who it’s split with.'; return; }
+  if(!g){ each.textContent = d.later ? 'It waits under “To sort” on your overview until you pick a group.' : 'Pick the group to see who it’s split with.'; return; }
   if( !(amount > 0) || !d.who.length || d.mode !== 'equal'){ each.textContent = d.mode !== 'equal' && g ? 'You’ll set each person’s part next.' : ''; return; }
   const split = distribute(amount, Object.fromEntries(d.who.map(id => [id, 1])), minorStep(cur()));
   const vals = Object.values(split), lo = Math.min(...vals), hi = Math.max(...vals);
@@ -83,7 +84,7 @@ function renderTray(){
   if(k === 'mode') tray.innerHTML = `<p class="tray-label" id="trayLabel">How’s it split?</p><div class="opts" role="group" aria-labelledby="trayLabel">${Object.entries(MODES).map(([v, l]) => text(v, l[0].toUpperCase() + l.slice(1), d.mode === v)).join('')}</div>`;
   if(k === 'group'){
     const open = activeGroups().slice().sort(byRecent);
-    tray.innerHTML = `<p class="tray-label" id="trayLabel">For which group?</p><div class="opts" role="group" aria-labelledby="trayLabel">${open.map(x => text(x.id, x.name, d.gid === x.id)).join('')}<button type="button" class="opt text" data-v="new">${icon.plus}New group</button></div>`;
+    tray.innerHTML = `<p class="tray-label" id="trayLabel">For which group?</p><div class="opts" role="group" aria-labelledby="trayLabel">${open.map(x => text(x.id, x.name, d.gid === x.id)).join('')}<button type="button" class="opt text" data-v="new">${icon.plus}New group</button><button type="button" class="opt text" aria-pressed="${!!d.later}" data-v="later">Decide later</button></div>`;
   }
   if(k === 'what') tray.innerHTML = `<label class="tray-label" for="cWhat">What was it for?</label><input id="cWhat" maxlength="80" value="${esc(d.what)}" placeholder="Dinner, taxi, tickets…" autocomplete="off" enterkeyhint="done">`;
   if(k === 'amount') tray.innerHTML = `<label class="tray-label" for="cAmount">How much? <span class="hint">in ${esc(cur())}</span></label>
@@ -119,7 +120,7 @@ function askGroup(){
 }
 /* A brand-new group ("New group" in the tray): start one, then come back to this sentence in it */
 function startGroup(){
-  const keep = { amount: draft.amount, what: draft.what, mode: draft.mode, open: null };
+  const keep = { amount: draft.amount, what: draft.what, mode: draft.mode, open: null, draftId: draft.draftId };
   const amount = toPence(keep.amount);
   openGroup(true, {
     carry: { desc: keep.what, amount: amount > 0 ? amount : 0, currency: cur(), resume: gid => openComposer({ ...keep, gid }) },
@@ -129,12 +130,13 @@ function startGroup(){
 
 async function save(){
   const d = draft, g = state.groups.find(x => x.id === d.gid);
-  if(!g) return askGroup();
-  if(d.mode !== 'equal'){ moreDetails(); return false; }
+  if(!g && !d.later) return askGroup();
+  if(g && d.mode !== 'equal'){ moreDetails(); return false; }
   const amount = toPence(d.amount), what = d.what.trim();
   const ask = (open, msg) => { d.open = open; render(); fail(msg); $(`[data-tok="${open}"]`)?.focus(); return false; };
   if(!(amount > 0)) return ask('amount', 'Enter an amount above zero.');
   if(!what) return ask('what', 'Add a short description, like “Dinner”.');
+  if(!g) return saveForLater(what, amount);
   if(!d.who.length) return ask('who', 'Pick at least one person to split with.');
   const weights = Object.fromEntries(d.who.map(id => [id, 1]));
   const splits = distribute(amount, weights, minorStep(g.currency));
@@ -142,7 +144,16 @@ async function save(){
     orig_currency: null, orig_amount_cents: null, fx_rate: null };
   const result = await saveExpenseRow(null, row, splits);
   if(result === false) return false;
+  /* It came from "To sort": now it has a group, so the draft is done */
+  if(d.draftId) await sb.from('expense_drafts').delete().eq('id', d.draftId);
   toast(`Added “${what}” to ${g.name}.`);
+}
+/* No group yet: keep what, how much and in what currency, privately, until one is picked */
+async function saveForLater(what, amount){
+  const d = draft, row = { description: what, amount_cents: amount, currency: cur() };
+  const { error } = d.draftId ? await sb.from('expense_drafts').update(row).eq('id', d.draftId) : await sb.from('expense_drafts').insert(row);
+  if(error) return fail(describeError(error));
+  toast(`Saved “${what}” for later. Find it under To sort on the overview.`);
 }
 
 export function initComposer(){
@@ -170,7 +181,16 @@ export function initComposer(){
     if(k === 'mode') draft.mode = v;
     if(k === 'group'){
       if(v === 'new') return startGroup();
+      if(v === 'later'){
+        const first = !draft.gid && !draft.later;
+        draft.gid = null; draft.later = true; draft.payer = null; draft.who = [];
+        if(first && !draft.amount) draft.open = 'amount';
+        render(); fail('');
+        if(draft.open === 'amount' && !touch()) $('#cAmount')?.focus();
+        return;
+      }
       const g = state.groups.find(x => x.id === v), first = !draft.gid;
+      draft.later = false;
       draft.gid = v; draft.who = g.members.slice();
       if(!g.members.includes(draft.payer)) draft.payer = meIn(g) || g.members[0];
       /* The group was the first question; the amount is the next */

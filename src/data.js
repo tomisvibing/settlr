@@ -79,6 +79,9 @@ export async function loadAllData(){
     id:p.id, from:p.from_person, to:p.to_person, amount:p.amount_cents, currency:p.currency,
     note:p.note, date:p.payment_date, createdAt:new Date(p.created_at).getTime()
   }));
+  /* Expenses kept for later (no group yet). Optional: a missing table just means none */
+  const drafts = await sb.from('expense_drafts').select('*').order('created_at', { ascending: false });
+  state.drafts = drafts.error ? [] : (drafts.data || []).map(d => ({ id: d.id, desc: d.description, amount: Number(d.amount_cents), currency: d.currency, createdAt: new Date(d.created_at).getTime() }));
   lastLoadedAt = Date.now();
 }
 /* A reload triggered by someone else's change (live.js): no toast on failure, and the activity
