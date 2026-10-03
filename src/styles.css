@@ -666,3 +666,4 @@ input.code{font-size:24px;letter-spacing:.3em;text-align:center;font-variant-num
 #composeGo{min-width:0;flex:0 1 auto}
 .go-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dlg-actions:has(#composeGo){flex-wrap:nowrap}
+#composeGo.idle{opacity:.55}
