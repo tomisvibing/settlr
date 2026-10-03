@@ -86,14 +86,17 @@ main{max-width:640px;margin:0 auto;padding:12px 16px calc(var(--tabbar-h) + var(
 :is([data-route="start"],[data-route="group"]) .topbrand{display:none}
 @media (min-width:900px){.topbrand{display:none}}
 
-.tabbar{position:fixed;left:16px;right:84px;bottom:calc(14px + var(--safe-b));z-index:15;height:56px;padding:0 5px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:center;border-radius:999px;background:var(--bar);border:1px solid var(--line);box-shadow:var(--float)}
+.tabbar{position:fixed;left:16px;right:84px;bottom:calc(14px + var(--safe-b));z-index:15;height:56px;padding:0 3px;display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr 1.2fr;align-items:center;border-radius:999px;background:var(--bar);border:1px solid var(--line);box-shadow:var(--float)}
 .tabbar .brand{display:none}
-.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:44px;color:var(--muted);text-decoration:none;font-size:13px;font-weight:600;border-radius:999px}
-.tab svg{width:22px;height:22px;display:none}
+.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;height:46px;color:var(--muted);text-decoration:none;font-size:10.5px;font-weight:600;border-radius:999px}
+.tab svg{width:20px;height:20px}
 .tab[aria-current="page"]{color:var(--ink);font-weight:700;background:var(--pill-on)}
 @media (hover:hover){.tab:hover{color:var(--ink)}}
-/* The narrowest phones: Overview gets the room it needs, You the least */
-@media (max-width:359px){.tabbar{grid-template-columns:1.3fr 1.1fr 1.1fr .8fr}.tab{font-size:12px}}
+/* Day/night on every screen: above the Add button on phones, at the foot of the sidebar on wide screens.
+   The landing page has its own, bottom left */
+.tabbar .shell-theme{position:absolute;inset:auto -63px auto auto;top:-58px;width:44px;height:44px;background:var(--bar)}
+.tabbar .shell-theme svg{width:20px;height:20px}
+.rail-toggle{display:none}
 /* Add sits apart from the tab capsule, as its own round button */
 .fab{position:absolute;right:-69px;top:-1px;width:56px;height:56px;border-radius:50%;border:0;background:var(--pill);color:var(--pill-ink);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;box-shadow:var(--float)}
 .fab svg{width:24px;height:24px}
@@ -109,8 +112,21 @@ main{max-width:640px;margin:0 auto;padding:12px 16px calc(var(--tabbar-h) + var(
   .fab svg{width:20px;height:20px}
   .fab .fab-label{display:inline}
   .tab{flex-direction:row;justify-content:flex-start;gap:12px;height:42px;padding:0 14px;font-size:15px;border-radius:999px}
-  .tab svg{display:block}
+  .tab svg{width:22px;height:22px}
   @media (hover:hover){.tab:hover{background:var(--pill-on)}}
+  .tabbar .shell-theme{position:static;inset:auto;margin-top:auto;align-self:flex-start;width:48px;height:48px;background:transparent}
+  .rail-toggle{display:inline-flex;align-items:center;justify-content:center;align-self:flex-start;width:48px;height:48px;margin-top:6px;border:0;border-radius:50%;background:transparent;color:var(--muted);cursor:pointer}
+  .rail-toggle svg{width:22px;height:22px}
+  @media (hover:hover){.rail-toggle:hover{color:var(--ink);background:var(--pill-on)}}
+  /* Collapsed: an icon rail. The words stay for screen readers */
+  .rail .shell{padding-left:76px}
+  .rail .tabbar{width:76px;padding:28px 14px;align-items:center}
+  .rail .tabbar .brand{display:none}
+  .rail .tab{width:48px;justify-content:center;padding:0;gap:0}
+  .rail .tab span,.rail .fab .fab-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .rail .fab{width:48px;height:48px;padding:0}
+  .rail .tabbar .shell-theme,.rail .rail-toggle{align-self:center}
+  .rail .rail-toggle svg{transform:scaleX(-1)}
 }
 
 /* ---------- Building blocks ---------- */
@@ -236,7 +252,7 @@ button.reel:focus-visible{outline:2px solid var(--focus);outline-offset:4px;bord
 .start-add svg{width:22px;height:22px;flex:none}
 .start-add[disabled]{opacity:.45;cursor:default}
 @media (hover:hover){.start-add:not([disabled]):hover{background:var(--pill-hover)}}
-.to-overview{position:fixed;inset-inline-end:16px;bottom:calc(16px + var(--safe-b));display:inline-flex;align-items:center;gap:10px;min-height:52px;padding:0 18px 0 20px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);font-weight:700;font-size:15px;text-decoration:none;box-shadow:var(--float)}
+.to-overview{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-width:min(100%,280px);min-height:56px;margin-top:12px;padding:0 24px;border:1px solid var(--line-strong);border-radius:999px;background:transparent;color:var(--ink);font-weight:700;font-size:16px;text-decoration:none}
 .to-overview svg{width:20px;height:20px;flex:none}
 @media (hover:hover){.to-overview:hover{border-color:var(--ink)}}
 /* Day/night, bottom left: just an outline, no fill */
@@ -380,9 +396,9 @@ button.st-row{cursor:pointer}
 .r-lines{list-style:none;margin:0;padding:0}
 .r-lines{display:grid;gap:4px}
 /* Each day starts a section: the day in italics, a dashed rule running off to the right */
-.day{display:flex;align-items:center;gap:12px;margin:22px 0 4px;font-family:var(--serif);font-size:20px;font-style:italic;font-weight:400;letter-spacing:0;color:var(--ink)}
-.day::after{content:"";flex:1;border-top:1px dashed var(--line-strong)}
-.r-lines > :first-child .day{margin-top:12px}
+.day{display:flex;align-items:center;gap:12px;margin:30px 0 8px;font-family:var(--font);font-size:15px;font-style:normal;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+.day::before,.day::after{content:"";flex:1;border-top:1px dashed var(--line-strong)}
+.r-lines > :first-child .day{margin-top:14px}
 .line{display:grid;grid-template-columns:minmax(0,max-content) minmax(16px,1fr) auto;align-items:baseline;column-gap:8px;row-gap:2px;width:100%;padding:8px 0;border:0;background:none;color:inherit;font:inherit;text-align:left}
 button.line{cursor:pointer}
 .l-what{font-weight:600;font-size:15px;overflow-wrap:anywhere}
@@ -416,6 +432,7 @@ button.line{cursor:pointer}
 .signed-in b{font-weight:600;color:var(--ink);overflow-wrap:anywhere}
 .prefs{list-style:none;margin:0;padding:0;border-block:1px solid var(--line)}
 .prefs li{padding:14px 4px;font-family:var(--serif);font-size:22px;line-height:1.7}
+.prefs select{width:auto;min-height:48px;font-family:var(--font);font-size:20px;font-weight:600;padding:0 12px;vertical-align:middle}
 .seg.inline{display:inline-flex;vertical-align:middle;padding:3px;border:1px solid var(--line-strong);background:none;font-family:var(--font);line-height:1.2}
 .seg.inline label{flex:none}
 .seg.inline span{padding:6px 12px}
@@ -619,3 +636,6 @@ input.code{font-size:24px;letter-spacing:.3em;text-align:center;font-variant-num
 @media (min-width:900px){#toast{bottom:24px;margin-left:116px}}
 [data-route="start"] #toast{bottom:calc(88px + var(--safe-b));margin-left:0}
 @media (prefers-reduced-motion: reduce){#toast{transition:none}}
+
+.add-here{margin-top:14px}
+.add-here svg{width:18px;height:18px}

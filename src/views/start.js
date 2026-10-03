@@ -5,10 +5,11 @@ import { isNight } from '../theme.js';
 const MOON = '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>';
 const SUN = '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/>';
 export function syncThemeToggle(){
-  const b = $('.theme-toggle'); if(!b) return;
   const night = isNight();
-  b.setAttribute('aria-pressed', String(night));
-  b.querySelector('svg').innerHTML = night ? SUN : MOON;
+  document.querySelectorAll('.theme-toggle').forEach(b => {
+    b.setAttribute('aria-pressed', String(night));
+    b.querySelector('svg').innerHTML = night ? SUN : MOON;
+  });
 }
 
 /* The reel under "Split": the things people split. It spins fast, eases to a stop on one, and lands
@@ -52,7 +53,7 @@ function spin(drum){
   frame = requestAnimationFrame(step);
 }
 
-/* Where everyone lands: one job, one button. The overview is a step away, bottom right.
+/* Where everyone lands: one job, one button, with the overview right underneath it.
    While the first load runs the button shows but waits, so a tap can't start a flow with no groups loaded.
    The reel spins when you arrive, not when a live update redraws the page */
 export function renderStart({ loading = false, entering = false } = {}){
@@ -67,12 +68,12 @@ export function renderStart({ loading = false, entering = false } = {}){
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
         <span>Add an expense</span>
       </button>
+      <a class="to-overview" href="#/overview">
+        <span>Overview</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>
+      </a>
     </div>
     <button type="button" class="theme-toggle" data-action="toggle-theme" aria-label="Night mode" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"></svg></button>
-    <a class="to-overview" href="#/overview">
-      <span>Overview</span>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>
-    </a>
   </section>`;
   syncThemeToggle();
   const drum = $('.start .drum');

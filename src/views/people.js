@@ -7,8 +7,8 @@ import { plainReceipt, lineHTML } from './receipt.js';
 
 const nameOf = pid => isMe(pid) ? 'You' : shortName(pid);
 
-/* Everyone in words: who's up and who's down across all your groups, in each currency. Tap a person
-   to edit them; people with nothing owed either way sit underneath as "All square" */
+/* Everyone in words: who's up and who's down across all your groups, in each currency. People with nothing owed
+   either way sit underneath as "All square" */
 export function renderPeopleView(){
   const app = $('#app');
   const people = state.people.slice().sort((a, b) => a.name.localeCompare(b.name));
@@ -18,7 +18,7 @@ export function renderPeopleView(){
     const amounts = Object.entries(personCurrencyTotals(p.id)).filter(([, v]) => v !== 0);
     if(!amounts.length){ square.push(p); continue; }
     const gnames = groupsOf(p.id).map(g => g.name);
-    rows.push({ pid: p.id, name: nameOf(p.id), amounts, sub: gnames.length ? `In ${gnames.join(', ')}` : 'Settlements outside groups', action: 'edit-person' });
+    rows.push({ pid: p.id, name: nameOf(p.id), amounts, sub: gnames.length ? `In ${gnames.join(', ')}` : 'Settlements outside groups' });
   }
   /* Owed most first, then the biggest owing last */
   const score = r => r.amounts.reduce((m, [, v]) => Math.abs(v) > Math.abs(m) ? v : m, 0);
@@ -35,7 +35,7 @@ export function renderPeopleView(){
       ${rows.length ? standings(rows, 'Balances with everyone') : ''}
       ${square.length ? `<div class="square-people">
         <h3>${rows.length ? 'All square' : 'Everyone’s square'}</h3>
-        <ul class="opts">${square.map(p => `<li><button class="opt" data-action="edit-person" data-id="${p.id}">${avatar(p.id, 'sm')}${esc(isMe(p.id) ? 'You' : personName(p.id))}</button></li>`).join('')}</ul>
+        <ul class="opts">${square.map(p => `<li><span class="opt">${avatar(p.id, 'sm')}${esc(isMe(p.id) ? 'You' : personName(p.id))}</span></li>`).join('')}</ul>
       </div>` : ''}
       ${!people.length ? `<p class="none">No one saved yet. Add a person to get started.</p>` : ''}
     </section>

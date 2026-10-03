@@ -92,6 +92,7 @@ export function renderGroupView(id){
       <p class="kicker">${n} ${n === 1 ? 'person' : 'people'} · ${esc(cur)}${frozen ? ' · Archived' : ''}</p>
       <h1 class="display">${esc(g.name)}</h1>
       <p class="sub">${money(spentIn(g), cur)} spent${g.expenses.length ? ` · last added ${ago(sorted[0].createdAt)}` : ''}</p>
+      ${frozen ? '' : `<button class="btn primary add-here" data-action="add-expense">${icon.plus}Add an expense</button>`}
     </header>
     ${frozen ? `<div class="archived-note" role="status">${icon.archive}<p><b>Archived ${ago(g.archivedAt)}.</b> It’s frozen: nobody can add or change anything until it’s restored.</p><button class="btn small" data-action="restore-group">Restore</button></div>` : ''}
 

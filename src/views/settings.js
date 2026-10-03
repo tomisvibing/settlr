@@ -48,7 +48,7 @@ export function renderSettings(){
   const joined = since(u.created_at);
   const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
   app.innerHTML = `<div class="stack">
-    <h1 class="sr">You</h1>
+    <h1 class="sr">Settings</h1>
     <div class="member-card" role="img" aria-label="Membership card: ${esc(name)}${joined ? `, member since ${joined}` : ''}, ${plural(groups, 'group')}, ${plural(expenses, 'expense')}, ${people} ${people === 1 ? 'person' : 'people'}">
       <div class="mc-top"><span class="mc-mark">settlr</span><span class="mc-no">No. ${memberNo(u.id)}</span></div>
       <div class="mc-name">${esc(name)}</div>
@@ -60,7 +60,7 @@ export function renderSettings(){
     <ul class="prefs">
       ${payPref()}
       <li><span id="themeLead">Show settlr in</span>
-        <span class="seg inline" role="radiogroup" aria-labelledby="themeLead">${[['light', 'day'], ['dark', 'night'], ['system', 'my phone’s']].map(([v, l]) =>
+        <span class="seg inline" role="radiogroup" aria-labelledby="themeLead">${[['light', 'day'], ['dark', 'night'], ['system', 'my device’s']].map(([v, l]) =>
           `<label><input type="radio" name="theme" value="${v}" ${theme === v ? 'checked' : ''}><span>${l}</span></label>`).join('')}</span>
         mode.</li>
       <li><label for="homeCur">My home currency is</label>

@@ -3,6 +3,7 @@ import { sb } from './supabase.js';
 import { state, session, myPersonId } from './store.js';
 import { setTheme, isNight } from './theme.js';
 import { syncThemeToggle } from './views/start.js';
+import { applyRail, toggleRail } from './rail.js';
 import { toast, forgetTrigger } from './ui.js';
 import { group, personLocked, meIn, isAdmin, canAdmin } from './selectors.js';
 import { balances } from './lib/ledger.js';
@@ -33,6 +34,7 @@ import { setHomeCurrency } from './prefs.js';
 const oops = (err, action = 'delete') => { if(dlg.open) fail(describeError(err, action)); else toast(describeError(err, action), { error: true }); };
 
 export function initEvents(){
+  applyRail();
   document.addEventListener('click', async ev => {
     const b = ev.target.closest('[data-action]'); if(!b || b.disabled) return;
     /* Rows in the Activity tab belong to different groups */
@@ -81,6 +83,7 @@ export function initEvents(){
       }
     }
     else if(a==='close') closeDialog();
+    else if(a==='toggle-rail') toggleRail();
     else if(a==='toggle-theme'){ setTheme(isNight() ? 'light' : 'dark'); syncThemeToggle(); }
     else if(a==='skip') $('#app').focus();
     else if(a==='add-member') await addPendingMember();
