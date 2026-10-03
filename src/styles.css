@@ -241,12 +241,14 @@ li.swipe{position:relative;overflow:hidden}
 [data-route="start"] :is(.tabbar,.skip-link){display:none}
 [data-route="start"] main{max-width:none;padding:0}
 @media (min-width:900px){[data-route="start"] .shell{padding-left:0}}
-.start{position:relative;min-height:calc(100dvh - env(safe-area-inset-top,0px));display:grid;place-items:center;padding:24px 20px calc(96px + var(--safe-b))}
+.start{position:relative;height:calc(100dvh - env(safe-area-inset-top,0px));overflow:hidden;display:grid;place-items:center;padding:56px 20px calc(56px + var(--safe-b))}
+/* The landing page never scrolls: nothing to catch and drag. It sizes itself to the screen instead */
+html:has(body[data-route="start"]),body[data-route="start"]{height:100dvh;overflow:hidden;overscroll-behavior:none}
 .start-brand{position:absolute;top:14px;inset-inline-start:22px;font-family:var(--serif);font-weight:500;font-size:28px;letter-spacing:-.02em;color:var(--ink);text-decoration:none}
-.start-stack{display:flex;flex-direction:column;align-items:center;text-align:center;width:min(100%,640px);--reel:clamp(34px,10vw,80px)}
-.start-head{font-size:clamp(52px,15vw,104px)}
+.start-stack{display:flex;flex-direction:column;align-items:center;text-align:center;width:min(100%,640px);--reel:clamp(28px,min(10vw,6.2dvh),80px)}
+.start-head{font-size:clamp(44px,min(15vw,10dvh),104px)}
 /* The reel: phrases round a drum, only the one facing you stays once it lands */
-.reel{position:relative;width:100%;height:calc(var(--reel) * 1.9);margin:-.06em 0 30px;perspective:900px;font-family:var(--serif);font-style:italic;font-size:var(--reel);line-height:1.1;letter-spacing:-.02em;color:var(--ink);
+.reel{position:relative;width:100%;height:calc(var(--reel) * 1.9);margin:-.06em 0 clamp(12px,3.5dvh,30px);perspective:900px;font-family:var(--serif);font-style:italic;font-size:var(--reel);line-height:1.1;letter-spacing:-.02em;color:var(--ink);
   -webkit-mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent);mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent)}
 .drum{position:absolute;inset:0;transform-style:preserve-3d}
 button.reel{display:block;padding:0;border:0;background:none;cursor:pointer;text-align:inherit;-webkit-user-select:none;user-select:none}
@@ -258,20 +260,19 @@ button.reel:focus-visible{outline:2px solid var(--focus);outline-offset:4px;bord
 .reel.spinning{animation:reel-in .45s ease-out both}
 @keyframes reel-in{from{opacity:0}to{opacity:1}}
 .drum span{position:absolute;left:0;right:0;top:50%;margin-top:-.55em;white-space:nowrap;backface-visibility:hidden}
-.start-add{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-width:min(100%,280px);min-height:68px;padding:0 36px;border:0;border-radius:999px;background:var(--pill);color:var(--pill-ink);font:inherit;font-size:19px;font-weight:700;letter-spacing:-.015em;cursor:pointer}
+.start-add{display:inline-flex;align-items:center;justify-content:center;gap:14px;min-width:min(100%,320px);min-height:clamp(60px,9dvh,80px);padding:0 28px;white-space:nowrap;box-shadow:var(--float);border:0;border-radius:999px;background:var(--pill);color:var(--pill-ink);font:inherit;font-size:clamp(19px,2.8dvh,22px);font-weight:700;letter-spacing:-.015em;cursor:pointer}
 .start-add svg{width:22px;height:22px;flex:none}
 .start-add[disabled]{opacity:.45;cursor:default}
 @media (hover:hover){.start-add:not([disabled]):hover{background:var(--pill-hover)}}
-.to-overview{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-width:min(100%,280px);min-height:56px;margin-top:12px;padding:0 24px;border:1px solid var(--line-strong);border-radius:999px;background:transparent;color:var(--ink);font-weight:700;font-size:16px;text-decoration:none}
-.to-overview svg{width:20px;height:20px;flex:none}
-@media (hover:hover){.to-overview:hover{border-color:var(--ink)}}
+.to-overview{display:inline-flex;align-items:center;justify-content:center;min-height:44px;margin-top:clamp(6px,2dvh,16px);padding:0 8px;color:var(--muted);font-size:16px;font-weight:500;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
+@media (hover:hover){.to-overview:hover{color:var(--ink)}}
 /* Day/night, bottom left: just an outline, no fill */
 .theme-toggle{position:fixed;inset-inline-start:16px;bottom:calc(16px + var(--safe-b));width:52px;height:52px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:50%;background:transparent;color:var(--ink);cursor:pointer}
 .theme-toggle svg{width:22px;height:22px}
 @media (hover:hover){.theme-toggle:hover{border-color:var(--ink)}}
 @media (prefers-reduced-motion: no-preference){
-  .start-add,.to-overview{transition:scale .15s ease-out}
-  .start-add:active:not([disabled]),.to-overview:active{scale:.96}
+  .start-add{transition:scale .15s ease-out}
+  .start-add:active:not([disabled]){scale:.96}
 }
 
 /* ---------- A new expense as one sentence (dialogs/compose.js) ---------- */

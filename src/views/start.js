@@ -53,7 +53,7 @@ function spin(drum){
   frame = requestAnimationFrame(step);
 }
 
-/* Where everyone lands: one job, one button, with the overview right underneath it.
+/* Where everyone lands: one job, one button, with a quiet link to the overview underneath it.
    While the first load runs the button shows but waits, so a tap can't start a flow with no groups loaded.
    The reel spins when you arrive, not when a live update redraws the page */
 export function renderStart({ loading = false, entering = false } = {}){
@@ -68,10 +68,7 @@ export function renderStart({ loading = false, entering = false } = {}){
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
         <span>Add an expense</span>
       </button>
-      <a class="to-overview" href="#/overview">
-        <span>Overview</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>
-      </a>
+      <a class="to-overview" href="#/overview">or take me to my overview</a>
     </div>
     <button type="button" class="theme-toggle" data-action="toggle-theme" aria-label="Night mode" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"></svg></button>
   </section>`;
