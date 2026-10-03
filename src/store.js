@@ -1,7 +1,7 @@
 /* App state, populated from Supabase by loadAllData (data.js).
    Exported bindings are live: other modules always read the current value,
    but only this module can reassign them, via the setters. */
-const emptyState = () => ({ people: [], groups: [], payments: [], payHandles: {}, myIds: new Set(), activeGroupId: null });
+const emptyState = () => ({ people: [], groups: [], payments: [], payHandles: {}, drafts: [], myIds: new Set(), activeGroupId: null });
 
 export let state = emptyState();
 export let session = null;

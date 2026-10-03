@@ -31,7 +31,7 @@ export function renderPeopleView(){
     </header>
 
     <section class="section" aria-labelledby="everyoneHead">
-      <div class="section-head"><h2 id="everyoneHead">Everyone</h2><button class="btn small" data-action="add-person">Add a person</button></div>
+      <div class="section-head"><h2 id="everyoneHead">Everyone</h2><div class="chipbar">${people.length ? '<button class="btn small" data-action="manage-people">Edit</button>' : ''}<button class="btn small" data-action="add-person">Add a person</button></div></div>
       ${rows.length ? standings(rows, 'Balances with everyone') : ''}
       ${square.length ? `<div class="square-people">
         <h3>${rows.length ? 'All square' : 'Everyone’s square'}</h3>

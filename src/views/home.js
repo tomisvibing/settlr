@@ -73,6 +73,20 @@ function nudges(){
   </section>`;
 }
 
+/* Expenses typed with "Decide later": still waiting for a group. Private to you */
+function toSort(){
+  if(!state.drafts.length) return '';
+  return `<section class="section" aria-labelledby="sortHead">
+    <div class="section-head"><h2 id="sortHead">To sort</h2></div>
+    <ul class="moves">${state.drafts.map(d => `<li class="move">
+      <span class="m-who"><b>${esc(d.desc)}</b></span>
+      <span class="m-amt">${money(d.amount, d.currency)}</span>
+      <span class="m-acts"><button class="btn small" data-action="sort-draft" data-id="${d.id}">Pick a group</button>
+        <button class="btn small" data-action="del-draft" data-id="${d.id}" data-desc="${esc(d.desc)}">Delete</button></span>
+    </li>`).join('')}</ul>
+  </section>`;
+}
+
 /* Your groups as tickets, then the archived ones folded away. Used on the overview and on Groups */
 export function groupList(){
   const byRecent = (a, c) => lastActivity(c) - lastActivity(a);
@@ -98,6 +112,7 @@ export function renderHome(){
   if(!state.groups.length){
     app.innerHTML = `<div class="stack">
       ${hello()}
+      ${toSort()}
       <section class="empty">
         <h1 class="display">Start a group to split your first bill.</h1>
         <button class="btn primary" data-action="new-group">Start a group</button>
@@ -111,6 +126,7 @@ export function renderHome(){
     <h1 class="sr">Overview</h1>
     ${story()}
     ${nudges()}
+    ${toSort()}
 
     ${groupList()}
   </div>`;

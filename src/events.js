@@ -18,7 +18,9 @@ import { openExpense, openAddExpense } from './dialogs/expense.js';
 import { openVoiceExpense, abortVoice, finishVoice } from './dialogs/voice.js';
 import { openPayment } from './dialogs/payment.js';
 import { openSettlement } from './dialogs/settlement.js';
-import { openPerson } from './dialogs/person.js';
+import { openPerson, openManagePeople } from './dialogs/person.js';
+import { openComposer } from './dialogs/compose.js';
+import { plainAmount } from './lib/format.js';
 import { openGroup, addPendingMember, renderMembers } from './dialogs/group.js';
 import { openJoinGroup } from './dialogs/join.js';
 import { openProfile, openDeleteAccount, signOut } from './dialogs/account.js';
@@ -65,7 +67,18 @@ export function initEvents(){
     else if(a==='edit-payment') openPayment({id:b.dataset.id});
     else if(a==='settle') openPayment({from:b.dataset.from, to:b.dataset.to, amount:+b.dataset.amount, settle:true});
     else if(a==='add-person') openPerson();
+    else if(a==='manage-people') openManagePeople();
     else if(a==='edit-person') openPerson(b.dataset.id);
+    else if(a==='sort-draft'){
+      const d = state.drafts.find(x => x.id === b.dataset.id);
+      if(d) openComposer({ amount: plainAmount(d.amount, d.currency), what: d.desc, draftId: d.id, open: 'group' });
+    }
+    else if(a==='del-draft'){
+      if(await askConfirm({ title: `Delete “${b.dataset.desc}”?`, body: 'It was only saved for later, so nothing else changes.', confirmLabel: 'Delete' })){
+        const { error } = await sb.from('expense_drafts').delete().eq('id', b.dataset.id);
+        if(error) oops(error); else await refresh();
+      }
+    }
     else if(a==='del-person'){
       if(!personLocked(b.dataset.id) && await askConfirm({ title: 'Delete this person?', body: 'They’re not in any group or settlement, so nothing else changes.', confirmLabel: 'Delete person' })){
         const { error } = await sb.from('people').delete().eq('id', b.dataset.id);
