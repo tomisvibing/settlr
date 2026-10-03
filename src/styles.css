@@ -441,7 +441,9 @@ button.line{cursor:pointer}
 .signed-in b{font-weight:600;color:var(--ink);overflow-wrap:anywhere}
 .prefs{list-style:none;margin:0;padding:0;border-block:1px solid var(--line)}
 .prefs li{padding:14px 4px;font-family:var(--serif);font-size:22px;line-height:1.7}
-.prefs select{width:auto;min-height:48px;font-family:var(--font);font-size:20px;font-weight:600;padding:0 12px;vertical-align:middle}
+.prefs li > label{display:inline;gap:0;font:inherit;color:inherit}
+/* The picker is the same size and weight as the day / night and nudge controls beside it */
+.prefs select{width:auto;min-height:40px;padding:0 10px 0 16px;border:1px solid var(--line-strong);border-radius:999px;background-color:transparent;font-family:var(--font);font-size:14px;font-weight:500;line-height:1.2;vertical-align:middle}
 .seg.inline{display:inline-flex;vertical-align:middle;padding:3px;border:1px solid var(--line-strong);background:none;font-family:var(--font);line-height:1.2}
 .seg.inline label{flex:none}
 .seg.inline span{padding:6px 12px}
