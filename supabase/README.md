@@ -37,7 +37,7 @@ The `push` Edge Function (`functions/push/`) sends web push notifications to the
 
 - `{ "type": "key" }` returns the public VAPID key a browser subscribes with. The key pair is made on first use and kept in `push_state`, which has no policies, so only the function's service role can read it. No secret needs setting by hand.
 - `{ "type": "nudge", "group_id", "person_id" }`, called by a signed-in member, tells someone who owes them in that group. It checks the caller is in the group and is owed by that person, allows one nudge per person per group every 12 hours (`push_nudges`), and does nothing for people without an account.
-- `{ "type": "weekly" }` sends everyone with notifications on the overview's sentence ("Alex owes you £20.00 for Lisbon. You owe Sam €30.00."), skipping anyone who's square. A `pg_cron` job calls it on Sundays at 17:00 UTC; the function sends at most once every six days, so an extra call does nothing.
+- `{ "type": "weekly" }` sends everyone with notifications on Home's sentence ("Alex owes you £20.00 for Lisbon. You owe Sam €30.00."), skipping anyone who's square. A `pg_cron` job calls it on Sundays at 17:00 UTC; the function sends at most once every six days, so an extra call does nothing.
 
 It reuses the app's `ledger.js`, `story.js` and `format.js` from copies in `functions/push/lib/`. After changing those files in `src/lib/`, run `npm run sync-functions` (a test fails until you do).
 

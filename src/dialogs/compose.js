@@ -68,7 +68,7 @@ function renderSentence(){
   const idle = isIdle(st), go = $('#composeGo');
   go.classList.toggle('idle', idle); go.setAttribute('aria-disabled', String(idle));
   const amount = toPence(d.amount), each = $('#each');
-  if(!g){ each.textContent = d.later ? 'It waits under “To sort” on your overview until you pick a group.' : 'Pick the group to see who it’s split with.'; return; }
+  if(!g){ each.textContent = d.later ? 'It waits on Home, under “Not in a group yet”, until you choose one.' : 'Pick the group to see who it’s split with.'; return; }
   if( !(amount > 0) || !d.who.length || d.mode !== 'equal'){ each.textContent = d.mode !== 'equal' && g ? 'You’ll set each person’s part next.' : ''; return; }
   const split = distribute(amount, Object.fromEntries(d.who.map(id => [id, 1])), minorStep(cur()));
   const vals = Object.values(split), lo = Math.min(...vals), hi = Math.max(...vals);
@@ -88,7 +88,7 @@ function renderTray(){
   if(k === 'mode') tray.innerHTML = `<p class="tray-label" id="trayLabel">How’s it split?</p><div class="opts" role="group" aria-labelledby="trayLabel">${Object.entries(MODES).map(([v, l]) => text(v, l[0].toUpperCase() + l.slice(1), d.mode === v)).join('')}</div>`;
   if(k === 'group'){
     const open = activeGroups().slice().sort(byRecent);
-    tray.innerHTML = `<p class="tray-label" id="trayLabel">For which group?</p><div class="opts" role="group" aria-labelledby="trayLabel">${open.map(x => text(x.id, x.name, d.gid === x.id)).join('')}<button type="button" class="opt text" data-v="new">${icon.plus}New group</button><button type="button" class="opt text" aria-pressed="${!!d.later}" data-v="later">Decide later</button></div>`;
+    tray.innerHTML = `<p class="tray-label" id="trayLabel">For which group?</p><div class="opts" role="group" aria-labelledby="trayLabel">${open.map(x => text(x.id, x.name, d.gid === x.id)).join('')}<button type="button" class="opt text" data-v="new">${icon.plus}New group</button><button type="button" class="opt text" aria-pressed="${!!d.later}" data-v="later">Choose a group later</button></div>`;
   }
   if(k === 'what') tray.innerHTML = `<label class="tray-label" for="cWhat">What was it for?</label><input id="cWhat" maxlength="80" value="${esc(d.what)}" placeholder="Dinner, taxi, tickets…" autocomplete="off" enterkeyhint="done">`;
   if(k === 'amount') tray.innerHTML = `<label class="tray-label" for="cAmount">How much? <span class="hint">in ${esc(cur())}</span></label>
@@ -147,7 +147,7 @@ async function save(){
     orig_currency: null, orig_amount_cents: null, fx_rate: null };
   const result = await saveExpenseRow(null, row, splits);
   if(result === false) return false;
-  /* It came from "To sort": now it has a group, so the draft is done */
+  /* It came from "Not in a group yet": now it has a group, so the draft is done */
   if(d.draftId) await sb.from('expense_drafts').delete().eq('id', d.draftId);
   toast(`Added “${what}” to ${g.name}.`);
 }
@@ -156,7 +156,7 @@ async function saveForLater(what, amount){
   const d = draft, row = { description: what, amount_cents: amount, currency: cur() };
   const { error } = d.draftId ? await sb.from('expense_drafts').update(row).eq('id', d.draftId) : await sb.from('expense_drafts').insert(row);
   if(error) return fail(describeError(error));
-  toast(`Saved “${what}” for later. Find it under To sort on the overview.`);
+  toast(`Saved “${what}” for later. It’s on Home, under Not in a group yet.`);
 }
 
 export function initComposer(){

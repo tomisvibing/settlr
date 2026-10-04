@@ -6,6 +6,7 @@ import { getThemeOverride } from '../theme.js';
 import { nudgePref } from '../nudge.js';
 import { homeCurrency } from '../prefs.js';
 import { pushKnown, checkPush, pushSupport } from '../push.js';
+import { folder } from './shared.js';
 
 /* A member number that's yours and stays put: six digits from your account id */
 function memberNo(id){
@@ -36,7 +37,8 @@ function payPref(){
     <button type="button" class="btn small pref-btn" data-action="pay-links">${apps.length ? 'Change' : 'Add Monzo, PayPal or Revolut'}</button></li>`;
 }
 
-/* You: your account as a member's card, settings as sentences you finish, then the plain links */
+/* You: your account as a member's card, settings as sentences you finish, then the plain links,
+   each in its folder */
 export function renderSettings(){
   const app = $('#app');
   const u = session.user;
@@ -48,7 +50,7 @@ export function renderSettings(){
   const joined = since(u.created_at);
   const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
   app.innerHTML = `<div class="stack">
-    <h1 class="sr">Settings</h1>
+    <h1 class="sr">You</h1>
     <div class="member-card" role="img" aria-label="Membership card: ${esc(name)}${joined ? `, member since ${joined}` : ''}, ${plural(groups, 'group')}, ${plural(expenses, 'expense')}, ${people} ${people === 1 ? 'person' : 'people'}">
       <div class="mc-top"><span class="mc-mark">settlr</span><span class="mc-no">No. ${memberNo(u.id)}</span></div>
       <div class="mc-name">${esc(name)}</div>
@@ -57,7 +59,7 @@ export function renderSettings(){
     </div>
     <p class="signed-in">Signed in as <b>${esc(u.email || 'your Google account')}</b></p>
 
-    <ul class="prefs">
+    ${folder({ id: 'prefs', title: 'Preferences', body: `<ul class="prefs">
       ${payPref()}
       <li><span id="themeLead">Show settlr in</span>
         <span class="seg inline" role="radiogroup" aria-labelledby="themeLead">${[['light', 'day'], ['dark', 'night'], ['system', 'my device’s']].map(([v, l]) =>
@@ -70,16 +72,16 @@ export function renderSettings(){
       <li><span id="nudgeLead">Remind me to nudge people who owe me</span>
         <span class="keep"><span class="seg inline" role="radiogroup" aria-labelledby="nudgeLead">${[['never', 'never'], ['weekly', 'weekly'], ['fortnightly', 'fortnightly'], ['monthly', 'monthly']].map(([v, l]) =>
           `<label><input type="radio" name="nudges" value="${v}" ${nudgePref() === v ? 'checked' : ''}><span>${l}</span></label>`).join('')}</span>.</span>
-        <span class="pref-note">Once a group’s been quiet that long, the overview lists who still owes you. Nothing is sent until you’ve read the message and said yes. Remembered on this device.</span></li>
-    </ul>
+        <span class="pref-note">Once a group’s been quiet that long, Home lists who still owes you. Nothing is sent until you’ve read the message and said yes. Remembered on this device.</span></li>
+    </ul>` })}
 
-    <div class="links">
+    ${folder({ id: 'account', title: 'Account', body: `<div class="links">
       <button type="button" data-action="join-group">Join a group with a code ${arrow}</button>
       <button type="button" data-action="edit-profile">Change my name ${arrow}</button>
       <button type="button" data-action="export-all">Download my data ${arrow}</button>
       <button type="button" data-action="sign-out">Sign out ${arrow}</button>
       <button type="button" class="danger" data-action="delete-account">Delete my account ${arrow}</button>
-    </div>
+    </div>` })}
     <p class="foot">Deleting your account removes everything only you use. Shared groups stay intact for everyone else.</p>
   </div>`;
 }

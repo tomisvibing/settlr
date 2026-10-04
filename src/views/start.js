@@ -53,14 +53,14 @@ function spin(drum){
   frame = requestAnimationFrame(step);
 }
 
-/* Where everyone lands: one job, one button, with a quiet link to the overview underneath it.
+/* Where everyone lands: one job, one button, with a quiet way home underneath it.
    While the first load runs the button shows but waits, so a tap can't start a flow with no groups loaded.
    The reel spins when you arrive, not when a live update redraws the page */
 export function renderStart({ loading = false, entering = false } = {}){
   const doSpin = !loading && (entering || wasLoading);
   wasLoading = loading;
   $('#app').innerHTML = `<section class="start" aria-labelledby="startTitle"${loading ? ' aria-busy="true"' : ''}>
-    <a class="start-brand" href="#/overview">settlr</a>
+    <a class="start-brand" href="#/home">settlr</a>
     <div class="start-stack">
       <h1 class="start-head display" id="startTitle">Split<span class="sr"> the bill for anything you share</span></h1>
       <button type="button" class="reel" aria-label="Spin for another idea"${loading ? ' disabled' : ''}><span class="drum" aria-hidden="true">${PHRASES.map(p => `<span>${p}</span>`).join('')}</span></button>
@@ -68,7 +68,7 @@ export function renderStart({ loading = false, entering = false } = {}){
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
         <span>Add an expense</span>
       </button>
-      <a class="to-overview" href="#/overview">or take me to my overview</a>
+      <p class="to-home">or <a href="#/home">take me home</a></p>
     </div>
     <button type="button" class="theme-toggle" data-action="toggle-theme" aria-label="Night mode" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"></svg></button>
   </section>`;

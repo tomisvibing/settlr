@@ -4,7 +4,7 @@
 //   { type: 'nudge', group_id, person_id }        from the app, signed in: tell someone who owes
 //                                                 you in a group that you've nudged them
 //   { type: 'weekly' }                            from the Sunday cron job: everyone with
-//                                                 notifications on gets the overview's sentence
+//                                                 notifications on gets Home's sentence
 //
 // Deployed with verify_jwt off (see supabase/config.toml): the publishable key isn't a JWT, so
 // the function checks the signed-in user itself where it matters (nudges). The VAPID key pair
@@ -140,7 +140,7 @@ async function weekly() {
     const { owedToMe, iOwe } = whoOwesWhom(mine, isMe);
     if (!owedToMe.length && !iOwe.length) continue;
     const body = storyText(storyParts(mine, isMe, (pid: string) => firstName(people[pid]?.name), money));
-    if (await send(uid, { title: 'Your week in settlr', body, url: '#/overview', tag: 'weekly' })) notified++;
+    if (await send(uid, { title: 'Your week in settlr', body, url: '#/home', tag: 'weekly' })) notified++;
   }
   return reply({ users: users.length, notified });
 }

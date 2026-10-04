@@ -7,7 +7,8 @@ import { overall, needsOverall } from '../lib/overall.js';
 import { rates as homeRates, load as loadRates } from '../homeRates.js';
 import { homeCurrency } from '../prefs.js';
 import { groupHref } from '../router.js';
-import { avatar, icon, swipeButtons } from './shared.js';
+import { avatar, icon, swipeButtons, folder } from './shared.js';
+import { spendingSection } from './spending.js';
 import { dueNow } from '../nudge.js';
 
 /* Whether the Archived list is open, kept across re-renders (live updates redraw the page) */
@@ -69,7 +70,7 @@ function overallLine(){
   return `<p class="overall">${word[0]} <em class="${word[1]}">${word[2] === 'square' ? 'square' : word[2].replace(/^\+/, '')}</em> across every currency, at today’s rates${missing.length ? `, not counting ${missing.join(', ')}` : ''}.</p>`;
 }
 
-/* As often as you chose in Settings (never, unless you switch it on), the people who still owe you in groups that have gone
+/* As often as you chose in You (never, unless you switch it on), the people who still owe you in groups that have gone
    quiet, each with a Nudge */
 function nudges(){
   const due = dueNow(); if(!due.length) return '';
@@ -83,39 +84,32 @@ function nudges(){
   </section>`;
 }
 
-/* Expenses typed with "Decide later": still waiting for a group. Private to you */
+/* Expenses saved with "Choose a group later": still waiting for a group. Private to you */
 function toSort(){
   if(!state.drafts.length) return '';
-  return `<section class="section" aria-labelledby="sortHead">
-    <div class="section-head"><h2 id="sortHead">To sort</h2></div>
-    <ul class="moves">${state.drafts.map(d => `<li class="move">
+  return folder({ id: 'sort', title: 'Not in a group yet', body: `<ul class="moves">${state.drafts.map(d => `<li class="move">
       <span class="m-who"><b>${esc(d.desc)}</b></span>
       <span class="m-amt">${money(d.amount, d.currency)}</span>
-      <span class="m-acts"><button class="btn small" data-action="sort-draft" data-id="${d.id}">Pick a group</button>
+      <span class="m-acts"><button class="btn small" data-action="sort-draft" data-id="${d.id}">Choose a group</button>
         <button class="btn small" data-action="del-draft" data-id="${d.id}" data-desc="${esc(d.desc)}">Delete</button></span>
-    </li>`).join('')}</ul>
-  </section>`;
+    </li>`).join('')}</ul>` });
 }
 
-/* Your groups as tickets, then the archived ones folded away. Used on the overview and on Groups */
-export function groupList(){
+/* Your groups as tickets, then the archived ones folded away */
+function groupList(){
   const byRecent = (a, c) => lastActivity(c) - lastActivity(a);
   const groups = state.groups.filter(g => !isArchived(g)).sort(byRecent);
   const archived = state.groups.filter(isArchived).sort((a, c) => c.archivedAt - a.archivedAt);
-  return `<section class="section" aria-labelledby="groupsHead">
-      <div class="section-head">
-        <h2 id="groupsHead">Your groups</h2>
-        <div class="chipbar"><button class="btn small" data-action="join-group">Join</button><button class="btn small" data-action="new-group">New group</button></div>
-      </div>
-      ${groups.length ? `<ul class="tickets">${groups.map(ticket).join('')}</ul>`
+  return folder({ id: 'groups', title: 'Your groups',
+    actions: `<div class="chipbar"><button class="btn small" data-action="join-group">Join</button><button class="btn small" data-action="new-group">New group</button></div>`,
+    body: `${groups.length ? `<ul class="tickets">${groups.map(ticket).join('')}</ul>`
         : `<p class="none">No active groups. Start one, or restore one from Archived below.</p>`}
       ${archived.length ? `<details class="archived" ${archivedOpen ? 'open' : ''}>
         <summary>${icon.archive}Archived <span class="count">${archived.length}</span></summary>
         <ul class="tickets">${archived.map(ticket).join('')}</ul>
-      </details>` : ''}
-    </section>`;
+      </details>` : ''}` });
 }
-export const bindArchived = root => root.querySelector('details.archived')?.addEventListener('toggle', ev => { archivedOpen = ev.target.open; });
+const bindArchived = root => root.querySelector('details.archived')?.addEventListener('toggle', ev => { archivedOpen = ev.target.open; });
 
 export function renderHome(){
   const app = $('#app');
@@ -133,13 +127,13 @@ export function renderHome(){
   }
   app.innerHTML = `<div class="stack">
     ${hello()}
-    <h1 class="sr">Overview</h1>
+    <h1 class="sr">Home</h1>
     ${story()}
     ${overallLine()}
     ${nudges()}
     ${toSort()}
-
     ${groupList()}
+    ${spendingSection(renderHome)}
   </div>`;
   bindArchived(app);
 }

@@ -16,7 +16,8 @@ import { filterActivity, setActivityGroup } from './views/receipt.js';
 import { dlg, closeDialog, fail, describeError } from './dialogs/dialog.js';
 import { openExpense, openAddExpense } from './dialogs/expense.js';
 import { openVoiceExpense, abortVoice, finishVoice } from './dialogs/voice.js';
-import { openPayment } from './dialogs/payment.js';
+import { openPayment, openSettle } from './dialogs/payment.js';
+import { jumpTo } from './jump.js';
 import { openSettlement } from './dialogs/settlement.js';
 import { openPerson, openManagePeople } from './dialogs/person.js';
 import { openComposer } from './dialogs/compose.js';
@@ -65,7 +66,9 @@ export function initEvents(){
     else if(a==='edit-expense') openExpense(b.dataset.id);
     else if(a==='add-payment') openPayment();
     else if(a==='edit-payment') openPayment({id:b.dataset.id});
-    else if(a==='settle') openPayment({from:b.dataset.from, to:b.dataset.to, amount:+b.dataset.amount, settle:true});
+    else if(a==='settle') openSettle({from:b.dataset.from, to:b.dataset.to, amount:+b.dataset.amount});
+    else if(a==='settle-edit') openPayment({from:b.dataset.from, to:b.dataset.to, amount:+b.dataset.amount, settle:true});
+    else if(a==='jump') jumpTo(b.dataset.to);
     else if(a==='add-person') openPerson();
     else if(a==='manage-people') openManagePeople();
     else if(a==='edit-person') openPerson(b.dataset.id);
@@ -134,7 +137,7 @@ export function initEvents(){
         const { error } = await sb.rpc('leave_group', { gid: g.id });
         if(error){ oops(error, 'leave'); return; }
         state.activeGroupId = null;
-        closeDialog(); navigate('#/overview'); await refresh();
+        closeDialog(); navigate('#/home'); await refresh();
         toast(`You left ${g.name}.`);
       }
     }
@@ -166,7 +169,7 @@ export function initEvents(){
         /* The security rules turn a non-admin's delete into "nothing deleted" rather than an error */
         if(!gone?.length){ fail('Only an admin can delete this group.'); return; }
         state.activeGroupId = null;
-        closeDialog(); navigate('#/overview'); await refresh();
+        closeDialog(); navigate('#/home'); await refresh();
         toast(`Deleted ${g.name}.`);
       }
     }
