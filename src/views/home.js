@@ -2,7 +2,10 @@ import { state, myPersonId } from '../store.js';
 import { $, esc, money, ago } from '../lib/format.js';
 import { balances } from '../lib/ledger.js';
 import { storyParts } from '../lib/story.js';
-import { personName, shortName, meIn, lastActivity, isArchived, canAdmin, isMe } from '../selectors.js';
+import { personName, shortName, meIn, lastActivity, isArchived, canAdmin, isMe, myTotals } from '../selectors.js';
+import { overall, needsOverall } from '../lib/overall.js';
+import { fetchRate } from '../rates.js';
+import { homeCurrency } from '../prefs.js';
 import { groupHref } from '../router.js';
 import { avatar, icon, swipeButtons } from './shared.js';
 import { dueNow } from '../nudge.js';
@@ -55,6 +58,23 @@ function story(){
     : p.person ? `<a href="#/people">${esc(p.name)}</a>`
     : `<em class="${p.tone}">${p.amount}</em>`).join('');
   return `<p class="story">${html}</p>`;
+}
+
+/* Today's rates into your home currency, looked up once per currency and kept; null where there isn't one */
+const homeRates = {};
+function overallLine(){
+  const totals = myTotals(), home = homeCurrency();
+  if(!needsOverall(totals)) return '';
+  const todo = totals.map(([c]) => c).filter(c => c !== home && !(c in homeRates));
+  if(todo.length){
+    todo.forEach(c => { homeRates[c] = null; });
+    Promise.all(todo.map(async c => { homeRates[c] = (await fetchRate(c, home))?.rate ?? null; }))
+      .then(() => { if(document.querySelector('#app .overall')) renderHome(); });
+  }
+  if(todo.length) return `<p class="overall">Adding it all up in ${home}…</p>`;
+  const { total, missing } = overall(totals, homeRates, home);
+  const word = total > 0 ? ['Overall you’re owed', 'up', `+${money(total, home)}`] : total < 0 ? ['Overall you owe', 'down', money(-total, home)] : ['Overall you’re', '', 'square'];
+  return `<p class="overall">${word[0]} <em class="${word[1]}">${word[2] === 'square' ? 'square' : word[2].replace(/^\+/, '')}</em> across every currency, at today’s rates${missing.length ? `, not counting ${missing.join(', ')}` : ''}.</p>`;
 }
 
 /* As often as you chose in Settings (never, unless you switch it on), the people who still owe you in groups that have gone
@@ -123,6 +143,7 @@ export function renderHome(){
     ${hello()}
     <h1 class="sr">Overview</h1>
     ${story()}
+    ${overallLine()}
     ${nudges()}
     ${toSort()}
 

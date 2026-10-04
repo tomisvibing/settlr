@@ -319,6 +319,9 @@ button.reel:focus-visible{outline:2px solid var(--focus);outline-offset:4px;bord
 .story{margin:0 4px;font-family:var(--serif);font-size:clamp(26px,7.4vw,36px);line-height:1.28;letter-spacing:-.01em}
 .story em{font-style:italic}
 .story em.down{color:var(--owe)}
+.overall{margin:-8px 4px 0;color:var(--muted,inherit);font-size:15px}
+.overall em{font-style:italic}
+.overall em.down{color:var(--owe)}
 .story a{color:inherit;text-decoration-color:var(--line-strong)}
 @media (hover:hover){.story a:hover{text-decoration-color:currentColor}}
 .tickets{list-style:none;margin:0;padding:0;display:grid;gap:12px}
