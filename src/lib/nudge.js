@@ -1,7 +1,7 @@
 /* Who to nudge, and what to say (tested in test/nudge.test.js). Pure: give it the groups and the
    nudges already sent. settlr doesn't message anyone itself; it lines people up and you send the
    nudge from your phone */
-import { balances, settlements } from './ledger.js';
+import { paymentPlan } from './ledger.js';
 
 export const WEEK = 7 * 864e5;
 /* How often to be reminded, in days; "never" is the default, so nobody is nagged unasked */
@@ -15,7 +15,7 @@ export function dueNudges(groups, isMe, { now = Date.now(), nudged = {}, lastAct
   const due = [];
   for(const g of groups){
     if(g.archivedAt || now - lastActivity(g) < every) continue;
-    for(const p of settlements(balances(g))){
+    for(const p of paymentPlan(g)){
       if(!isMe(p.to) || isMe(p.from)) continue;
       if(now - (nudged[key(g.id, p.from)] || 0) < every) continue;
       due.push({ g, pid: p.from, amount: p.amount });

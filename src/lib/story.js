@@ -1,6 +1,6 @@
 /* The overview's opening paragraph: who owes you, who you owe and what's square, in words
    (tested in test/story.test.js). Pure: give it groups and a way to recognise you */
-import { balances, settlements } from './ledger.js';
+import { paymentPlan } from './ledger.js';
 
 /* Pairwise debts between you and each person, from each group's fewest-payments plan */
 export function whoOwesWhom(groups, isMe){
@@ -13,7 +13,7 @@ export function whoOwesWhom(groups, isMe){
   };
   for(const g of groups){
     if(!g.members.some(isMe)) continue;
-    const plan = settlements(balances(g));
+    const plan = paymentPlan(g);
     let mine = false;
     for(const p of plan){
       if(isMe(p.to) && !isMe(p.from)){ add(owedToMe, p.from, g.currency, p.amount, g.name); mine = true; }

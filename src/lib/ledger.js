@@ -40,3 +40,25 @@ export function settlements(b){
   }
   return out;
 }
+/* Who pays whom without rerouting: each pair of people nets what they owe each other directly, so
+   nobody pays someone they never owed. A payment between two people counts like an expense one paid for the other */
+export function directDebts(g){
+  const owes = {}, ids = new Set(g.members);
+  g.expenses.forEach(e => {
+    for(const [pid, v] of Object.entries(e.splits)){
+      if(pid === e.paidBy || !ids.has(pid) || !ids.has(e.paidBy)) continue;
+      ((owes[pid] ||= {})[e.paidBy] ||= 0);
+      owes[pid][e.paidBy] += v;
+    }
+  });
+  const out = [];
+  for(const a of ids) for(const b of ids){
+    if(a >= b) continue;
+    const d = (owes[a]?.[b] || 0) - (owes[b]?.[a] || 0);
+    if(d > 0) out.push({ from: a, to: b, amount: d });
+    else if(d < 0) out.push({ from: b, to: a, amount: -d });
+  }
+  return out.sort((x, y) => y.amount - x.amount);
+}
+/* The payments that settle a group: the fewest, or direct pair by pair when the group turns simplifying off */
+export const paymentPlan = g => g.simplify === false ? directDebts(g) : settlements(balances(g));

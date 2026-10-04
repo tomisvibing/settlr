@@ -16,6 +16,7 @@ export function openGroup(isNew, { carry = null, note = '' } = {}){
     ${note || carry ? `<p class="hint">${note || `A new group for ${esc(carry.desc)} · ${money(carry.amount, carry.currency)}. Add the people you’re splitting it with.`}</p>` : ''}
     <label>Group name<input name="name" maxlength="50" value="${esc(g?.name||'')}" placeholder="Flat 4B, Lisbon weekend"></label>
     <label>Currency<select name="currency" ${g?.expenses.length ? 'disabled' : ''}>${currencyOptions(g?.currency || carry?.currency || homeCurrency())}</select>${g?.expenses.length ? '<span class="hint" style="font-weight:400">Fixed now the group has expenses. Each expense can still be in any currency.</span>' : ''}</label>
+    <label class="daterow">Simplify debts<select name="simplify"><option value="1" ${g?.simplify === false ? '' : 'selected'}>On: fewest payments</option><option value="0" ${g?.simplify === false ? 'selected' : ''}>Off: pay back who you owe</option></select></label>
     ${g?`<p class="hint">Invite code: <b>${esc(g.inviteCode)}</b> <button type="button" class="btn small" data-action="invite">Share invite link</button></p>`:''}
     <fieldset><legend>People in this group</legend><div id="mlist" class="srows"></div></fieldset>
     <div class="mrow"><label>Add someone<input name="newMember" maxlength="30" placeholder="A saved or new name" autocomplete="off"></label><button type="button" class="btn" data-action="add-member">Add</button></div>
@@ -38,7 +39,7 @@ export function openGroup(isNew, { carry = null, note = '' } = {}){
       if(new Set(chosen).size !== chosen.length) return fail('Two of the people you picked share a name. Rename one so the ledger stays clear.');
       try{
         if(g){
-          const { error } = await sb.from('groups').update({ name, currency: form.currency.value }).eq('id', g.id);
+          const { error } = await sb.from('groups').update({ name, currency: form.currency.value, simplify_debts: form.simplify.value === '1' }).eq('id', g.id);
           if(error) throw error;
           const before = new Set(g.members), after = new Set(draft.members);
           const toAdd = draft.members.filter(id => !before.has(id));
@@ -48,6 +49,7 @@ export function openGroup(isNew, { carry = null, note = '' } = {}){
         } else {
           const { data: gid, error } = await sb.rpc('create_group', { name, currency: form.currency.value, member_person_ids: draft.members });
           if(error) throw error;
+          if(form.simplify.value === '0') await sb.from('groups').update({ simplify_debts: false }).eq('id', gid);
           /* Started from a new expense: go back to it, now in this group */
           if(carry?.resume){ await refresh(); state.activeGroupId = gid; carry.resume(gid); return false; }
           return '#/g/' + encodeURIComponent(gid);

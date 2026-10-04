@@ -70,6 +70,7 @@ export async function loadAllData(){
   const mineNow = g => (membersByGroup[g.id] || []).some(pid => state.myIds.has(pid));
   state.groups = groups.filter(mineNow).map(g => ({
     id: g.id, name: g.name, currency: g.currency, inviteCode: g.invite_code, createdAt: new Date(g.created_at).getTime(),
+    simplify: g.simplify_debts !== false,
     archivedAt: g.archived_at ? new Date(g.archived_at).getTime() : null,
     members: membersByGroup[g.id] || [], left: leftByGroup[g.id] || [], admins: adminsByGroup[g.id] || [],
     expenses: expensesByGroup[g.id] || [], recurring: recurringByGroup[g.id] || []

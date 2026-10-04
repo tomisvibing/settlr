@@ -73,3 +73,28 @@ describe('settlements', () => {
     expect(settlements({ a: 0, b: 0 })).toEqual([]);
   });
 });
+
+describe('direct debts (simplify off)', () => {
+  const e = (paidBy, amount, splits) => ({ type: 'expense', paidBy, amount, splits });
+  const g = { members: ['a', 'b', 'c'], expenses: [e('a', 3000, { a: 1000, b: 1000, c: 1000 }), e('b', 3000, { a: 1000, b: 1000, c: 1000 })] };
+  it('nets each pair directly, so c pays both a and b', async () => {
+    const { directDebts } = await import('../src/lib/ledger.js');
+    expect(directDebts(g).map(p => `${p.from}>${p.to}:${p.amount}`).sort()).toEqual(['c>a:1000', 'c>b:1000']);
+  });
+  it('simplified, the same group needs the same total but may route differently', async () => {
+    const { paymentPlan } = await import('../src/lib/ledger.js');
+    const total = p => p.reduce((s, x) => s + x.amount, 0);
+    expect(total(paymentPlan({ ...g, simplify: true }))).toBe(2000);
+  });
+  it('a chain a<-b<-c stays a chain when off, collapses when on', async () => {
+    const { paymentPlan } = await import('../src/lib/ledger.js');
+    const chain = { members: ['a', 'b', 'c'], expenses: [e('a', 1000, { b: 1000 }), e('b', 1000, { c: 1000 })] };
+    expect(paymentPlan({ ...chain, simplify: false })).toHaveLength(2);
+    expect(paymentPlan({ ...chain, simplify: true })).toEqual([{ from: 'c', to: 'a', amount: 1000 }]);
+  });
+  it('treats a payment like an expense one paid for the other', async () => {
+    const { directDebts } = await import('../src/lib/ledger.js');
+    const pay = { members: ['a', 'b'], expenses: [e('a', 1000, { b: 1000 }), { type: 'payment', paidBy: 'b', amount: 400, splits: { a: 400 } }] };
+    expect(directDebts(pay)).toEqual([{ from: 'b', to: 'a', amount: 600 }]);
+  });
+});

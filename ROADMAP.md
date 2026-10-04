@@ -65,7 +65,7 @@ Everything later builds on these.
 - [x] Categories on expenses (Eating out, Groceries, Transport, Stay, Fun, Bills, Shopping, Other): pick one when adding or editing, and the group's "Where it went" shows spending by category (`expenses.category`, migration `20261004110619_expense_categories.sql`)
 - [x] Spending across all groups, on the Groups page ("Where it all went"): total in your home currency, by group and by category
 - [x] Archive finished groups: frozen and read-only for everyone, kept under Archived on Home, and restorable by any member
-- [ ] "Simplify debts" as a setting
+- [x] "Simplify debts" as a setting, per group (Edit group): on, the fewest payments; off, everyone pays back exactly who they owe, pair by pair (`groups.simplify_debts`, migration `20261004112619_simplify_debts.sql`)
 
 ## Phase 5: Reach
 

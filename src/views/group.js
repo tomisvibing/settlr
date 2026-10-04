@@ -1,6 +1,6 @@
 import { state, takeJustPaid } from '../store.js';
 import { $, esc, money, byNewest, ago } from '../lib/format.js';
-import { balances, settlements } from '../lib/ledger.js';
+import { balances, paymentPlan } from '../lib/ledger.js';
 import { group, shortName, isMe, spentIn, isArchived, handlesOf } from '../selectors.js';
 import { payLinks } from '../lib/paylinks.js';
 import { avatar, icon } from './shared.js';
@@ -85,7 +85,7 @@ export function renderGroupView(id){
     return;
   }
   const cur = g.currency, b = balances(g);
-  const plan = settlements(b);
+  const plan = paymentPlan(g);
   const sorted = [...g.expenses].sort(byNewest);
   const n = g.members.length;
   const frozen = isArchived(g);
