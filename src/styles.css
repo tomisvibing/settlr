@@ -319,6 +319,9 @@ button.reel:focus-visible{outline:2px solid var(--focus);outline-offset:4px;bord
 .story{margin:0 4px;font-family:var(--serif);font-size:clamp(26px,7.4vw,36px);line-height:1.28;letter-spacing:-.01em}
 .story em{font-style:italic}
 .story em.down{color:var(--owe)}
+.overall{margin:-8px 4px 0;color:var(--muted,inherit);font-size:15px}
+.overall em{font-style:italic}
+.overall em.down{color:var(--owe)}
 .story a{color:inherit;text-decoration-color:var(--line-strong)}
 @media (hover:hover){.story a:hover{text-decoration-color:currentColor}}
 .tickets{list-style:none;margin:0;padding:0;display:grid;gap:12px}
@@ -376,6 +379,14 @@ button.st-row{cursor:pointer}
 .pref-note{display:block;margin-top:4px;font-family:var(--font);font-size:13px;line-height:1.45;color:var(--muted)}
 
 /* ---------- A group: the fewest payments, stamped Paid when marked ---------- */
+.spend-lead{margin:0 0 14px;font-family:var(--serif);font-size:20px;line-height:1.35}
+.bars{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.bars + .bars{margin-top:18px}
+.bars li{display:grid;grid-template-columns:92px 1fr auto;align-items:center;gap:10px;font-size:14px}
+.b-lbl{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.b-track{height:10px;border-radius:5px;background:var(--line-soft);overflow:hidden}
+.b-fill{display:block;height:100%;border-radius:5px;background:var(--accent)}
+.b-amt{font-variant-numeric:tabular-nums}
 .moves{list-style:none;margin:0;padding:0;display:grid;gap:10px}
 .move{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:12px 12px 12px 14px;border:1px solid var(--line);border-radius:20px;background:var(--surface);overflow:hidden}
 .m-who{display:flex;align-items:center;gap:6px;flex:1 1 150px;min-width:0;font-size:15px}

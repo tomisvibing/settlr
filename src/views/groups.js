@@ -1,6 +1,7 @@
 import { state } from '../store.js';
 import { $ } from '../lib/format.js';
 import { groupList, bindArchived } from './home.js';
+import { spendingSection } from './spending.js';
 
 /* Every group in one place: the tickets from the overview, without the story above them */
 export function renderGroups(){
@@ -18,6 +19,7 @@ export function renderGroups(){
   app.innerHTML = `<div class="stack">
     <header class="page-head"><h1 class="display">Groups</h1></header>
     ${groupList()}
+    ${spendingSection(renderGroups)}
   </div>`;
   bindArchived(app);
 }

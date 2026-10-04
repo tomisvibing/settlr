@@ -11,7 +11,7 @@
 // is made on first use and kept in push_state, which only the service role can read.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import webpush from 'npm:web-push@3.6.7';
-import { balances, settlements } from './lib/ledger.js';
+import { paymentPlan } from './lib/ledger.js';
 import { storyParts, storyText, whoOwesWhom } from './lib/story.js';
 import { money } from './lib/format.js';
 
@@ -75,7 +75,7 @@ async function all(table: string, columns: string, filter?: (q: any) => any) {
 async function loadGroups(groupIds?: string[]) {
   const inGroups = (col: string) => groupIds ? (q: any) => q.in(col, groupIds) : undefined;
   const [g, m, e, p] = await Promise.all([
-    all('groups', 'id, name, currency, archived_at', inGroups('id')),
+    all('groups', 'id, name, currency, archived_at, simplify_debts', inGroups('id')),
     all('group_members', 'id, group_id, person_id, left_at', inGroups('group_id')),
     all('expenses', 'id, group_id, type, amount_cents, paid_by', inGroups('group_id')),
     all('people', 'id, name, user_id'),
@@ -84,7 +84,7 @@ async function loadGroups(groupIds?: string[]) {
   const splits: Record<string, Record<string, number>> = {};
   for (const x of s) (splits[x.expense_id] ||= {})[x.person_id] = Number(x.amount_cents);
   const groups = g.map((row: any) => ({
-    id: row.id, name: row.name, currency: row.currency, archivedAt: row.archived_at,
+    id: row.id, name: row.name, currency: row.currency, simplify: row.simplify_debts !== false, archivedAt: row.archived_at,
     members: m.filter((x: any) => x.group_id === row.id && !x.left_at).map((x: any) => x.person_id),
     expenses: e.filter((x: any) => x.group_id === row.id)
       .map((x: any) => ({ type: x.type, amount: Number(x.amount_cents), paidBy: x.paid_by, splits: splits[x.id] || {} })),
@@ -104,7 +104,7 @@ async function nudge(req: Request, groupId: string, personId: string) {
   const { groups, people } = await loadGroups([groupId]);
   const g = groups[0];
   if (!g || g.archivedAt || !g.members.some((pid: string) => people[pid]?.user_id === me)) return reply({ error: 'Not in that group.' }, 403);
-  const owed = settlements(balances(g)).find(p => p.from === personId && people[p.to]?.user_id === me);
+  const owed = paymentPlan(g).find(p => p.from === personId && people[p.to]?.user_id === me);
   if (!owed) return reply({ error: 'They don’t owe you in this group.' }, 400);
   const target = people[personId]?.user_id;
   if (!target || target === me) return reply({ sent: 0, reason: 'no-account' });

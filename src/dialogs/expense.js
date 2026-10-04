@@ -1,3 +1,4 @@
+import { CATEGORIES } from '../lib/categories.js';
 import { sb } from '../supabase.js';
 import { session } from '../store.js';
 import { $, esc, ago, money, toPence, today, currencySymbol, currencyOptions, plainAmount, minorDigits, minorStep } from '../lib/format.js';
@@ -91,6 +92,7 @@ export function openExpense(eid, prefill){
       <div class="seg small">${modes.map(([v,l]) => `<label><input type="radio" name="mode" value="${v}" ${draft.mode===v?'checked':''}><span>${l}</span></label>`).join('')}</div>
       <div id="splitRows"></div>
     </fieldset>
+    <label class="daterow">Category<select name="category"><option value="">None</option>${CATEGORIES.map(([v, l]) => `<option value="${v}" ${e?.category === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
     <label class="daterow">Date<input type="date" name="date" value="${dateVal}"></label>
     ${e ? '' : `<label class="daterow">Repeats<select name="repeat"><option value="">Doesn’t repeat</option>${FREQUENCIES.map(([v, l]) => `<option value="${v}">${l[0].toUpperCase() + l.slice(1)}</option>`).join('')}</select></label>
     <p class="hint" id="repeatHint" hidden></p>`}
@@ -368,7 +370,7 @@ async function saveExpense(){
     splits = distribute(amount, input, step);
     if(!splits) return fail(draft.mode==='equal' ? 'Pick at least one person to split with.' : 'Give at least one person a share above zero.', form.querySelector('#splitRows input'));
   }
-  const row = { group_id: g.id, type:'expense', description: desc, amount_cents: amount, paid_by: form.paidBy.value, split_mode: draft.mode, expense_date: form.date.value || today(), split_input: input,
+  const row = { group_id: g.id, type:'expense', description: desc, amount_cents: amount, paid_by: form.paidBy.value, split_mode: draft.mode, expense_date: form.date.value || today(), split_input: input, category: form.category?.value || null,
     orig_currency: isForeign ? draft.cur : null, orig_amount_cents: isForeign ? typed : null, fx_rate: isForeign ? draft.rate : null };
   /* Upload first so the expense never points at a file that isn't there; tidy up whichever file lost */
   const d = draft, old = d.receiptPath;

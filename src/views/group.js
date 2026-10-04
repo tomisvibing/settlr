@@ -1,6 +1,6 @@
 import { state, takeJustPaid } from '../store.js';
 import { $, esc, money, byNewest, ago } from '../lib/format.js';
-import { balances, settlements } from '../lib/ledger.js';
+import { balances, paymentPlan } from '../lib/ledger.js';
 import { group, shortName, isMe, spentIn, isArchived, handlesOf } from '../selectors.js';
 import { payLinks } from '../lib/paylinks.js';
 import { avatar, icon } from './shared.js';
@@ -8,6 +8,8 @@ import { standings } from './standings.js';
 import { nudgedAt } from '../nudge.js';
 import { receipt } from './receipt.js';
 import { nextDate, frequencyLabel } from '../lib/recurring.js';
+import { insights, monthLabel } from '../lib/insights.js';
+import { categoryLabel } from '../lib/categories.js';
 
 const nameOf = pid => isMe(pid) ? 'You' : shortName(pid);
 
@@ -57,6 +59,20 @@ function repeating(g, frozen){
   </section>`;
 }
 
+/* Where the money went: by month, who paid most, and the biggest single expense */
+function spending(g){
+  const i = insights(g);
+  if(i.count < 2) return '';
+  const m = v => money(v, g.currency), top = Math.max(...i.byMonth.map(x => x.amount), 1);
+  const lead = i.paidBy[0];
+  return `<section class="section" aria-labelledby="spendHead">
+    <div class="section-head"><h2 id="spendHead">Where it went</h2></div>
+    <p class="spend-lead">${i.count} expenses, <b>${m(i.total)}</b> in all${lead && g.members.length > 1 ? `. ${isMe(lead.pid) ? 'You' : esc(shortName(lead.pid))} paid the most, <b>${m(lead.amount)}</b>` : ''}${i.biggest ? `. The biggest was <b>${esc(i.biggest.desc)}</b> at ${m(i.biggest.amount)}` : ''}.</p>
+    ${i.byCategory.some(x => x.category) ? `<ul class="bars" aria-label="Spending by category">${i.byCategory.map(x => `<li><span class="b-lbl">${categoryLabel(x.category)}</span><span class="b-track" aria-hidden="true"><span class="b-fill" style="width:${Math.max(2, Math.round(x.amount / i.byCategory[0].amount * 100))}%"></span></span><span class="b-amt">${m(x.amount)}</span></li>`).join('')}</ul>` : ''}
+    ${i.byMonth.length > 1 ? `<ul class="bars" aria-label="Spending by month">${i.byMonth.map(x => `<li><span class="b-lbl">${monthLabel(x.month)}</span><span class="b-track" aria-hidden="true"><span class="b-fill" style="width:${Math.max(2, Math.round(x.amount / top * 100))}%"></span></span><span class="b-amt">${m(x.amount)}</span></li>`).join('')}</ul>` : ''}
+  </section>`;
+}
+
 export function renderGroupView(id){
   const app = $('#app');
   state.activeGroupId = id;
@@ -69,7 +85,7 @@ export function renderGroupView(id){
     return;
   }
   const cur = g.currency, b = balances(g);
-  const plan = settlements(b);
+  const plan = paymentPlan(g);
   const sorted = [...g.expenses].sort(byNewest);
   const n = g.members.length;
   const frozen = isArchived(g);
@@ -105,6 +121,8 @@ export function renderGroupView(id){
       ${plan.length || justPaid ? `<ul class="moves">${justPaid ? move(g, justPaid, frozen, true) : ''}${plan.map(p => move(g, p, frozen)).join('')}</ul>` : ''}
       ${!plan.length ? `<p class="square-line">${g.expenses.length ? 'Square. Nobody owes anybody.' : 'Nothing to settle yet. Add the first expense with the + button.'}</p>` : ''}
     </section>
+
+    ${spending(g)}
 
     ${repeating(g, frozen)}
 

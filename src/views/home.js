@@ -2,7 +2,10 @@ import { state, myPersonId } from '../store.js';
 import { $, esc, money, ago } from '../lib/format.js';
 import { balances } from '../lib/ledger.js';
 import { storyParts } from '../lib/story.js';
-import { personName, shortName, meIn, lastActivity, isArchived, canAdmin, isMe } from '../selectors.js';
+import { personName, shortName, meIn, lastActivity, isArchived, canAdmin, isMe, myTotals } from '../selectors.js';
+import { overall, needsOverall } from '../lib/overall.js';
+import { rates as homeRates, load as loadRates } from '../homeRates.js';
+import { homeCurrency } from '../prefs.js';
 import { groupHref } from '../router.js';
 import { avatar, icon, swipeButtons } from './shared.js';
 import { dueNow } from '../nudge.js';
@@ -55,6 +58,15 @@ function story(){
     : p.person ? `<a href="#/people">${esc(p.name)}</a>`
     : `<em class="${p.tone}">${p.amount}</em>`).join('');
   return `<p class="story">${html}</p>`;
+}
+
+function overallLine(){
+  const totals = myTotals(), home = homeCurrency();
+  if(!needsOverall(totals)) return '';
+  if(loadRates(totals.map(([c]) => c), () => { if(document.querySelector('#app .overall')) renderHome(); })) return `<p class="overall">Adding it all up in ${home}…</p>`;
+  const { total, missing } = overall(totals, homeRates, home);
+  const word = total > 0 ? ['Overall you’re owed', 'up', `+${money(total, home)}`] : total < 0 ? ['Overall you owe', 'down', money(-total, home)] : ['Overall you’re', '', 'square'];
+  return `<p class="overall">${word[0]} <em class="${word[1]}">${word[2] === 'square' ? 'square' : word[2].replace(/^\+/, '')}</em> across every currency, at today’s rates${missing.length ? `, not counting ${missing.join(', ')}` : ''}.</p>`;
 }
 
 /* As often as you chose in Settings (never, unless you switch it on), the people who still owe you in groups that have gone
@@ -123,6 +135,7 @@ export function renderHome(){
     ${hello()}
     <h1 class="sr">Overview</h1>
     ${story()}
+    ${overallLine()}
     ${nudges()}
     ${toSort()}
 

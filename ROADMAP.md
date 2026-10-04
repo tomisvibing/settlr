@@ -59,11 +59,13 @@ Everything later builds on these.
 - [x] Payment links: add your Monzo, PayPal or Revolut username under Settings, and anyone who owes you gets "Pay with Monzo" beside the payment, with the amount filled in (Monzo for pounds; Revolut opens your page without an amount). Your link also goes in the nudges you send
 - [x] 50 currencies to pick from, with names, and whole-number amounts for currencies without pence (yen, won, forint…)
 - [x] Multiple currencies in one group: each expense or payment in any currency, converted into the group's at the European Central Bank rate for its date (or your own), keeping both amounts
-- [ ] One overall total on Home in your own currency, across groups in different currencies
+- [x] One overall total on Home in your own currency, across groups in different currencies: shown under the overview sentence when your balances span more than one currency, at today's European Central Bank rates (currencies without a rate are named and left out)
 - [x] Recurring expenses (rent, bills): choose Repeats when adding an expense (weekly, fortnightly, monthly or yearly); a daily job adds each one when it falls due, and the group page lists them with a Stop
-- [ ] Categories and insights: spending by group and month, trip totals, who paid most
+- [x] Insights on each group page ("Where it went"): total spent, spending by month, who paid most, the biggest expense
+- [x] Categories on expenses (Eating out, Groceries, Transport, Stay, Fun, Bills, Shopping, Other): pick one when adding or editing, and the group's "Where it went" shows spending by category (`expenses.category`, migration `20261004110619_expense_categories.sql`)
+- [x] Spending across all groups, on the Groups page ("Where it all went"): total in your home currency, by group and by category
 - [x] Archive finished groups: frozen and read-only for everyone, kept under Archived on Home, and restorable by any member
-- [ ] "Simplify debts" as a setting
+- [x] "Simplify debts" as a setting, per group (Edit group): on, the fewest payments; off, everyone pays back exactly who they owe, pair by pair (`groups.simplify_debts`, migration `20261004112619_simplify_debts.sql`)
 
 ## Phase 5: Reach
 
