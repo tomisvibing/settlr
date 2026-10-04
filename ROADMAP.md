@@ -35,6 +35,14 @@ Everything later builds on these.
   - the overview as a paragraph, with groups as tear-off tickets
   - who's up and who's down in words, the fewest payments with a Paid stamp, and spending printed as a till receipt
   - a membership card on Settings, with settings as sentences
+- [x] **Sections as folders** ([canvas](https://claude.ai/artifact/VRYX782Ji2tqAdM2WXpH1A)), after a usability review:
+  - every section is a sand folder with its name on a tab, and tickets, payment slips and the receipt sit inside as paper (lighter than the folder at night too)
+  - four tabs: Home (the old Overview and Groups together, with spending at the foot), People, Activity and You. The Split page stays where you land, with "or take me home"
+  - a group page runs Settle up, Expenses, Balances, Spending, with tabs along the top to jump between them, and one Group settings sheet for members, the invite link, History, Export, Archive, Leave and Delete
+  - Mark paid asks one question ("Did Maya pay you?") with the amount large enough to check
+  - you're always in a group you start, and the people list in a group's sheet is searchable
+  - Home and People net what's between you and each person across groups, so nobody shows on both sides
+  - plainer words ("Not in a group yet", "Fewest payments") and no taglines
 - [ ] **More polish**: a custom date picker (the phone's own is fine for now)
 - [x] **Sign in without Google**:
   - [x] email with a 6-digit code (needs the email sender set up in Supabase, see the README, before codes reach everyone)

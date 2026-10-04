@@ -1,5 +1,5 @@
 /* Spending printed like a till receipt: days in italics, dotted leaders to the price, your share
-   underneath, a total at the foot. Used by Activity, a group's page and the overview */
+   underneath, a total at the foot. Used by Activity, a group's page and People */
 import { $, esc, money } from '../lib/format.js';
 import { byDay } from '../lib/days.js';
 import { personName, isArchived } from '../selectors.js';
@@ -32,7 +32,7 @@ const totalsHTML = sums => {
 };
 /* The receipt's masthead: the wordmark and, if it has one, what the receipt is for */
 const rHead = title => `<header class="r-head"><span class="serif">settlr</span>${title ? `<span class="r-sub">${esc(title)}</span>` : ''}</header>`;
-export function receipt(entries, { title, withGroup = false, foot = '', id = 'activityList' } = {}){
+export function receipt(entries, { title, withGroup = false, id = 'activityList' } = {}){
   const sums = {};
   entries.forEach(({ e, g }) => { if(e.type !== 'payment') sums[g.currency] = (sums[g.currency] || 0) + e.amount; });
   return `<div class="till">
@@ -40,16 +40,14 @@ export function receipt(entries, { title, withGroup = false, foot = '', id = 'ac
     <ol class="r-lines" id="${id}">${byDay(entries, dateOf).map(d => `<li class="day-head"><h3 class="day">${d.label}</h3></li>${d.items.map(({ e, g }) => entryLine(e, g, withGroup)).join('')}`).join('')}</ol>
     <p class="none" id="noMatches" hidden>Nothing matches that search.</p>
     <div class="r-total"><span>Total spent</span><span class="l-dots" aria-hidden="true"></span><span id="receiptTotal">${totalsHTML(sums)}</span></div>
-    ${foot ? `<p class="thanks">${esc(foot)}</p>` : ''}
   </div>`;
 }
 
 /* A receipt of plain lines (the People page's settlements), with the same look */
-export function plainReceipt(title, lines, foot = ''){
+export function plainReceipt(title, lines){
   return `<div class="till">
     ${rHead(title)}
     <ol class="r-lines">${lines.join('')}</ol>
-    ${foot ? `<p class="thanks">${esc(foot)}</p>` : ''}
   </div>`;
 }
 export const lineHTML = ({ what, amt, sub = '', right = '', attrs = '', swipe = '' }) =>

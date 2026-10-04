@@ -2,7 +2,7 @@ import { $ } from '../lib/format.js';
 import { parseRoute } from '../router.js';
 import { renderStart } from './start.js';
 
-/* Shown while the first load runs: the shape of the overview, softly pulsing */
+/* Shown while the first load runs: the shape of Home, softly pulsing */
 export function renderSkeleton(){
   /* The landing page is already just a button: show it, waiting */
   if(parseRoute().name === 'start'){ document.body.dataset.route = 'start'; renderStart({ loading: true }); return; }

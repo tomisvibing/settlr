@@ -1,5 +1,5 @@
 import { sb } from '../supabase.js';
-import { state, session } from '../store.js';
+import { state, session, myPersonId } from '../store.js';
 import { $, esc, money, currencyOptions } from '../lib/format.js';
 import { group, personName, involved, isMe, meIn, canAdmin, isAdmin, hasAccount, isArchived } from '../selectors.js';
 import { form, draft, setDraft, openDialog, fail, describeError } from './dialog.js';
@@ -10,16 +10,28 @@ import { homeCurrency } from '../prefs.js';
    expense's sheet opens in it, filled in, instead of the group's page */
 export function openGroup(isNew, { carry = null, note = '' } = {}){
   const g = isNew ? null : group();
-  setDraft({ editingGroupId: g?.id || null, members: g ? g.members.slice() : [] });
+  /* You're always in a group you start: it would vanish from your list otherwise */
+  setDraft({ editingGroupId: g?.id || null, members: g ? g.members.slice() : [myPersonId].filter(Boolean), q: '' });
   openDialog(`
-    <h2>${isNew?'New group':'Edit group'}</h2>
+    <h2>${isNew?'New group':'Group settings'}</h2>
     ${note || carry ? `<p class="hint">${note || `A new group for ${esc(carry.desc)} · ${money(carry.amount, carry.currency)}. Add the people you’re splitting it with.`}</p>` : ''}
     <label>Group name<input name="name" maxlength="50" value="${esc(g?.name||'')}" placeholder="Flat 4B, Lisbon weekend"></label>
     <label>Currency<select name="currency" ${g?.expenses.length ? 'disabled' : ''}>${currencyOptions(g?.currency || carry?.currency || homeCurrency())}</select>${g?.expenses.length ? '<span class="hint" style="font-weight:400">Fixed now the group has expenses. Each expense can still be in any currency.</span>' : ''}</label>
-    <label class="daterow">Simplify debts<select name="simplify"><option value="1" ${g?.simplify === false ? '' : 'selected'}>On: fewest payments</option><option value="0" ${g?.simplify === false ? 'selected' : ''}>Off: pay back who you owe</option></select></label>
-    ${g?`<p class="hint">Invite code: <b>${esc(g.inviteCode)}</b> <button type="button" class="btn small" data-action="invite">Share invite link</button></p>`:''}
-    <fieldset><legend>People in this group</legend><div id="mlist" class="srows"></div></fieldset>
-    <div class="mrow"><label>Add someone<input name="newMember" maxlength="30" placeholder="A saved or new name" autocomplete="off"></label><button type="button" class="btn" data-action="add-member">Add</button></div>
+    <div class="field">
+      <div class="rowline"><span id="simpLead">Fewest payments</span><span class="seg inline" role="radiogroup" aria-labelledby="simpLead">${[['1', 'on', g?.simplify !== false], ['0', 'off', g?.simplify === false]].map(([v, l, on]) =>
+        `<label><input type="radio" name="simplify" value="${v}" ${on ? 'checked' : ''}><span>${l}</span></label>`).join('')}</span></div>
+      <p class="hint">settlr works out the fewest payments that square everyone up. Off: everyone pays back exactly who they owe.</p>
+    </div>
+    <fieldset><legend>Who’s in it</legend>
+      <div class="mrow"><input name="newMember" maxlength="30" placeholder="Find or add someone" aria-label="Find someone, or type a new name" autocomplete="off"><button type="button" class="btn" data-action="add-member">Add</button></div>
+      <div id="mlist" class="srows"></div>
+      ${g ? '<p class="hint">Search to add someone you’ve saved, or type a new name and press Add.</p>' : ''}
+    </fieldset>
+    ${g ? `<div class="sheet-links">
+      <button type="button" data-action="invite">Share invite link <span class="sval">code ${esc(g.inviteCode)} <span aria-hidden="true">→</span></span></button>
+      <button type="button" data-action="history">History <span aria-hidden="true">→</span></button>
+      <button type="button" data-action="export-group" ${g.expenses.length ? '' : 'disabled'}>Export as CSV <span aria-hidden="true">→</span></button>
+    </div>` : ''}
     <p class="err" role="alert"></p>
     ${g ? `<div class="grp-exit">
       ${isArchived(g) ? `<button type="button" class="btn" data-action="restore-group">Restore group</button>` : `<button type="button" class="btn" data-action="archive-group">Archive group</button>`}
@@ -27,14 +39,16 @@ export function openGroup(isNew, { carry = null, note = '' } = {}){
       ${canAdmin(g) ? `<button type="button" class="btn danger" data-action="del-group">Delete group</button>` : ''}
     </div>` : ''}
     <div class="dlg-actions">
+      <span class="hint" id="mcount" aria-live="polite"></span>
       <span class="sp"></span>
       <button type="button" class="btn" data-action="close">Cancel</button>
       <button type="submit" class="btn primary">${carry ? 'Create and continue' : isNew ? 'Create group' : 'Save changes'}</button>
     </div>`, async () => {
-      await addPendingMember();
+      if(!await addPendingMember()) return false;
       const name = form.name.value.trim();
       if(!name) return fail('Give the group a name.', form.name);
-      if(draft.members.length < 2) return fail('Add at least two people.', form.newMember);
+      if(!g && myPersonId && !draft.members.includes(myPersonId)) draft.members.unshift(myPersonId);
+      if(draft.members.length < 2) return fail('Add at least one other person.', form.newMember);
       const chosen = draft.members.map(id => personName(id).toLowerCase());
       if(new Set(chosen).size !== chosen.length) return fail('Two of the people you picked share a name. Rename one so the ledger stays clear.');
       try{
@@ -60,17 +74,29 @@ export function openGroup(isNew, { carry = null, note = '' } = {}){
 }
 /* Why a ticked person can't be unticked, or '' if they can */
 function lockReason(g, pid){
-  if(!g || !g.members.includes(pid)) return '';
+  if(!g) return isMe(pid) ? 'always in groups you start' : '';
+  if(!g.members.includes(pid)) return '';
   if(involved(g, pid)) return 'in an expense';
   if(isMe(pid)) return 'you';
   if(hasAccount(pid) && !canAdmin(g)) return 'admins can remove';
   return '';
 }
+/* Beside the buttons: how many are in it so far */
+function countMembers(){
+  const n = draft.members.length, count = $('#mcount'); if(!count) return;
+  count.textContent = n === 1 && draft.members.some(isMe) ? 'Just you so far' : `${n} ${n === 1 ? 'person' : 'people'}`;
+}
 export function renderMembers(){
   const box = $('#mlist'); if(!box) return;
-  const list = state.people.slice().sort((a,b) => a.name.localeCompare(b.name));
   const editingGroup = draft.editingGroupId ? state.groups.find(x => x.id === draft.editingGroupId) : null;
-  box.innerHTML = list.length ? list.map(p => {
+  /* You first, then by name. A group's settings list who's in it; searching shows everyone you've saved,
+     so a long contact list never fills the sheet */
+  const q = (draft.q || '').trim().toLowerCase();
+  const list = state.people.slice().sort((a,b) => isMe(b.id) - isMe(a.id) || a.name.localeCompare(b.name))
+    .filter(p => q ? p.name.toLowerCase().includes(q) : !editingGroup || draft.members.includes(p.id));
+  countMembers();
+  if(!list.length){ box.innerHTML = `<p class="hint" style="margin:10px 0">${q ? `No one saved called “${esc(draft.q.trim())}”. Press Add to add them.` : 'No one saved yet. Type a name above and press Add.'}</p>`; return; }
+  box.innerHTML = list.map(p => {
     const g = editingGroup;
     /* Someone who left comes back through an invite link, not from here */
     if(g?.left.includes(p.id) && !draft.members.includes(p.id)) return `<div class="srow"><label class="srow-pick"><input type="checkbox" disabled aria-describedby="why-${p.id}"><span class="nm">${esc(p.name)}</span></label><span class="sval" id="why-${p.id}">left the group</span></div>`;
@@ -84,20 +110,29 @@ export function renderMembers(){
       : admin ? '<span class="tag">Admin</span>' : '';
     const shown = why && why !== 'you';
     return `<div class="srow"><label class="srow-pick"><input type="checkbox" data-pid="${p.id}" ${checked?'checked':''} ${why?'disabled':''}${shown ? ` aria-describedby="why-${p.id}"` : ''}><span class="nm">${esc(p.name)}${isMe(p.id) ? ' <span class="you">(you)</span>' : ''}</span></label>${shown ? `<span class="sval" id="why-${p.id}">${why}</span>` : ''}${roleCtl}</div>`;
-  }).join('') : `<p class="hint" style="margin:0">No one saved yet. Add people below.</p>`;
+  }).join('');
 }
+/* Add what's typed in the name box. It's a search too, so: a name that matches one saved person ticks
+   them, a name nobody has becomes a new person, and a name that matches several asks which */
 export async function addPendingMember(){
-  const inp = form.newMember; if(!inp) return;
-  const n = inp.value.trim(); if(!n) return;
-  let p = state.people.find(x => x.name.toLowerCase() === n.toLowerCase());
+  const inp = form.newMember; if(!inp) return true;
+  const n = inp.value.trim(); if(!n) return true;
+  const low = n.toLowerCase();
+  let p = state.people.find(x => x.name.toLowerCase() === low);
+  if(!p){
+    const partial = state.people.filter(x => x.name.toLowerCase().includes(low));
+    if(partial.length > 1){ fail(`More than one person matches “${n}”. Tick the one you mean, or type their full name.`, inp); return false; }
+    p = partial[0];
+  }
   if(!p){
     const { data, error } = await sb.from('people').insert({ name: n, owner_id: session.user.id }).select('id,name').single();
-    if(error){ fail(describeError(error, 'add them'), inp); return; }
+    if(error){ fail(describeError(error, 'add them'), inp); return false; }
     p = { id: data.id, name: data.name };
     state.people.push(p);
   }
   if(!draft.members.includes(p.id)) draft.members.push(p.id);
-  inp.value = ''; renderMembers(); inp.focus();
+  inp.value = ''; draft.q = ''; renderMembers(); inp.focus();
+  return true;
 }
 export function initGroupDialog(){
   form.addEventListener('keydown', async ev => { if(ev.target.name === 'newMember' && ev.key === 'Enter'){ ev.preventDefault(); await addPendingMember(); } });
@@ -106,6 +141,9 @@ export function initGroupDialog(){
     if(t.dataset.pid && draft){
       if(t.checked){ if(!draft.members.includes(t.dataset.pid)) draft.members.push(t.dataset.pid); }
       else draft.members = draft.members.filter(id => id !== t.dataset.pid);
+      countMembers();
     }
   });
+  /* The name box doubles as a search over everyone you've saved */
+  form.addEventListener('input', ev => { if(ev.target.name === 'newMember' && draft?.members){ draft.q = ev.target.value; renderMembers(); } });
 }

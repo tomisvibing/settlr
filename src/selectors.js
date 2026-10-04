@@ -23,7 +23,6 @@ export function defaultPayer(g){ return meIn(g) || g.members[0]; }
 export const personPhoto = pid => person(pid).photo || (isMe(pid) ? accountPhoto(session?.user) : null);
 export const nameWithYou = pid => esc(personName(pid)) + (isMe(pid) ? ' <span class="you">(you)</span>' : '');
 export function lastActivity(g){ return g.expenses.reduce((m,e) => Math.max(m, e.createdAt), g.createdAt || 0); }
-export function groupsOf(pid){ return state.groups.filter(g => g.members.includes(pid)); }
 export function personLocked(pid){ return state.groups.some(g => g.members.includes(pid)) || state.payments.some(p => p.from===pid || p.to===pid); }
 /* Runs the group: an admin, or anyone when no admin with an account is left (matches private.is_group_admin) */
 export function canAdmin(g){

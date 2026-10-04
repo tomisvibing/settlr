@@ -16,12 +16,12 @@ const read = (k, fallback) => { try{ return JSON.parse(localStorage.getItem(k)) 
 const write = (k, v) => { try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){ /* private mode: just not remembered */ } };
 
 export const nudgedAt = (gid, pid) => read(NUDGED, {})[nudgeKey(gid, pid)] || 0;
-/* "never" (the default), "weekly", "fortnightly" or "monthly": how often the overview lines up who to nudge */
+/* "never" (the default), "weekly", "fortnightly" or "monthly": how often Home lines up who to nudge */
 export const nudgePref = () => { const v = read(PREF, 'never'); return v in FREQUENCIES ? v : 'never'; };
 export const setNudgePref = v => write(PREF, v in FREQUENCIES ? v : 'never');
 export const dismissNudges = () => write(DISMISSED, Date.now());
 
-/* The overview's list: nothing when switched off or put away since the last interval */
+/* Home's list: nothing when switched off or put away since the last interval */
 export function dueNow(now = Date.now()){
   const pref = nudgePref(), every = frequencyMs(pref);
   if(pref === 'never' || now - read(DISMISSED, 0) < every) return [];

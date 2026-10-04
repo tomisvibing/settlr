@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { storyParts, storyText, whoOwesWhom } from '../src/lib/story.js';
+import { storyParts, storyText, whoOwesWhom, between } from '../src/lib/story.js';
 import { money } from '../src/lib/format.js';
 
 const names = { me: 'You', a: 'Alex', p: 'Priya', s: 'Sam', j: 'Jess', m: 'Mo' };
@@ -12,7 +12,7 @@ const lisbon = group('Lisbon weekend', 'GBP', ['me', 'a', 'p'], [exp('me', 60000
 const chalet = group('the ski chalet', 'EUR', ['me', 's'], [exp('s', 65800, { me: 32900, s: 32900 })]);
 const tokyo = group('Tokyo', 'JPY', ['me', 's'], [exp('me', 4000, { me: 2000, s: 2000 }), exp('s', 4000, { me: 2000, s: 2000 })]);
 
-describe('the overview sentence', () => {
+describe('Home’s sentence', () => {
   it('says who owes you, who you owe and what is square', () => {
     expect(tell([lisbon, chalet, tokyo])).toBe('Alex owes you £200.00 and Priya £200.00, both from Lisbon weekend. You owe Sam €329.00 for the ski chalet. Tokyo is square.');
   });
@@ -41,9 +41,33 @@ describe('the overview sentence', () => {
     expect(w.iOwe.map(x => x.pid)).toEqual(['a']);
     expect(w.square).toEqual([]);
   });
+  it('nets one person across groups, so nobody is on both sides', () => {
+    const flat = group('Flat 4B', 'GBP', ['me', 's'], [exp('s', 9600, { me: 4800, s: 4800 })]);
+    const trip = group('Lisbon weekend', 'GBP', ['me', 's'], [exp('me', 3540, { me: 1770, s: 1770 })]);
+    expect(tell([flat, trip])).toBe('You owe Sam £30.30.');
+    const evens = group('Pub', 'GBP', ['me', 's'], [exp('me', 9600, { me: 4800, s: 4800 })]);
+    expect(tell([flat, evens])).toBe('Everything’s square. Nobody owes anybody.');
+  });
   it('marks people and amounts so the view can link and colour them', () => {
     const parts = storyParts([chalet], isMe, id => names[id], money);
     expect(parts.find(p => p.person)).toEqual({ person: 's', name: 'Sam' });
     expect(parts.find(p => p.amount)).toEqual({ amount: '€329.00', tone: 'down' });
+  });
+});
+
+describe('what is between you and each person', () => {
+  it('signs each person’s amount and keeps the groups it comes from', () => {
+    const flat = group('Flat 4B', 'GBP', ['me', 's'], [exp('s', 9600, { me: 4800, s: 4800 })]);
+    const trip = group('Lisbon weekend', 'GBP', ['me', 's', 'a'], [exp('me', 5310, { me: 1770, s: 1770, a: 1770 })]);
+    const sam = between([flat, trip], isMe).get('s');
+    expect(sam.amounts).toEqual({ GBP: -3030 });
+    expect(sam.parts).toEqual([{ where: 'Flat 4B', cur: 'GBP', amount: -4800 }, { where: 'Lisbon weekend', cur: 'GBP', amount: 1770 }]);
+    expect(between([flat, trip], isMe).get('a').amounts).toEqual({ GBP: 1770 });
+  });
+  it('counts settlements made outside any group', () => {
+    const paid = [{ from: 'me', to: 'j', amount: 1200, currency: 'GBP' }, { from: 'm', to: 'me', amount: 3000, currency: 'GBP' }];
+    const b = between([], isMe, paid);
+    expect(b.get('j').amounts).toEqual({ GBP: 1200 });
+    expect(b.get('m').parts).toEqual([{ where: null, cur: 'GBP', amount: -3000 }]);
   });
 });

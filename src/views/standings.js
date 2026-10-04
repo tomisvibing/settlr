@@ -1,4 +1,4 @@
-/* "Who's up, who's down" in words, like the overview: "You're up £811.04", "Alex is down
+/* "Who's up, who's down" in words, like Home: "You're up £811.04", "Alex is down
    £399.52". What someone is down is red; where it comes from sits underneath */
 import { esc, money } from '../lib/format.js';
 import { isMe } from '../selectors.js';
