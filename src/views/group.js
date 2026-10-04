@@ -8,6 +8,7 @@ import { standings } from './standings.js';
 import { nudgedAt } from '../nudge.js';
 import { receipt } from './receipt.js';
 import { nextDate, frequencyLabel } from '../lib/recurring.js';
+import { insights, monthLabel } from '../lib/insights.js';
 
 const nameOf = pid => isMe(pid) ? 'You' : shortName(pid);
 
@@ -54,6 +55,19 @@ function repeating(g, frozen){
       <span class="m-acts"><span class="m-note">${esc(frequencyLabel(r.frequency))}${next ? ` · next ${when(next)}` : ' · finished'}</span>
         ${frozen ? '' : `<button class="btn small" data-action="stop-recurring" data-group="${g.id}" data-id="${r.id}" data-desc="${esc(r.desc)}">Stop</button>`}</span>
     </li>`; }).join('')}</ul>
+  </section>`;
+}
+
+/* Where the money went: by month, who paid most, and the biggest single expense */
+function spending(g){
+  const i = insights(g);
+  if(i.count < 2) return '';
+  const m = v => money(v, g.currency), top = Math.max(...i.byMonth.map(x => x.amount), 1);
+  const lead = i.paidBy[0];
+  return `<section class="section" aria-labelledby="spendHead">
+    <div class="section-head"><h2 id="spendHead">Where it went</h2></div>
+    <p class="spend-lead">${i.count} expenses, <b>${m(i.total)}</b> in all${lead && g.members.length > 1 ? `. ${isMe(lead.pid) ? 'You' : esc(shortName(lead.pid))} paid the most, <b>${m(lead.amount)}</b>` : ''}${i.biggest ? `. The biggest was <b>${esc(i.biggest.desc)}</b> at ${m(i.biggest.amount)}` : ''}.</p>
+    ${i.byMonth.length > 1 ? `<ul class="bars" aria-label="Spending by month">${i.byMonth.map(x => `<li><span class="b-lbl">${monthLabel(x.month)}</span><span class="b-track" aria-hidden="true"><span class="b-fill" style="width:${Math.max(2, Math.round(x.amount / top * 100))}%"></span></span><span class="b-amt">${m(x.amount)}</span></li>`).join('')}</ul>` : ''}
   </section>`;
 }
 
@@ -105,6 +119,8 @@ export function renderGroupView(id){
       ${plan.length || justPaid ? `<ul class="moves">${justPaid ? move(g, justPaid, frozen, true) : ''}${plan.map(p => move(g, p, frozen)).join('')}</ul>` : ''}
       ${!plan.length ? `<p class="square-line">${g.expenses.length ? 'Square. Nobody owes anybody.' : 'Nothing to settle yet. Add the first expense with the + button.'}</p>` : ''}
     </section>
+
+    ${spending(g)}
 
     ${repeating(g, frozen)}
 
