@@ -38,6 +38,7 @@ Everything later builds on these.
 - [x] **Sections as folders** ([canvas](https://claude.ai/artifact/VRYX782Ji2tqAdM2WXpH1A)), after a usability review:
   - every section is a sand folder with its name on a tab, and tickets, payment slips and the receipt sit inside as paper (lighter than the folder at night too)
   - four tabs: Home (the old Overview and Groups together, with spending at the foot), People, Activity and You. The Split page stays where you land, with "or take me home"
+  - on phones, swipe left and right between the tabs; on a group's page, swipe right to go back to Home. Leftwards on a row still opens its Edit and Delete
   - a group page runs Settle up, Expenses, Balances, Spending, with tabs along the top to jump between them, and one Group settings sheet for members, the invite link, History, Export, Archive, Leave and Delete
   - Mark paid asks one question ("Did Maya pay you?") with the amount large enough to check
   - you're always in a group you start, and the people list in a group's sheet is searchable

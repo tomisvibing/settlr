@@ -688,6 +688,17 @@ input.code{font-size:24px;letter-spacing:.3em;text-align:center;font-variant-num
 ::view-transition-new(root){animation:vt-in .22s cubic-bezier(.2,.8,.2,1) both}
 @keyframes vt-out{to{opacity:0}}
 @keyframes vt-in{from{opacity:0;transform:translateY(8px)}}
+/* Swiped between tabs (pageswipe.js): the page slides the way the finger went */
+:root[data-nav="next"]::view-transition-old(root){animation:vt-out-left .16s ease-in both}
+:root[data-nav="next"]::view-transition-new(root){animation:vt-in-right .26s cubic-bezier(.2,.8,.2,1) both}
+:root[data-nav="prev"]::view-transition-old(root){animation:vt-out-right .16s ease-in both}
+:root[data-nav="prev"]::view-transition-new(root){animation:vt-in-left .26s cubic-bezier(.2,.8,.2,1) both}
+@keyframes vt-out-left{to{opacity:0;transform:translateX(-48px)}}
+@keyframes vt-out-right{to{opacity:0;transform:translateX(48px)}}
+@keyframes vt-in-right{from{opacity:0;transform:translateX(48px)}}
+@keyframes vt-in-left{from{opacity:0;transform:translateX(-48px)}}
+/* A swipe that didn't go far enough eases back */
+.page-settle{transition:translate .2s cubic-bezier(.2,.8,.2,1)}
 
 /* ---------- Loading placeholders ---------- */
 .sk{display:block;background:var(--line-soft);border-radius:8px;animation:sk-pulse 1.4s ease-in-out infinite}
