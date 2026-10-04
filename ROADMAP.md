@@ -62,7 +62,7 @@ Everything later builds on these.
 - [x] One overall total on Home in your own currency, across groups in different currencies: shown under the overview sentence when your balances span more than one currency, at today's European Central Bank rates (currencies without a rate are named and left out)
 - [x] Recurring expenses (rent, bills): choose Repeats when adding an expense (weekly, fortnightly, monthly or yearly); a daily job adds each one when it falls due, and the group page lists them with a Stop
 - [x] Insights on each group page ("Where it went"): total spent, spending by month, who paid most, the biggest expense
-- [ ] Categories (food, travel, rent…) on expenses, with spending by category. Needs a database change
+- [x] Categories on expenses (Eating out, Groceries, Transport, Stay, Fun, Bills, Shopping, Other): pick one when adding or editing, and the group's "Where it went" shows spending by category (`expenses.category`, migration `20261004110619_expense_categories.sql`)
 - [ ] Spending across all groups on Home
 - [x] Archive finished groups: frozen and read-only for everyone, kept under Archived on Home, and restorable by any member
 - [ ] "Simplify debts" as a setting

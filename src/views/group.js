@@ -9,6 +9,7 @@ import { nudgedAt } from '../nudge.js';
 import { receipt } from './receipt.js';
 import { nextDate, frequencyLabel } from '../lib/recurring.js';
 import { insights, monthLabel } from '../lib/insights.js';
+import { categoryLabel } from '../lib/categories.js';
 
 const nameOf = pid => isMe(pid) ? 'You' : shortName(pid);
 
@@ -67,6 +68,7 @@ function spending(g){
   return `<section class="section" aria-labelledby="spendHead">
     <div class="section-head"><h2 id="spendHead">Where it went</h2></div>
     <p class="spend-lead">${i.count} expenses, <b>${m(i.total)}</b> in all${lead && g.members.length > 1 ? `. ${isMe(lead.pid) ? 'You' : esc(shortName(lead.pid))} paid the most, <b>${m(lead.amount)}</b>` : ''}${i.biggest ? `. The biggest was <b>${esc(i.biggest.desc)}</b> at ${m(i.biggest.amount)}` : ''}.</p>
+    ${i.byCategory.some(x => x.category) ? `<ul class="bars" aria-label="Spending by category">${i.byCategory.map(x => `<li><span class="b-lbl">${categoryLabel(x.category)}</span><span class="b-track" aria-hidden="true"><span class="b-fill" style="width:${Math.max(2, Math.round(x.amount / i.byCategory[0].amount * 100))}%"></span></span><span class="b-amt">${m(x.amount)}</span></li>`).join('')}</ul>` : ''}
     ${i.byMonth.length > 1 ? `<ul class="bars" aria-label="Spending by month">${i.byMonth.map(x => `<li><span class="b-lbl">${monthLabel(x.month)}</span><span class="b-track" aria-hidden="true"><span class="b-fill" style="width:${Math.max(2, Math.round(x.amount / top * 100))}%"></span></span><span class="b-amt">${m(x.amount)}</span></li>`).join('')}</ul>` : ''}
   </section>`;
 }

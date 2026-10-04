@@ -381,7 +381,8 @@ button.st-row{cursor:pointer}
 /* ---------- A group: the fewest payments, stamped Paid when marked ---------- */
 .spend-lead{margin:0 0 14px;font-family:var(--serif);font-size:20px;line-height:1.35}
 .bars{list-style:none;margin:0;padding:0;display:grid;gap:8px}
-.bars li{display:grid;grid-template-columns:76px 1fr auto;align-items:center;gap:10px;font-size:14px}
+.bars + .bars{margin-top:18px}
+.bars li{display:grid;grid-template-columns:92px 1fr auto;align-items:center;gap:10px;font-size:14px}
 .b-lbl{color:var(--muted)}
 .b-track{height:10px;border-radius:5px;background:var(--line-soft);overflow:hidden}
 .b-fill{display:block;height:100%;border-radius:5px;background:var(--accent)}

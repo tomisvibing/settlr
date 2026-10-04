@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { insights } from '../src/lib/insights.js';
 
-const e = (date, paidBy, amount, splits, type = 'expense') => ({ type, date, paidBy, amount, splits });
+const e = (date, paidBy, amount, splits, type = 'expense', category = null) => ({ type, date, paidBy, amount, splits, category });
 const g = { expenses: [
-  e('2026-08-30', 'a', 6000, { a: 3000, b: 3000 }),
+  e('2026-08-30', 'a', 6000, { a: 3000, b: 3000 }, 'expense', 'food'),
   e('2026-09-02', 'b', 9000, { a: 3000, b: 3000, c: 3000 }),
-  e('2026-09-20', 'a', 3000, { a: 1500, b: 1500 }),
+  e('2026-09-20', 'a', 3000, { a: 1500, b: 1500 }, 'expense', 'food'),
   e('2026-09-21', 'b', 4000, { a: 4000 }, 'payment'),
 ] };
 
@@ -22,6 +22,11 @@ describe('group insights', () => {
     expect(i.paidBy).toEqual([{ pid: 'a', amount: 9000 }, { pid: 'b', amount: 9000 }]);
     expect(i.shareOf.map(x => x.pid)).toEqual(['a', 'b', 'c']);
     expect(i.shareOf[0].amount).toBe(7500);
+  });
+  it('totals by category, largest first, with uncategorised kept apart', () => {
+    expect(i.byCategory).toHaveLength(2);
+    expect(i.byCategory.find(x => x.category === 'food').amount).toBe(9000);
+    expect(i.byCategory.find(x => x.category === null).amount).toBe(9000);
   });
   it('finds the biggest expense', () => {
     expect(i.biggest.amount).toBe(9000);
