@@ -37,6 +37,8 @@ export function render(){
 function renderRoute(r){
   /* The landing page has no navigation: just the button and the way home */
   const entering = document.body.dataset.route !== r.name;
+  /* A page swiped away (pageswipe.js) was following the finger: the new one starts in place */
+  document.getElementById('app').style.translate = '';
   document.body.dataset.route = r.name;
   const tab = r.name === 'group' ? 'home' : r.name;
   [['home','#navHome'],['people','#navPeople'],['activity','#navActivity'],['settings','#navYou']].forEach(([n,sel]) => {
